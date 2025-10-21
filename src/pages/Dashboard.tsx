@@ -150,6 +150,7 @@ const Dashboard = () => {
   const isStudent = roles.some(r => r.role === "student");
   const isAdmin = roles.some(r => r.role === "admin");
   const isSuperAdmin = roles.some(r => r.role === "super_admin");
+  const hasAdminAccess = isAdmin || isSuperAdmin;
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -168,6 +169,11 @@ const Dashboard = () => {
             )}
             {isSuperAdmin && <Badge className="bg-accent">Super Admin</Badge>}
             {isAdmin && !isSuperAdmin && <Badge className="bg-primary">Admin</Badge>}
+            {hasAdminAccess && (
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
+                Admin Panel
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={handleSignOut}>
               <LogOut className="w-4 h-4 mr-2" />
               Logout
