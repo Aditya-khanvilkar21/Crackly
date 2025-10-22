@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { signIn, signUp } from "@/lib/auth";
+import { signIn, signUp, signOut } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { GraduationCap } from "lucide-react";
 
@@ -27,7 +27,7 @@ const Auth = () => {
     checkUser();
   }, [navigate]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent, loginType: "student" | "admin") => {
     e.preventDefault();
     setLoading(true);
 
@@ -43,8 +43,34 @@ const Auth = () => {
       toast.error(error.message);
       setLoading(false);
     } else {
-      toast.success("Successfully logged in!");
-      navigate("/dashboard");
+      // Check user role after successful login
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id);
+
+        const isAdmin = roles?.some(r => r.role === "admin" || r.role === "super_admin");
+        const isStudent = roles?.some(r => r.role === "student");
+
+        if (loginType === "admin" && !isAdmin) {
+          toast.error("You don't have admin access. Please login as a student.");
+          await signOut();
+          setLoading(false);
+          return;
+        }
+
+        if (loginType === "student" && !isStudent) {
+          toast.error("This account doesn't have student access. Please login as admin.");
+          await signOut();
+          setLoading(false);
+          return;
+        }
+
+        toast.success("Successfully logged in!");
+        navigate(isAdmin && loginType === "admin" ? "/admin" : "/dashboard");
+      }
     }
   };
 
@@ -92,24 +118,25 @@ const Auth = () => {
           <p className="text-muted-foreground">Master your JEE preparation</p>
         </div>
 
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="login">Login</TabsTrigger>
+        <Tabs defaultValue="student-login" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="student-login">Student Login</TabsTrigger>
+            <TabsTrigger value="admin-login">Admin Login</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="login">
+          <TabsContent value="student-login">
             <Card>
               <CardHeader>
-                <CardTitle>Welcome Back</CardTitle>
-                <CardDescription>Enter your credentials to continue</CardDescription>
+                <CardTitle>Student Login</CardTitle>
+                <CardDescription>Access your tests and track your progress</CardDescription>
               </CardHeader>
-              <form onSubmit={handleLogin}>
+              <form onSubmit={(e) => handleLogin(e, "student")}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="student-email">Email</Label>
                     <Input
-                      id="login-email"
+                      id="student-email"
                       type="email"
                       placeholder="your@email.com"
                       value={loginForm.email}
@@ -118,9 +145,9 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
+                    <Label htmlFor="student-password">Password</Label>
                     <Input
-                      id="login-password"
+                      id="student-password"
                       type="password"
                       placeholder="••••••••"
                       value={loginForm.password}
@@ -131,7 +158,47 @@ const Auth = () => {
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
+                    {loading ? "Logging in..." : "Login as Student"}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="admin-login">
+            <Card>
+              <CardHeader>
+                <CardTitle>Admin Login</CardTitle>
+                <CardDescription>Manage classes and monitor student progress</CardDescription>
+              </CardHeader>
+              <form onSubmit={(e) => handleLogin(e, "admin")}>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-email">Email</Label>
+                    <Input
+                      id="admin-email"
+                      type="email"
+                      placeholder="admin@email.com"
+                      value={loginForm.email}
+                      onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-password">Password</Label>
+                    <Input
+                      id="admin-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={loginForm.password}
+                      onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                      required
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Logging in..." : "Login as Admin"}
                   </Button>
                 </CardFooter>
               </form>

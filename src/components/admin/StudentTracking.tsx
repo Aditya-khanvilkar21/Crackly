@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, TrendingUp, Award } from "lucide-react";
+import { Plus, Trash2, TrendingUp, Award, Download, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,20 @@ interface Student {
   student_id: string;
   test_count?: number;
   avg_score?: number;
+}
+
+interface TestResult {
+  id: string;
+  test_id: string;
+  score: number;
+  total_questions: number;
+  completed_at: string;
+  time_taken_seconds: number;
+  tests: {
+    title: string;
+    subject: string;
+    chapter: string;
+  };
 }
 
 interface TuitionClass {
@@ -41,6 +55,9 @@ export const StudentTracking = () => {
   const [selectedStudent, setSelectedStudent] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isProgressOpen, setIsProgressOpen] = useState(false);
+  const [selectedStudentDetails, setSelectedStudentDetails] = useState<Student | null>(null);
+  const [studentResults, setStudentResults] = useState<TestResult[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -225,6 +242,73 @@ export const StudentTracking = () => {
     }
   };
 
+  const viewStudentProgress = async (student: Student) => {
+    setSelectedStudentDetails(student);
+    setIsProgressOpen(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("test_results")
+        .select(`
+          id,
+          test_id,
+          score,
+          total_questions,
+          completed_at,
+          time_taken_seconds,
+          tests (
+            title,
+            subject,
+            chapter
+          )
+        `)
+        .eq("student_id", student.id)
+        .order("completed_at", { ascending: false });
+
+      if (error) throw error;
+      setStudentResults(data as any || []);
+    } catch (error: any) {
+      toast({
+        title: "Error fetching student results",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const downloadResults = () => {
+    if (!selectedStudentDetails || studentResults.length === 0) return;
+
+    const csvContent = [
+      ["Test Title", "Subject", "Chapter", "Score", "Total Questions", "Percentage", "Time Taken", "Date"],
+      ...studentResults.map(result => [
+        result.tests.title,
+        result.tests.subject,
+        result.tests.chapter,
+        result.score.toString(),
+        result.total_questions.toString(),
+        ((result.score / result.total_questions) * 100).toFixed(2) + "%",
+        result.time_taken_seconds ? `${Math.floor(result.time_taken_seconds / 60)}:${(result.time_taken_seconds % 60).toString().padStart(2, '0')}` : "N/A",
+        new Date(result.completed_at).toLocaleDateString()
+      ])
+    ].map(row => row.join(",")).join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${selectedStudentDetails.full_name}_Results_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Success",
+      description: "Results downloaded successfully",
+    });
+  };
+
   if (loading) {
     return <div className="flex justify-center p-8">Loading...</div>;
   }
@@ -333,13 +417,22 @@ export const StudentTracking = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleRemoveStudent(student.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => viewStudentProgress(student)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleRemoveStudent(student.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -348,6 +441,107 @@ export const StudentTracking = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Student Progress Dialog */}
+      <Dialog open={isProgressOpen} onOpenChange={setIsProgressOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Student Progress: {selectedStudentDetails?.full_name}
+            </DialogTitle>
+            <DialogDescription>
+              ID: {selectedStudentDetails?.student_id} | Total Tests: {studentResults.length}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {studentResults.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No test results found for this student
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Total Tests</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{studentResults.length}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Average Score</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {Math.round(
+                          studentResults.reduce((sum, r) => sum + (r.score / r.total_questions) * 100, 0) / studentResults.length
+                        )}%
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm">Best Score</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {Math.max(...studentResults.map(r => (r.score / r.total_questions) * 100)).toFixed(0)}%
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Test</TableHead>
+                      <TableHead>Subject</TableHead>
+                      <TableHead>Chapter</TableHead>
+                      <TableHead>Score</TableHead>
+                      <TableHead>Percentage</TableHead>
+                      <TableHead>Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {studentResults.map((result) => (
+                      <TableRow key={result.id}>
+                        <TableCell className="font-medium">{result.tests.title}</TableCell>
+                        <TableCell>{result.tests.subject}</TableCell>
+                        <TableCell>{result.tests.chapter}</TableCell>
+                        <TableCell>
+                          {result.score}/{result.total_questions}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={
+                            (result.score / result.total_questions) >= 0.8 ? "default" :
+                            (result.score / result.total_questions) >= 0.6 ? "secondary" : "destructive"
+                          }>
+                            {((result.score / result.total_questions) * 100).toFixed(1)}%
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{new Date(result.completed_at).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsProgressOpen(false)}>
+              Close
+            </Button>
+            <Button onClick={downloadResults} disabled={studentResults.length === 0}>
+              <Download className="h-4 w-4 mr-2" />
+              Download Results
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
