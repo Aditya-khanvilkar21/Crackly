@@ -93,9 +93,50 @@ const Dashboard = () => {
   }, [navigate]);
 
   const fetchTests = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    // Get student's classes
+    const { data: classData } = await supabase
+      .from("class_students")
+      .select("class_id")
+      .eq("student_id", session.user.id);
+
+    if (!classData || classData.length === 0) {
+      // If student is not in any class, show all tests
+      const { data, error } = await supabase
+        .from("tests")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (!error && data) {
+        setTests(data as unknown as Test[]);
+      }
+      return;
+    }
+
+    const classIds = classData.map(c => c.class_id);
+
+    // Get unlocked tests for student's classes
+    const { data: availabilityData } = await supabase
+      .from("test_availability")
+      .select("test_id")
+      .in("class_id", classIds)
+      .eq("is_locked", false);
+
+    if (!availabilityData || availabilityData.length === 0) {
+      setTests([]);
+      return;
+    }
+
+    const testIds = availabilityData.map(a => a.test_id);
+
+    // Get test details
     const { data, error } = await supabase
       .from("tests")
       .select("*")
+      .in("id", testIds)
       .eq("is_active", true)
       .order("created_at", { ascending: false });
 

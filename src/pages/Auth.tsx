@@ -74,7 +74,7 @@ const Auth = () => {
     }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent, signupType?: "admin") => {
     e.preventDefault();
     setLoading(true);
 
@@ -96,14 +96,25 @@ const Auth = () => {
       return;
     }
 
-    const { error } = await signUp(signupForm.email, signupForm.password, signupForm.fullName);
+    const { data, error } = await signUp(signupForm.email, signupForm.password, signupForm.fullName);
 
     if (error) {
       toast.error(error.message);
       setLoading(false);
     } else {
+      // If admin signup, add admin role
+      if (signupType === "admin" && data?.user) {
+        const { error: roleError } = await supabase
+          .from("user_roles")
+          .insert({ user_id: data.user.id, role: "admin" });
+
+        if (roleError) {
+          console.error("Error adding admin role:", roleError);
+        }
+      }
+
       toast.success("Account created! Logging you in...");
-      navigate("/dashboard");
+      navigate(signupType === "admin" ? "/admin" : "/dashboard");
     }
   };
 
@@ -119,10 +130,11 @@ const Auth = () => {
         </div>
 
         <Tabs defaultValue="student-login" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="student-login">Student Login</TabsTrigger>
             <TabsTrigger value="admin-login">Admin Login</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsTrigger value="signup">Student Signup</TabsTrigger>
+            <TabsTrigger value="admin-signup">Admin Signup</TabsTrigger>
           </TabsList>
 
           <TabsContent value="student-login">
@@ -208,10 +220,10 @@ const Auth = () => {
           <TabsContent value="signup">
             <Card>
               <CardHeader>
-                <CardTitle>Create Account</CardTitle>
+                <CardTitle>Create Student Account</CardTitle>
                 <CardDescription>Start your JEE preparation journey</CardDescription>
               </CardHeader>
-              <form onSubmit={handleSignup}>
+              <form onSubmit={(e) => handleSignup(e)}>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Full Name</Label>
@@ -260,7 +272,69 @@ const Auth = () => {
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating account..." : "Sign Up"}
+                    {loading ? "Creating account..." : "Sign Up as Student"}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="admin-signup">
+            <Card>
+              <CardHeader>
+                <CardTitle>Create Admin Account</CardTitle>
+                <CardDescription>Set up your tuition class management</CardDescription>
+              </CardHeader>
+              <form onSubmit={(e) => handleSignup(e, "admin")}>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-signup-name">Full Name</Label>
+                    <Input
+                      id="admin-signup-name"
+                      type="text"
+                      placeholder="John Doe"
+                      value={signupForm.fullName}
+                      onChange={(e) => setSignupForm({ ...signupForm, fullName: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-signup-email">Email</Label>
+                    <Input
+                      id="admin-signup-email"
+                      type="email"
+                      placeholder="admin@email.com"
+                      value={signupForm.email}
+                      onChange={(e) => setSignupForm({ ...signupForm, email: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-signup-password">Password</Label>
+                    <Input
+                      id="admin-signup-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={signupForm.password}
+                      onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-signup-confirm">Confirm Password</Label>
+                    <Input
+                      id="admin-signup-confirm"
+                      type="password"
+                      placeholder="••••••••"
+                      value={signupForm.confirmPassword}
+                      onChange={(e) => setSignupForm({ ...signupForm, confirmPassword: e.target.value })}
+                      required
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Creating account..." : "Sign Up as Admin"}
                   </Button>
                 </CardFooter>
               </form>

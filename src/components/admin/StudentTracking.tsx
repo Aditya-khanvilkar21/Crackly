@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, TrendingUp, Award, Download, Eye } from "lucide-react";
+import { Plus, Trash2, TrendingUp, Award, Download, Eye, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +53,7 @@ export const StudentTracking = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [availableStudents, setAvailableStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<string>("");
+  const [studentIdSearch, setStudentIdSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isProgressOpen, setIsProgressOpen] = useState(false);
@@ -212,6 +213,61 @@ export const StudentTracking = () => {
     }
   };
 
+  const addStudentByStudentId = async () => {
+    if (!selectedClass || !studentIdSearch) {
+      toast({
+        title: "Missing information",
+        description: "Please enter a student ID",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Find student by student_id
+      const { data: studentData, error: studentError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("student_id", studentIdSearch)
+        .single();
+
+      if (studentError || !studentData) {
+        toast({
+          title: "Student not found",
+          description: "No student found with this ID",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Add student to class
+      const { error } = await supabase
+        .from("class_students")
+        .insert({
+          class_id: selectedClass,
+          student_id: studentData.id,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Student added successfully",
+        description: "The student has been added to the class",
+      });
+
+      setStudentIdSearch("");
+      setIsAddOpen(false);
+      fetchClassStudents();
+      fetchAvailableStudents();
+    } catch (error: any) {
+      toast({
+        title: "Error adding student",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleRemoveStudent = async (studentId: string) => {
     if (!confirm("Are you sure you want to remove this student from the class?")) {
       return;
@@ -346,10 +402,37 @@ export const StudentTracking = () => {
                   <DialogHeader>
                     <DialogTitle>Add Student to Class</DialogTitle>
                     <DialogDescription>
-                      Select a student to add to this class
+                      Add a student by their unique ID or select from available students
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="student-id">Search by Student ID</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="student-id"
+                          placeholder="e.g., JEE2025XXXXX"
+                          value={studentIdSearch}
+                          onChange={(e) => setStudentIdSearch(e.target.value)}
+                        />
+                        <Button onClick={addStudentByStudentId}>
+                          <Search className="h-4 w-4 mr-2" />
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          Or select from list
+                        </span>
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
                       <Label>Student</Label>
                       <Select value={selectedStudent} onValueChange={setSelectedStudent}>
@@ -370,7 +453,7 @@ export const StudentTracking = () => {
                     <Button variant="outline" onClick={() => setIsAddOpen(false)}>
                       Cancel
                     </Button>
-                    <Button onClick={handleAddStudent}>Add</Button>
+                    <Button onClick={handleAddStudent} disabled={!selectedStudent}>Add Selected Student</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>

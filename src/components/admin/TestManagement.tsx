@@ -4,7 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Clock, Target } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BookOpen, Clock, Target, Unlock, Lock } from "lucide-react";
 
 interface Test {
   id: string;
@@ -17,17 +19,31 @@ interface Test {
   questions: any;
 }
 
+interface TuitionClass {
+  id: string;
+  name: string;
+}
+
+interface TestAvailability {
+  class_id: string;
+  is_locked: boolean;
+}
+
 interface TestManagementProps {
   userRole: string;
 }
 
 export const TestManagement = ({ userRole }: TestManagementProps) => {
   const [tests, setTests] = useState<Test[]>([]);
+  const [classes, setClasses] = useState<TuitionClass[]>([]);
+  const [testAvailability, setTestAvailability] = useState<Record<string, TestAvailability[]>>({});
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchTests();
+    fetchClasses();
+    fetchTestAvailability();
   }, []);
 
   const fetchTests = async () => {
@@ -36,6 +52,7 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
         .from("tests")
         .select("*")
         .eq("is_active", true)
+        .eq("subject", "physics")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -48,6 +65,102 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchClasses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("tuition_classes")
+        .select("id, name")
+        .order("name");
+
+      if (error) throw error;
+      setClasses(data || []);
+    } catch (error: any) {
+      console.error("Error fetching classes:", error);
+    }
+  };
+
+  const fetchTestAvailability = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("test_availability")
+        .select("test_id, class_id, is_locked");
+
+      if (error) throw error;
+      
+      const availability: Record<string, TestAvailability[]> = {};
+      data?.forEach((item) => {
+        if (!availability[item.test_id]) {
+          availability[item.test_id] = [];
+        }
+        availability[item.test_id].push({
+          class_id: item.class_id,
+          is_locked: item.is_locked || false,
+        });
+      });
+      setTestAvailability(availability);
+    } catch (error: any) {
+      console.error("Error fetching test availability:", error);
+    }
+  };
+
+  const handleUnlockTest = async (testId: string, classId: string) => {
+    try {
+      const { error } = await supabase
+        .from("test_availability")
+        .upsert({ 
+          test_id: testId, 
+          class_id: classId, 
+          is_locked: false 
+        }, { 
+          onConflict: "test_id,class_id" 
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Test Unlocked",
+        description: "Students in this class can now access the test",
+      });
+      
+      fetchTestAvailability();
+    } catch (error: any) {
+      toast({
+        title: "Error unlocking test",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLockTest = async (testId: string, classId: string) => {
+    try {
+      const { error } = await supabase
+        .from("test_availability")
+        .upsert({ 
+          test_id: testId, 
+          class_id: classId, 
+          is_locked: true 
+        }, { 
+          onConflict: "test_id,class_id" 
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Test Locked",
+        description: "Students in this class can no longer access the test",
+      });
+      
+      fetchTestAvailability();
+    } catch (error: any) {
+      toast({
+        title: "Error locking test",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -72,65 +185,92 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Test Management</CardTitle>
+          <CardTitle>Physics Test Management</CardTitle>
           <CardDescription>
-            View and manage available tests
-            {userRole === "super_admin" && " (Super admins can create tests via database)"}
+            Unlock physics tests for your classes
           </CardDescription>
         </CardHeader>
         <CardContent>
           {tests.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No tests available yet. Contact a super admin to create tests.
+              No physics tests available yet. Contact a super admin to create tests.
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Test Title</TableHead>
-                  <TableHead>Subject</TableHead>
-                  <TableHead>Chapter</TableHead>
-                  <TableHead>Difficulty</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Questions</TableHead>
-                  <TableHead>Created</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tests.map((test) => (
-                  <TableRow key={test.id}>
-                    <TableCell className="font-medium">{test.title}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4 text-muted-foreground" />
-                        {test.subject}
+            <div className="space-y-6">
+              {tests.map((test) => (
+                <Card key={test.id}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{test.title}</CardTitle>
+                        <CardDescription>{test.chapter}</CardDescription>
                       </div>
-                    </TableCell>
-                    <TableCell>{test.chapter}</TableCell>
-                    <TableCell>
-                      <Badge className={getDifficultyColor(test.difficulty)}>
-                        {test.difficulty}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex gap-2">
+                        <Badge className={getDifficultyColor(test.difficulty)}>
+                          {test.difficulty}
+                        </Badge>
+                        <Badge variant="outline">{test.subject}</Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
                         {test.duration_minutes} min
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Target className="h-4 w-4 text-muted-foreground" />
-                        {Array.isArray(test.questions) ? test.questions.length : 0}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(test.created_at).toLocaleDateString()}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Target className="h-4 w-4" />
+                        {Array.isArray(test.questions) ? test.questions.length : 0} questions
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium">Unlock for Classes:</p>
+                      {classes.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No classes available. Create a class first.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {classes.map((cls) => {
+                            const availability = testAvailability[test.id]?.find(
+                              (a) => a.class_id === cls.id
+                            );
+                            const isLocked = availability?.is_locked !== false;
+
+                            return (
+                              <div key={cls.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                <span className="text-sm">{cls.name}</span>
+                                <Button
+                                  size="sm"
+                                  variant={isLocked ? "default" : "outline"}
+                                  onClick={() =>
+                                    isLocked
+                                      ? handleUnlockTest(test.id, cls.id)
+                                      : handleLockTest(test.id, cls.id)
+                                  }
+                                >
+                                  {isLocked ? (
+                                    <>
+                                      <Unlock className="h-4 w-4 mr-2" />
+                                      Unlock
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Lock className="h-4 w-4 mr-2" />
+                                      Lock
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
