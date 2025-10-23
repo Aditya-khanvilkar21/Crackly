@@ -20,11 +20,6 @@ interface Test {
   title: string;
   subject: string;
   chapter: string;
-  questions: Array<{
-    question: string;
-    options: string[];
-    correct_answer: number;
-  }>;
 }
 
 export default function TestResult() {
@@ -66,7 +61,6 @@ export default function TestResult() {
       setResult(resultData as unknown as TestResult);
       setTest(testData as unknown as Test);
     } catch (error) {
-      console.error("Error fetching result:", error);
       toast.error("Failed to load test result");
       navigate("/dashboard");
     }

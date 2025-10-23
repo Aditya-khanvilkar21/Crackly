@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { signIn, signUp, signOut } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { GraduationCap } from "lucide-react";
+import { emailSchema, passwordSchema, fullNameSchema } from "@/lib/validation";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -31,46 +32,61 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    if (!loginForm.email || !loginForm.password) {
-      toast.error("Please fill in all fields");
-      setLoading(false);
-      return;
-    }
+    try {
+      // Validate inputs
+      const emailValidation = emailSchema.safeParse(loginForm.email);
+      const passwordValidation = passwordSchema.safeParse(loginForm.password);
 
-    const { error } = await signIn(loginForm.email, loginForm.password);
-
-    if (error) {
-      toast.error(error.message);
-      setLoading(false);
-    } else {
-      // Check user role after successful login
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id);
-
-        const isAdmin = roles?.some(r => r.role === "admin" || r.role === "super_admin");
-        const isStudent = roles?.some(r => r.role === "student");
-
-        if (loginType === "admin" && !isAdmin) {
-          toast.error("You don't have admin access. Please login as a student.");
-          await signOut();
-          setLoading(false);
-          return;
-        }
-
-        if (loginType === "student" && !isStudent) {
-          toast.error("This account doesn't have student access. Please login as admin.");
-          await signOut();
-          setLoading(false);
-          return;
-        }
-
-        toast.success("Successfully logged in!");
-        navigate(isAdmin && loginType === "admin" ? "/admin" : "/dashboard");
+      if (!emailValidation.success) {
+        toast.error(emailValidation.error.errors[0].message);
+        setLoading(false);
+        return;
       }
+
+      if (!passwordValidation.success) {
+        toast.error(passwordValidation.error.errors[0].message);
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await signIn(loginForm.email, loginForm.password);
+
+      if (error) {
+        toast.error("Invalid email or password");
+        setLoading(false);
+      } else {
+        // Check user role after successful login
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: roles } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", session.user.id);
+
+          const isAdmin = roles?.some(r => r.role === "admin" || r.role === "super_admin");
+          const isStudent = roles?.some(r => r.role === "student");
+
+          if (loginType === "admin" && !isAdmin) {
+            toast.error("You don't have admin access. Please login as a student.");
+            await signOut();
+            setLoading(false);
+            return;
+          }
+
+          if (loginType === "student" && !isStudent) {
+            toast.error("This account doesn't have student access. Please login as admin.");
+            await signOut();
+            setLoading(false);
+            return;
+          }
+
+          toast.success("Successfully logged in!");
+          navigate(isAdmin && loginType === "admin" ? "/admin" : "/dashboard");
+        }
+      }
+    } catch (error) {
+      toast.error("An error occurred during login");
+      setLoading(false);
     }
   };
 
@@ -78,43 +94,59 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    if (!signupForm.email || !signupForm.password || !signupForm.fullName) {
-      toast.error("Please fill in all fields");
-      setLoading(false);
-      return;
-    }
+    try {
+      // Validate inputs
+      const nameValidation = fullNameSchema.safeParse(signupForm.fullName);
+      const emailValidation = emailSchema.safeParse(signupForm.email);
+      const passwordValidation = passwordSchema.safeParse(signupForm.password);
 
-    if (signupForm.password !== signupForm.confirmPassword) {
-      toast.error("Passwords do not match");
-      setLoading(false);
-      return;
-    }
-
-    if (signupForm.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      setLoading(false);
-      return;
-    }
-
-    const { data, error } = await signUp(signupForm.email, signupForm.password, signupForm.fullName);
-
-    if (error) {
-      toast.error(error.message);
-      setLoading(false);
-    } else {
-      // If admin signup, add admin role
-      if (signupType === "admin" && data?.user) {
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .insert({ user_id: data.user.id, role: "admin" });
-
-        if (roleError) {
-          console.error("Error adding admin role:", roleError);
-        }
+      if (!nameValidation.success) {
+        toast.error(nameValidation.error.errors[0].message);
+        setLoading(false);
+        return;
       }
 
-      toast.success("Account created! Logging you in...");
-      navigate(signupType === "admin" ? "/admin" : "/dashboard");
+      if (!emailValidation.success) {
+        toast.error(emailValidation.error.errors[0].message);
+        setLoading(false);
+        return;
+      }
+
+      if (signupForm.password !== signupForm.confirmPassword) {
+        toast.error("Passwords do not match");
+        setLoading(false);
+        return;
+      }
+
+      if (!passwordValidation.success) {
+        toast.error(passwordValidation.error.errors[0].message);
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await signUp(signupForm.email, signupForm.password, signupForm.fullName);
+
+      if (error) {
+        toast.error("Failed to create account. Email may already be in use.");
+        setLoading(false);
+      } else {
+        // If admin signup, add admin role
+        if (signupType === "admin" && data?.user) {
+          const { error: roleError } = await supabase
+            .from("user_roles")
+            .insert({ user_id: data.user.id, role: "admin" });
+
+          if (roleError) {
+            // Silent fail - user created but role not updated
+          }
+        }
+
+        toast.success("Account created! Logging you in...");
+        navigate(signupType === "admin" ? "/admin" : "/dashboard");
+      }
+    } catch (error) {
+      toast.error("An error occurred during signup");
+      setLoading(false);
     }
   };
 

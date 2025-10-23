@@ -21,7 +21,6 @@ import {
 interface Question {
   question: string;
   options: string[];
-  correct_answer: number;
 }
 
 interface Test {
@@ -92,37 +91,32 @@ export default function TakeTest() {
   };
 
   const submitTest = async () => {
+    if (!test || !selectedQuestions) return;
+
     setIsSubmitting(true);
-    
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
 
-      let score = 0;
-      selectedQuestions.forEach((question, index) => {
-        if (answers[index] === question.correct_answer) {
-          score++;
-        }
-      });
+      const timeInSeconds = test.duration_minutes * 60 - timeLeft;
 
-      const timeTaken = 1800 - timeLeft;
-
-      const { error } = await supabase.from("test_results").insert({
-        test_id: testId,
-        student_id: user.id,
-        score,
-        total_questions: 25,
-        answers: answers,
-        time_taken_seconds: timeTaken,
+      // Submit to secure edge function
+      const { data, error } = await supabase.functions.invoke('submit-test', {
+        body: {
+          testId,
+          answers,
+          timeInSeconds,
+        },
       });
 
       if (error) throw error;
+      if (!data.success) throw new Error(data.error || "Submission failed");
 
-      toast.success(`Test submitted! Score: ${score}/25`);
+      toast.success("Test submitted successfully!");
       navigate(`/test-result/${testId}`);
     } catch (error) {
-      console.error("Error submitting test:", error);
-      toast.error("Failed to submit test");
+      toast.error("Failed to submit test. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
