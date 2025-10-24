@@ -9,6 +9,7 @@ import { signOut } from "@/lib/auth";
 import { ClassManagement } from "@/components/admin/ClassManagement";
 import { StudentTracking } from "@/components/admin/StudentTracking";
 import { TestManagement } from "@/components/admin/TestManagement";
+import { AdminOverview } from "@/components/admin/AdminOverview";
 import { ArrowLeft } from "lucide-react";
 
 interface UserRole {
@@ -111,12 +112,17 @@ const AdminPanel = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="classes" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="classes">Classes</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="tests">Tests</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="overview" className="mt-6">
+            <AdminOverview userRole={userRole} />
+          </TabsContent>
 
           <TabsContent value="classes" className="mt-6">
             <ClassManagement userRole={userRole} />

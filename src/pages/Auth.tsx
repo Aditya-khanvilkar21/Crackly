@@ -129,19 +129,24 @@ const Auth = () => {
       if (error) {
         toast.error("Failed to create account. Email may already be in use.");
         setLoading(false);
-      } else {
-        // If admin signup, add admin role
-        if (signupType === "admin" && data?.user) {
-          const { error: roleError } = await supabase
-            .from("user_roles")
-            .insert({ user_id: data.user.id, role: "admin" });
+      } else if (data?.user) {
+        // Assign the appropriate role based on signup type
+        const role = signupType === "admin" ? "admin" : "student";
+        const { error: roleError } = await supabase
+          .from("user_roles")
+          .insert({ user_id: data.user.id, role });
 
-          if (roleError) {
-            // Silent fail - user created but role not updated
-          }
+        if (roleError) {
+          toast.error("Account created but role assignment failed. Please contact support.");
+          setLoading(false);
+          return;
         }
 
         toast.success("Account created! Logging you in...");
+        
+        // Refresh session to ensure role is available
+        await supabase.auth.refreshSession();
+        
         navigate(signupType === "admin" ? "/admin" : "/dashboard");
       }
     } catch (error) {

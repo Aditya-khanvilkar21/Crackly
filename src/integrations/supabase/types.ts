@@ -274,6 +274,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_class_admin: {
+        Args: { _class_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_in_class: {
+        Args: { _class_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "student" | "admin" | "super_admin"
