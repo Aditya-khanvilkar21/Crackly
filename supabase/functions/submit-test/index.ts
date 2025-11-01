@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
 
     // Calculate score server-side
     const questions = test.questions as Array<{ correct_answer: number }>;
-    const totalQuestionsAnswered = answers.length;
+    const totalQuestionsAnswered = Object.keys(answers).length;
     let score = 0;
     
     for (let i = 0; i < totalQuestionsAnswered; i++) {
