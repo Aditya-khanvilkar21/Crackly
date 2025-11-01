@@ -47,9 +47,10 @@ Deno.serve(async (req) => {
 
     // Calculate score server-side
     const questions = test.questions as Array<{ correct_answer: number }>;
+    const totalQuestionsAnswered = answers.length;
     let score = 0;
     
-    for (let i = 0; i < questions.length; i++) {
+    for (let i = 0; i < totalQuestionsAnswered; i++) {
       if (answers[i] === questions[i].correct_answer) {
         score++;
       }
@@ -62,7 +63,7 @@ Deno.serve(async (req) => {
         test_id: testId,
         student_id: user.id,
         score,
-        total_questions: questions.length,
+        total_questions: totalQuestionsAnswered,
         answers,
         time_taken_seconds: timeInSeconds,
       })
@@ -78,7 +79,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         score,
-        totalQuestions: questions.length,
+        totalQuestions: totalQuestionsAnswered,
         resultId: result.id
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

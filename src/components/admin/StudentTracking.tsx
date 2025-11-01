@@ -229,7 +229,7 @@ export const StudentTracking = () => {
         .from("profiles")
         .select("id")
         .eq("student_id", studentIdSearch)
-        .single();
+        .maybeSingle();
 
       if (studentError || !studentData) {
         toast({
