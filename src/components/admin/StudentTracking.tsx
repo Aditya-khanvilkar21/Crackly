@@ -224,17 +224,34 @@ export const StudentTracking = () => {
     }
 
     try {
-      // Find student by student_id
-      const { data: studentData, error: studentError } = await supabase
+      // First check if this is a UUID (user_id) or a student_id
+      const trimmedId = studentIdSearch.trim();
+      
+      // Try to find by student_id first
+      let { data: studentData, error: studentError } = await supabase
         .from("profiles")
         .select("id")
-        .eq("student_id", studentIdSearch)
+        .eq("student_id", trimmedId)
         .maybeSingle();
+
+      // If not found by student_id, try by user id (UUID format check)
+      if (!studentData && !studentError) {
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (uuidRegex.test(trimmedId)) {
+          const result = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("id", trimmedId)
+            .maybeSingle();
+          studentData = result.data;
+          studentError = result.error;
+        }
+      }
 
       if (studentError || !studentData) {
         toast({
           title: "Student not found",
-          description: "No student found with this ID",
+          description: "No student found with this ID. Make sure the student has an account and the ID is correct.",
           variant: "destructive",
         });
         return;

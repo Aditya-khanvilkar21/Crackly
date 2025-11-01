@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -195,9 +196,8 @@ const Auth = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="student-password">Password</Label>
-                    <Input
+                    <PasswordInput
                       id="student-password"
-                      type="password"
                       placeholder="••••••••"
                       value={loginForm.password}
                       onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
@@ -235,9 +235,8 @@ const Auth = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="admin-password">Password</Label>
-                    <Input
+                    <PasswordInput
                       id="admin-password"
-                      type="password"
                       placeholder="••••••••"
                       value={loginForm.password}
                       onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
@@ -286,9 +285,8 @@ const Auth = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
-                    <Input
+                    <PasswordInput
                       id="signup-password"
-                      type="password"
                       placeholder="••••••••"
                       value={signupForm.password}
                       onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })}
@@ -297,9 +295,8 @@ const Auth = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-confirm">Confirm Password</Label>
-                    <Input
+                    <PasswordInput
                       id="signup-confirm"
-                      type="password"
                       placeholder="••••••••"
                       value={signupForm.confirmPassword}
                       onChange={(e) => setSignupForm({ ...signupForm, confirmPassword: e.target.value })}
@@ -348,9 +345,8 @@ const Auth = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="admin-signup-password">Password</Label>
-                    <Input
+                    <PasswordInput
                       id="admin-signup-password"
-                      type="password"
                       placeholder="••••••••"
                       value={signupForm.password}
                       onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })}
@@ -359,9 +355,8 @@ const Auth = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="admin-signup-confirm">Confirm Password</Label>
-                    <Input
+                    <PasswordInput
                       id="admin-signup-confirm"
-                      type="password"
                       placeholder="••••••••"
                       value={signupForm.confirmPassword}
                       onChange={(e) => setSignupForm({ ...signupForm, confirmPassword: e.target.value })}
