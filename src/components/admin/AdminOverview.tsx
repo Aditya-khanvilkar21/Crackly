@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, BookOpen, GraduationCap, TrendingUp } from "lucide-react";
+import { Users, BookOpen, GraduationCap, TrendingUp, BarChart3 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AdminAnalytics } from "@/components/analytics/AdminAnalytics";
 
 interface OverviewStats {
   totalClasses: number;
@@ -226,9 +228,20 @@ export const AdminOverview = ({ userRole }: AdminOverviewProps) => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+    <Tabs defaultValue="overview" className="space-y-6">
+      <TabsList className="bg-muted">
+        <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          Overview
+        </TabsTrigger>
+        <TabsTrigger value="analytics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <BarChart3 className="w-4 h-4 mr-2" />
+          Analytics
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="overview" className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Classes</CardTitle>
             <GraduationCap className="h-4 w-4 text-muted-foreground" />
@@ -239,9 +252,9 @@ export const AdminOverview = ({ userRole }: AdminOverviewProps) => {
               {userRole === "super_admin" ? "Across all admins" : "Your classes"}
             </p>
           </CardContent>
-        </Card>
+          </Card>
 
-        <Card>
+          <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Students</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -252,9 +265,9 @@ export const AdminOverview = ({ userRole }: AdminOverviewProps) => {
               Enrolled students
             </p>
           </CardContent>
-        </Card>
+          </Card>
 
-        <Card>
+          <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Available Tests</CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
@@ -265,9 +278,9 @@ export const AdminOverview = ({ userRole }: AdminOverviewProps) => {
               Active physics tests
             </p>
           </CardContent>
-        </Card>
+          </Card>
 
-        <Card>
+          <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Average Score</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -278,10 +291,10 @@ export const AdminOverview = ({ userRole }: AdminOverviewProps) => {
               From {stats.totalTestResults} test attempts
             </p>
           </CardContent>
-        </Card>
-      </div>
+          </Card>
+        </div>
 
-      <Card>
+        <Card className="shadow-md hover:shadow-lg transition-shadow">
         <CardHeader>
           <CardTitle>Recent Test Submissions</CardTitle>
           <CardDescription>Latest test results from your students</CardDescription>
@@ -326,7 +339,12 @@ export const AdminOverview = ({ userRole }: AdminOverviewProps) => {
             </Table>
           )}
         </CardContent>
-      </Card>
-    </div>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="analytics">
+        <AdminAnalytics userRole={userRole} />
+      </TabsContent>
+    </Tabs>
   );
 };

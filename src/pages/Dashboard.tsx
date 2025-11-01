@@ -5,8 +5,10 @@ import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, BookOpen, Clock, Target, PlayCircle, Award } from "lucide-react";
+import { LogOut, BookOpen, Clock, Target, PlayCircle, Award, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StudentAnalytics } from "@/components/analytics/StudentAnalytics";
 
 interface Profile {
   id: string;
@@ -226,15 +228,28 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         {isStudent && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-3xl font-bold mb-2">Your Dashboard</h2>
-              <p className="text-muted-foreground">Track your progress and attempt tests</p>
+          <Tabs defaultValue="overview" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold mb-2">Your Dashboard</h2>
+                <p className="text-muted-foreground">Track your progress and attempt tests</p>
+              </div>
+              <TabsList className="bg-muted">
+                <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="analytics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  Analytics
+                </TabsTrigger>
+              </TabsList>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
+            <TabsContent value="overview" className="space-y-6">
+
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Tests Attempted</CardTitle>
                   <BookOpen className="h-4 w-4 text-muted-foreground" />
@@ -245,9 +260,9 @@ const Dashboard = () => {
                     {recentResults.length === 0 ? "No tests completed yet" : "Total tests completed"}
                   </p>
                 </CardContent>
-              </Card>
+                </Card>
 
-              <Card>
+                <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Average Score</CardTitle>
                   <Target className="h-4 w-4 text-muted-foreground" />
@@ -266,9 +281,9 @@ const Dashboard = () => {
                     {recentResults.length === 0 ? "Complete tests to see stats" : "Across all tests"}
                   </p>
                 </CardContent>
-              </Card>
+                </Card>
 
-              <Card>
+                <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Tests Available</CardTitle>
                   <Clock className="h-4 w-4 text-muted-foreground" />
@@ -277,10 +292,10 @@ const Dashboard = () => {
                   <div className="text-2xl font-bold">{tests.length}</div>
                   <p className="text-xs text-muted-foreground">Ready to attempt</p>
                 </CardContent>
-              </Card>
-            </div>
+                </Card>
+              </div>
 
-            {/* Available Tests */}
+              {/* Available Tests */}
             <div>
               <h3 className="text-xl font-semibold mb-4">Available Tests</h3>
               {tests.length === 0 ? (
@@ -372,7 +387,12 @@ const Dashboard = () => {
                 </Card>
               </div>
             )}
-          </div>
+            </TabsContent>
+
+            <TabsContent value="analytics">
+              <StudentAnalytics />
+            </TabsContent>
+          </Tabs>
         )}
 
         {(isAdmin || isSuperAdmin) && (
