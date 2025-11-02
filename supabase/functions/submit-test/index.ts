@@ -46,13 +46,13 @@ Deno.serve(async (req) => {
     }
 
     // Calculate score server-side
-    const questions = test.questions as Array<{ correct_answer: number }>;
+    const questions = test.questions as Array<{ correctAnswer: number }>;
     let score = 0;
     
     // Iterate through each submitted answer
     Object.entries(answers).forEach(([questionIndex, selectedAnswer]) => {
       const index = parseInt(questionIndex);
-      if (questions[index] && questions[index].correct_answer === selectedAnswer) {
+      if (questions[index] && questions[index].correctAnswer === selectedAnswer) {
         score++;
       }
     });

@@ -55,7 +55,6 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
         .from("tests")
         .select("*")
         .eq("is_active", true)
-        .eq("subject", "physics")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -210,80 +209,258 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
                 No tests available yet. Contact a super admin to create tests.
               </div>
             ) : (
-              <div className="space-y-6">
-                {tests.map((test) => (
-                  <Card key={test.id}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="text-lg">{test.title}</CardTitle>
-                          <CardDescription>{test.chapter}</CardDescription>
-                        </div>
-                        <div className="flex gap-2">
-                          <Badge className={getDifficultyColor(test.difficulty)}>
-                            {test.difficulty}
-                          </Badge>
-                          <Badge variant="outline">{test.subject}</Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {test.duration_minutes} min
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Target className="h-4 w-4" />
-                          {Array.isArray(test.questions) ? test.questions.length : 0} questions
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <p className="text-sm font-medium">Unlock for Classes:</p>
-                        {classes.length === 0 ? (
-                          <p className="text-sm text-muted-foreground">No classes available. Create a class first.</p>
-                        ) : (
-                          <div className="space-y-2">
-                            {classes.map((cls) => {
-                              const availability = testAvailability[test.id]?.find(
-                                (a) => a.class_id === cls.id
-                              );
-                              const isLocked = availability?.is_locked !== false;
+              <div className="space-y-8">
+                {/* Physics Tests */}
+                {tests.filter(t => t.subject.toLowerCase() === 'physics').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+                      Physics Tests
+                    </h3>
+                    <div className="space-y-4">
+                      {tests.filter(t => t.subject.toLowerCase() === 'physics').map((test) => (
+                        <Card key={test.id} className="border-l-4 border-l-blue-500">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <CardTitle className="text-lg">{test.title}</CardTitle>
+                                <CardDescription>{test.chapter}</CardDescription>
+                              </div>
+                              <div className="flex gap-2">
+                                <Badge className={getDifficultyColor(test.difficulty)}>
+                                  {test.difficulty}
+                                </Badge>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {test.duration_minutes} min
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Target className="h-4 w-4" />
+                                {Array.isArray(test.questions) ? test.questions.length : 0} questions
+                              </span>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <p className="text-sm font-medium">Unlock for Classes:</p>
+                              {classes.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">No classes available. Create a class first.</p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {classes.map((cls) => {
+                                    const availability = testAvailability[test.id]?.find(
+                                      (a) => a.class_id === cls.id
+                                    );
+                                    const isLocked = availability?.is_locked !== false;
 
-                              return (
-                                <div key={cls.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                  <span className="text-sm">{cls.name}</span>
-                                  <Button
-                                    size="sm"
-                                    variant={isLocked ? "default" : "outline"}
-                                    onClick={() =>
-                                      isLocked
-                                        ? handleUnlockTest(test.id, cls.id)
-                                        : handleLockTest(test.id, cls.id)
-                                    }
-                                  >
-                                    {isLocked ? (
-                                      <>
-                                        <Unlock className="h-4 w-4 mr-2" />
-                                        Unlock
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Lock className="h-4 w-4 mr-2" />
-                                        Lock
-                                      </>
-                                    )}
-                                  </Button>
+                                    return (
+                                      <div key={cls.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                        <span className="text-sm">{cls.name}</span>
+                                        <Button
+                                          size="sm"
+                                          variant={isLocked ? "default" : "outline"}
+                                          onClick={() =>
+                                            isLocked
+                                              ? handleUnlockTest(test.id, cls.id)
+                                              : handleLockTest(test.id, cls.id)
+                                          }
+                                        >
+                                          {isLocked ? (
+                                            <>
+                                              <Unlock className="h-4 w-4 mr-2" />
+                                              Unlock
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Lock className="h-4 w-4 mr-2" />
+                                              Lock
+                                            </>
+                                          )}
+                                        </Button>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Chemistry Tests */}
+                {tests.filter(t => t.subject.toLowerCase() === 'chemistry').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <div className="w-1 h-6 bg-green-500 rounded-full"></div>
+                      Chemistry Tests
+                    </h3>
+                    <div className="space-y-4">
+                      {tests.filter(t => t.subject.toLowerCase() === 'chemistry').map((test) => (
+                        <Card key={test.id} className="border-l-4 border-l-green-500">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <CardTitle className="text-lg">{test.title}</CardTitle>
+                                <CardDescription>{test.chapter}</CardDescription>
+                              </div>
+                              <div className="flex gap-2">
+                                <Badge className={getDifficultyColor(test.difficulty)}>
+                                  {test.difficulty}
+                                </Badge>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {test.duration_minutes} min
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Target className="h-4 w-4" />
+                                {Array.isArray(test.questions) ? test.questions.length : 0} questions
+                              </span>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <p className="text-sm font-medium">Unlock for Classes:</p>
+                              {classes.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">No classes available. Create a class first.</p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {classes.map((cls) => {
+                                    const availability = testAvailability[test.id]?.find(
+                                      (a) => a.class_id === cls.id
+                                    );
+                                    const isLocked = availability?.is_locked !== false;
+
+                                    return (
+                                      <div key={cls.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                        <span className="text-sm">{cls.name}</span>
+                                        <Button
+                                          size="sm"
+                                          variant={isLocked ? "default" : "outline"}
+                                          onClick={() =>
+                                            isLocked
+                                              ? handleUnlockTest(test.id, cls.id)
+                                              : handleLockTest(test.id, cls.id)
+                                          }
+                                        >
+                                          {isLocked ? (
+                                            <>
+                                              <Unlock className="h-4 w-4 mr-2" />
+                                              Unlock
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Lock className="h-4 w-4 mr-2" />
+                                              Lock
+                                            </>
+                                          )}
+                                        </Button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Mathematics Tests */}
+                {tests.filter(t => t.subject.toLowerCase() === 'mathematics').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+                      Mathematics Tests
+                    </h3>
+                    <div className="space-y-4">
+                      {tests.filter(t => t.subject.toLowerCase() === 'mathematics').map((test) => (
+                        <Card key={test.id} className="border-l-4 border-l-purple-500">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <CardTitle className="text-lg">{test.title}</CardTitle>
+                                <CardDescription>{test.chapter}</CardDescription>
+                              </div>
+                              <div className="flex gap-2">
+                                <Badge className={getDifficultyColor(test.difficulty)}>
+                                  {test.difficulty}
+                                </Badge>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {test.duration_minutes} min
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Target className="h-4 w-4" />
+                                {Array.isArray(test.questions) ? test.questions.length : 0} questions
+                              </span>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <p className="text-sm font-medium">Unlock for Classes:</p>
+                              {classes.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">No classes available. Create a class first.</p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {classes.map((cls) => {
+                                    const availability = testAvailability[test.id]?.find(
+                                      (a) => a.class_id === cls.id
+                                    );
+                                    const isLocked = availability?.is_locked !== false;
+
+                                    return (
+                                      <div key={cls.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                        <span className="text-sm">{cls.name}</span>
+                                        <Button
+                                          size="sm"
+                                          variant={isLocked ? "default" : "outline"}
+                                          onClick={() =>
+                                            isLocked
+                                              ? handleUnlockTest(test.id, cls.id)
+                                              : handleLockTest(test.id, cls.id)
+                                          }
+                                        >
+                                          {isLocked ? (
+                                            <>
+                                              <Unlock className="h-4 w-4 mr-2" />
+                                              Unlock
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Lock className="h-4 w-4 mr-2" />
+                                              Lock
+                                            </>
+                                          )}
+                                        </Button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

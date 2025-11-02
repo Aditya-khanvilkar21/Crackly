@@ -295,7 +295,7 @@ const Dashboard = () => {
                 </Card>
               </div>
 
-              {/* Available Tests */}
+              {/* Available Tests - Organized by Subject */}
             <div>
               <h3 className="text-xl font-semibold mb-4">Available Tests</h3>
               {tests.length === 0 ? (
@@ -309,37 +309,129 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {tests.map((test) => (
-                    <Card key={test.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-start justify-between mb-2">
-                          <Badge className={getDifficultyColor(test.difficulty)}>
-                            {test.difficulty}
-                          </Badge>
-                          <Badge variant="outline">{test.subject}</Badge>
-                        </div>
-                        <CardTitle className="text-lg">{test.title}</CardTitle>
-                        <CardDescription>{test.chapter}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                          <span className="flex items-center gap-1">
-                            <BookOpen className="w-4 h-4" />
-                            25 Questions
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {test.duration_minutes} min
-                          </span>
-                        </div>
-                        <Button onClick={() => navigate(`/take-test/${test.id}`)} className="w-full">
-                          <PlayCircle className="w-4 h-4 mr-2" />
-                          Start Test
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="space-y-8">
+                  {/* Physics Tests */}
+                  {tests.filter(t => t.subject.toLowerCase() === 'physics').length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+                        Physics Tests
+                      </h4>
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {tests.filter(t => t.subject.toLowerCase() === 'physics').map((test) => (
+                          <Card key={test.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
+                            <CardHeader>
+                              <div className="flex items-start justify-between mb-2">
+                                <Badge className={getDifficultyColor(test.difficulty)}>
+                                  {test.difficulty}
+                                </Badge>
+                              </div>
+                              <CardTitle className="text-lg">{test.title}</CardTitle>
+                              <CardDescription>{test.chapter}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                                <span className="flex items-center gap-1">
+                                  <BookOpen className="w-4 h-4" />
+                                  25 Questions
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-4 h-4" />
+                                  {test.duration_minutes} min
+                                </span>
+                              </div>
+                              <Button onClick={() => navigate(`/take-test/${test.id}`)} className="w-full">
+                                <PlayCircle className="w-4 h-4 mr-2" />
+                                Start Test
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Chemistry Tests */}
+                  {tests.filter(t => t.subject.toLowerCase() === 'chemistry').length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-green-500 rounded-full"></div>
+                        Chemistry Tests
+                      </h4>
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {tests.filter(t => t.subject.toLowerCase() === 'chemistry').map((test) => (
+                          <Card key={test.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-green-500">
+                            <CardHeader>
+                              <div className="flex items-start justify-between mb-2">
+                                <Badge className={getDifficultyColor(test.difficulty)}>
+                                  {test.difficulty}
+                                </Badge>
+                              </div>
+                              <CardTitle className="text-lg">{test.title}</CardTitle>
+                              <CardDescription>{test.chapter}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                                <span className="flex items-center gap-1">
+                                  <BookOpen className="w-4 h-4" />
+                                  25 Questions
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-4 h-4" />
+                                  {test.duration_minutes} min
+                                </span>
+                              </div>
+                              <Button onClick={() => navigate(`/take-test/${test.id}`)} className="w-full">
+                                <PlayCircle className="w-4 h-4 mr-2" />
+                                Start Test
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Mathematics Tests */}
+                  {tests.filter(t => t.subject.toLowerCase() === 'mathematics').length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+                        Mathematics Tests
+                      </h4>
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {tests.filter(t => t.subject.toLowerCase() === 'mathematics').map((test) => (
+                          <Card key={test.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-purple-500">
+                            <CardHeader>
+                              <div className="flex items-start justify-between mb-2">
+                                <Badge className={getDifficultyColor(test.difficulty)}>
+                                  {test.difficulty}
+                                </Badge>
+                              </div>
+                              <CardTitle className="text-lg">{test.title}</CardTitle>
+                              <CardDescription>{test.chapter}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                                <span className="flex items-center gap-1">
+                                  <BookOpen className="w-4 h-4" />
+                                  25 Questions
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-4 h-4" />
+                                  {test.duration_minutes} min
+                                </span>
+                              </div>
+                              <Button onClick={() => navigate(`/take-test/${test.id}`)} className="w-full">
+                                <PlayCircle className="w-4 h-4 mr-2" />
+                                Start Test
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
