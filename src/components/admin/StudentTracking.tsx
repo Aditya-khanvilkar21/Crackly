@@ -415,16 +415,16 @@ export const StudentTracking = () => {
                     Add Student
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Add Student to Class</DialogTitle>
                     <DialogDescription>
-                      Add a student by their unique ID or select from available students
+                      Search by ID or select from all registered students below
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                      <Label htmlFor="student-id">Search by Student ID</Label>
+                      <Label htmlFor="student-id">Quick Add by Student ID</Label>
                       <div className="flex gap-2">
                         <Input
                           id="student-id"
@@ -445,32 +445,79 @@ export const StudentTracking = () => {
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
                         <span className="bg-background px-2 text-muted-foreground">
-                          Or select from list
+                          All Registered Students
                         </span>
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Student</Label>
-                      <Select value={selectedStudent} onValueChange={setSelectedStudent}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a student" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableStudents.map((student) => (
-                            <SelectItem key={student.id} value={student.id}>
-                              {student.full_name} ({student.student_id})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label>Select from available students</Label>
+                      {availableStudents.length === 0 ? (
+                        <div className="text-center py-4 text-muted-foreground text-sm">
+                          No available students to add. All registered students are already in this class.
+                        </div>
+                      ) : (
+                        <div className="border rounded-lg">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Student Name</TableHead>
+                                <TableHead>Student ID</TableHead>
+                                <TableHead className="w-[100px]">Action</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {availableStudents.map((student) => (
+                                <TableRow key={student.id}>
+                                  <TableCell className="font-medium">{student.full_name}</TableCell>
+                                  <TableCell>
+                                    <Badge variant="outline">{student.student_id}</Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      onClick={async () => {
+                                        try {
+                                          const { error } = await supabase
+                                            .from("class_students")
+                                            .insert([{ class_id: selectedClass, student_id: student.id }]);
+
+                                          if (error) throw error;
+
+                                          toast({
+                                            title: "Success",
+                                            description: `${student.full_name} added to class`,
+                                          });
+
+                                          setIsAddOpen(false);
+                                          fetchClassStudents();
+                                          fetchAvailableStudents();
+                                        } catch (error: any) {
+                                          toast({
+                                            title: "Error",
+                                            description: error.message,
+                                            variant: "destructive",
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <Plus className="h-3 w-3 mr-1" />
+                                      Add
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setIsAddOpen(false)}>
-                      Cancel
+                      Close
                     </Button>
-                    <Button onClick={handleAddStudent} disabled={!selectedStudent}>Add Selected Student</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
