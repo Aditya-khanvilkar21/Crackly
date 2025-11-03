@@ -4,7 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, XCircle, Clock, Award } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+
+interface Question {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+}
 
 interface TestResult {
   id: string;
@@ -20,6 +27,7 @@ interface Test {
   title: string;
   subject: string;
   chapter: string;
+  questions: Question[];
 }
 
 export default function TestResult() {
@@ -134,6 +142,70 @@ export default function TestResult() {
                 <div className="text-sm text-muted-foreground">Incorrect</div>
               </div>
             </div>
+          </div>
+        </Card>
+
+        {/* Detailed Review */}
+        <Card className="p-6 mb-6">
+          <h2 className="text-xl font-bold mb-6">Detailed Review</h2>
+          <div className="space-y-6">
+            {Object.entries(result.answers).map(([questionIndex, selectedAnswer]) => {
+              const qIndex = parseInt(questionIndex);
+              const question = test.questions[qIndex];
+              const isCorrect = selectedAnswer === question.correctAnswer;
+              
+              return (
+                <div key={qIndex} className={`p-4 rounded-lg border-2 ${
+                  isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-950/20' : 'border-red-500 bg-red-50 dark:bg-red-950/20'
+                }`}>
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold">Q{qIndex + 1}.</span>
+                      {isCorrect ? (
+                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-red-600" />
+                      )}
+                    </div>
+                    <Badge className={isCorrect ? 'bg-green-600' : 'bg-red-600'}>
+                      {isCorrect ? 'Correct' : 'Incorrect'}
+                    </Badge>
+                  </div>
+                  
+                  <p className="font-medium mb-4">{question.question}</p>
+                  
+                  <div className="space-y-2">
+                    {question.options.map((option, optIndex) => {
+                      const isSelected = selectedAnswer === optIndex;
+                      const isCorrectOption = question.correctAnswer === optIndex;
+                      
+                      return (
+                        <div key={optIndex} className={`p-3 rounded-lg ${
+                          isCorrectOption 
+                            ? 'bg-green-100 dark:bg-green-900/30 border-2 border-green-500' 
+                            : isSelected 
+                            ? 'bg-red-100 dark:bg-red-900/30 border-2 border-red-500' 
+                            : 'bg-muted/50'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">
+                              {String.fromCharCode(97 + optIndex)})
+                            </span>
+                            <span>{option}</span>
+                            {isCorrectOption && (
+                              <Badge className="ml-auto bg-green-600">Correct Answer</Badge>
+                            )}
+                            {isSelected && !isCorrectOption && (
+                              <Badge className="ml-auto bg-red-600">Your Answer</Badge>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </Card>
 

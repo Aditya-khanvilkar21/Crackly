@@ -10,6 +10,7 @@ import { ClassManagement } from "@/components/admin/ClassManagement";
 import { StudentTracking } from "@/components/admin/StudentTracking";
 import { TestManagement } from "@/components/admin/TestManagement";
 import { AdminOverview } from "@/components/admin/AdminOverview";
+import { JoinRequestsManagement } from "@/components/admin/JoinRequestsManagement";
 import { ArrowLeft } from "lucide-react";
 
 interface UserRole {
@@ -113,10 +114,11 @@ const AdminPanel = () => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="classes">Classes</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
+            <TabsTrigger value="requests">Join Requests</TabsTrigger>
             <TabsTrigger value="tests">Tests</TabsTrigger>
           </TabsList>
 
@@ -130,6 +132,10 @@ const AdminPanel = () => {
 
           <TabsContent value="students" className="mt-6">
             <StudentTracking />
+          </TabsContent>
+
+          <TabsContent value="requests" className="mt-6">
+            <JoinRequestsManagement />
           </TabsContent>
 
           <TabsContent value="tests" className="mt-6">

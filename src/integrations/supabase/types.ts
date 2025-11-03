@@ -50,25 +50,76 @@ export type Database = {
           },
         ]
       }
+      join_requests: {
+        Row: {
+          class_id: string
+          created_at: string
+          id: string
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          id?: string
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          id?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "join_requests_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "tuition_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "join_requests_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          class_status: string | null
           created_at: string
+          district: string | null
           full_name: string
           id: string
+          state: string | null
           student_id: string | null
           updated_at: string
         }
         Insert: {
+          class_status?: string | null
           created_at?: string
+          district?: string | null
           full_name: string
           id: string
+          state?: string | null
           student_id?: string | null
           updated_at?: string
         }
         Update: {
+          class_status?: string | null
           created_at?: string
+          district?: string | null
           full_name?: string
           id?: string
+          state?: string | null
           student_id?: string | null
           updated_at?: string
         }
