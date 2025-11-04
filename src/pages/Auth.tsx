@@ -6,15 +6,17 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { signIn, signUp, signOut } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, UserCircle, Shield } from "lucide-react";
 import { emailSchema, passwordSchema, fullNameSchema } from "@/lib/validation";
 
 const Auth = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [loginType, setLoginType] = useState<"student" | "admin">("student");
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [signupForm, setSignupForm] = useState({ email: "", password: "", fullName: "", confirmPassword: "" });
 
@@ -91,7 +93,7 @@ const Auth = () => {
     }
   };
 
-  const handleSignup = async (e: React.FormEvent, signupType?: "admin") => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -131,11 +133,10 @@ const Auth = () => {
         toast.error("Failed to create account. Email may already be in use.");
         setLoading(false);
       } else if (data?.user) {
-        // Assign the appropriate role based on signup type
-        const role = signupType === "admin" ? "admin" : "student";
+        // Assign student role
         const { error: roleError } = await supabase
           .from("user_roles")
-          .insert({ user_id: data.user.id, role });
+          .insert({ user_id: data.user.id, role: "student" });
 
         if (roleError) {
           toast.error("Account created but role assignment failed. Please contact support.");
@@ -148,7 +149,7 @@ const Auth = () => {
         // Refresh session to ensure role is available
         await supabase.auth.refreshSession();
         
-        navigate(signupType === "admin" ? "/admin" : "/dashboard");
+        navigate("/dashboard");
       }
     } catch (error) {
       toast.error("An error occurred during signup");
@@ -167,100 +168,27 @@ const Auth = () => {
           <p className="text-muted-foreground">Master your JEE preparation</p>
         </div>
 
-        <Tabs defaultValue="student-login" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
-            <TabsTrigger value="student-login">Student Login</TabsTrigger>
-            <TabsTrigger value="admin-login">Admin Login</TabsTrigger>
-            <TabsTrigger value="signup">Student Signup</TabsTrigger>
-            <TabsTrigger value="admin-signup">Admin Signup</TabsTrigger>
+        <Tabs defaultValue="signup" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="signup" className="text-base">
+              <UserCircle className="w-4 h-4 mr-2" />
+              Sign Up
+            </TabsTrigger>
+            <TabsTrigger value="login" className="text-base">
+              <Shield className="w-4 h-4 mr-2" />
+              Login
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="student-login">
-            <Card>
-              <CardHeader>
-                <CardTitle>Student Login</CardTitle>
-                <CardDescription>Access your tests and track your progress</CardDescription>
-              </CardHeader>
-              <form onSubmit={(e) => handleLogin(e, "student")}>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="student-email">Email</Label>
-                    <Input
-                      id="student-email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={loginForm.email}
-                      onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="student-password">Password</Label>
-                    <PasswordInput
-                      id="student-password"
-                      placeholder="••••••••"
-                      value={loginForm.password}
-                      onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                      required
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Logging in..." : "Login as Student"}
-                  </Button>
-                </CardFooter>
-              </form>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="admin-login">
-            <Card>
-              <CardHeader>
-                <CardTitle>Admin Login</CardTitle>
-                <CardDescription>Manage classes and monitor student progress</CardDescription>
-              </CardHeader>
-              <form onSubmit={(e) => handleLogin(e, "admin")}>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="admin-email">Email</Label>
-                    <Input
-                      id="admin-email"
-                      type="email"
-                      placeholder="admin@email.com"
-                      value={loginForm.email}
-                      onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="admin-password">Password</Label>
-                    <PasswordInput
-                      id="admin-password"
-                      placeholder="••••••••"
-                      value={loginForm.password}
-                      onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                      required
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Logging in..." : "Login as Admin"}
-                  </Button>
-                </CardFooter>
-              </form>
-            </Card>
-          </TabsContent>
-
+          {/* Signup Tab - Student Only */}
           <TabsContent value="signup">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create Student Account</CardTitle>
-                <CardDescription>Start your JEE preparation journey</CardDescription>
+            <Card className="border-2">
+              <CardHeader className="bg-gradient-subtle">
+                <CardTitle className="text-xl">Create Student Account</CardTitle>
+                <CardDescription>Start your JEE preparation journey today</CardDescription>
               </CardHeader>
-              <form onSubmit={(e) => handleSignup(e)}>
-                <CardContent className="space-y-4">
+              <form onSubmit={handleSignup}>
+                <CardContent className="space-y-4 pt-6">
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Full Name</Label>
                     <Input
@@ -305,68 +233,84 @@ const Auth = () => {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating account..." : "Sign Up as Student"}
+                  <Button type="submit" className="w-full" disabled={loading} size="lg">
+                    {loading ? "Creating account..." : "Create Student Account"}
                   </Button>
                 </CardFooter>
               </form>
             </Card>
           </TabsContent>
 
-          <TabsContent value="admin-signup">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create Admin Account</CardTitle>
-                <CardDescription>Set up your tuition class management</CardDescription>
+          {/* Login Tab - Student and Admin */}
+          <TabsContent value="login">
+            <Card className="border-2">
+              <CardHeader className="bg-gradient-subtle">
+                <CardTitle className="text-xl">Login to Your Account</CardTitle>
+                <CardDescription>Select your account type and login</CardDescription>
               </CardHeader>
-              <form onSubmit={(e) => handleSignup(e, "admin")}>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="admin-signup-name">Full Name</Label>
-                    <Input
-                      id="admin-signup-name"
-                      type="text"
-                      placeholder="John Doe"
-                      value={signupForm.fullName}
-                      onChange={(e) => setSignupForm({ ...signupForm, fullName: e.target.value })}
-                      required
-                    />
+              <form onSubmit={(e) => handleLogin(e, loginType)}>
+                <CardContent className="space-y-6 pt-6">
+                  {/* Login Type Selection */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Account Type</Label>
+                    <RadioGroup 
+                      value={loginType} 
+                      onValueChange={(value) => setLoginType(value as "student" | "admin")}
+                      className="grid grid-cols-2 gap-4"
+                    >
+                      <div>
+                        <RadioGroupItem value="student" id="student" className="peer sr-only" />
+                        <Label
+                          htmlFor="student"
+                          className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
+                        >
+                          <UserCircle className="mb-3 h-8 w-8" />
+                          <span className="font-semibold">Student</span>
+                          <span className="text-xs text-muted-foreground mt-1">Access tests & track progress</span>
+                        </Label>
+                      </div>
+                      <div>
+                        <RadioGroupItem value="admin" id="admin" className="peer sr-only" />
+                        <Label
+                          htmlFor="admin"
+                          className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
+                        >
+                          <Shield className="mb-3 h-8 w-8" />
+                          <span className="font-semibold">Admin</span>
+                          <span className="text-xs text-muted-foreground mt-1">Manage classes & students</span>
+                        </Label>
+                      </div>
+                    </RadioGroup>
                   </div>
+
+                  {/* Email Input */}
                   <div className="space-y-2">
-                    <Label htmlFor="admin-signup-email">Email</Label>
+                    <Label htmlFor="login-email">Email</Label>
                     <Input
-                      id="admin-signup-email"
+                      id="login-email"
                       type="email"
-                      placeholder="admin@email.com"
-                      value={signupForm.email}
-                      onChange={(e) => setSignupForm({ ...signupForm, email: e.target.value })}
+                      placeholder={loginType === "student" ? "your@email.com" : "admin@email.com"}
+                      value={loginForm.email}
+                      onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                       required
                     />
                   </div>
+
+                  {/* Password Input */}
                   <div className="space-y-2">
-                    <Label htmlFor="admin-signup-password">Password</Label>
+                    <Label htmlFor="login-password">Password</Label>
                     <PasswordInput
-                      id="admin-signup-password"
+                      id="login-password"
                       placeholder="••••••••"
-                      value={signupForm.password}
-                      onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="admin-signup-confirm">Confirm Password</Label>
-                    <PasswordInput
-                      id="admin-signup-confirm"
-                      placeholder="••••••••"
-                      value={signupForm.confirmPassword}
-                      onChange={(e) => setSignupForm({ ...signupForm, confirmPassword: e.target.value })}
+                      value={loginForm.password}
+                      onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                       required
                     />
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating account..." : "Sign Up as Admin"}
+                  <Button type="submit" className="w-full" disabled={loading} size="lg">
+                    {loading ? "Logging in..." : `Login as ${loginType === "student" ? "Student" : "Admin"}`}
                   </Button>
                 </CardFooter>
               </form>
