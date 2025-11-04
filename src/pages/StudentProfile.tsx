@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { User, ArrowLeft, Save, Send } from "lucide-react";
+import { User, ArrowLeft, Save, Send, BookOpen } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface Profile {
@@ -242,61 +242,129 @@ export default function StudentProfile() {
             </CardContent>
           </Card>
 
-          {/* Tuition Classes */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Tuition Classes</CardTitle>
+          {/* Tuition Classes - Enhanced UI */}
+          <Card className="border-2">
+            <CardHeader className="bg-gradient-subtle">
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" />
+                My Tuition Classes
+              </CardTitle>
               <CardDescription>
                 {myClasses.length > 0 
-                  ? "You are enrolled in the following classes" 
-                  : "You are not enrolled in any tuition class yet"}
+                  ? `You are enrolled in ${myClasses.length} class${myClasses.length !== 1 ? 'es' : ''}` 
+                  : "Join a tuition class to access exclusive tests and track your progress"}
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               {myClasses.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {myClasses.map((cls) => (
-                    <div key={cls.id} className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                      <Badge variant="outline">{cls.name}</Badge>
+                    <div key={cls.id} className="flex items-center gap-3 p-4 bg-primary/5 border-2 border-primary/20 rounded-lg hover:border-primary/40 transition-colors">
+                      <div className="w-2 h-12 bg-primary rounded-full" />
+                      <div className="flex-1">
+                        <Badge variant="outline" className="text-sm font-semibold">
+                          {cls.name}
+                        </Badge>
+                        <p className="text-xs text-muted-foreground mt-1">Enrolled Class</p>
+                      </div>
                     </div>
                   ))}
+                  <div className="mt-6 pt-4 border-t">
+                    <p className="text-sm text-muted-foreground mb-3">Want to join another class?</p>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full">
+                          <Send className="w-4 h-4 mr-2" />
+                          Request to Join Another Class
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Join a Tuition Class</DialogTitle>
+                          <DialogDescription>
+                            Select a class to send a join request to the admin
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="classSelect">Available Classes</Label>
+                            <Select value={selectedClass} onValueChange={setSelectedClass}>
+                              <SelectTrigger id="classSelect">
+                                <SelectValue placeholder="Choose a class to join" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {classes.length === 0 ? (
+                                  <SelectItem value="none" disabled>No classes available</SelectItem>
+                                ) : (
+                                  classes.map((cls) => (
+                                    <SelectItem key={cls.id} value={cls.id}>
+                                      {cls.name}
+                                    </SelectItem>
+                                  ))
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <Button onClick={handleSendRequest} disabled={!selectedClass} className="w-full">
+                            <Send className="w-4 h-4 mr-2" />
+                            Send Join Request
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">Not enrolled in any class</p>
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <BookOpen className="w-8 h-8 text-primary" />
+                  </div>
+                  <p className="text-muted-foreground mb-2 font-medium">Not enrolled in any class yet</p>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Join a class to unlock tests and track your performance
+                  </p>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button>
+                      <Button size="lg" className="shadow-primary">
                         <Send className="w-4 h-4 mr-2" />
-                        Request to Join Class
+                        Request to Join a Class
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-md">
                       <DialogHeader>
                         <DialogTitle>Join a Tuition Class</DialogTitle>
                         <DialogDescription>
                           Select a class to send a join request to the admin
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="space-y-4">
+                      <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                          <Label>Select Class</Label>
+                          <Label htmlFor="classSelect">Available Classes</Label>
                           <Select value={selectedClass} onValueChange={setSelectedClass}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Choose a class" />
+                            <SelectTrigger id="classSelect">
+                              <SelectValue placeholder="Choose a class to join" />
                             </SelectTrigger>
                             <SelectContent>
-                              {classes.map((cls) => (
-                                <SelectItem key={cls.id} value={cls.id}>
-                                  {cls.name}
-                                </SelectItem>
-                              ))}
+                              {classes.length === 0 ? (
+                                <SelectItem value="none" disabled>No classes available</SelectItem>
+                              ) : (
+                                classes.map((cls) => (
+                                  <SelectItem key={cls.id} value={cls.id}>
+                                    {cls.name}
+                                  </SelectItem>
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
+                          {classes.length > 0 && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              {classes.length} class{classes.length !== 1 ? 'es' : ''} available
+                            </p>
+                          )}
                         </div>
-                        <Button onClick={handleSendRequest} disabled={!selectedClass}>
+                        <Button onClick={handleSendRequest} disabled={!selectedClass} className="w-full">
                           <Send className="w-4 h-4 mr-2" />
-                          Send Request
+                          Send Join Request
                         </Button>
                       </div>
                     </DialogContent>

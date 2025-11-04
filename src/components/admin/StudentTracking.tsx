@@ -214,71 +214,60 @@ export const StudentTracking = () => {
   };
 
   const addStudentByStudentId = async () => {
-    if (!selectedClass || !studentIdSearch) {
-      toast({
-        title: "Missing information",
-        description: "Please enter a student ID",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!studentIdSearch.trim() || !selectedClass) return;
 
     try {
-      // First check if this is a UUID (user_id) or a student_id
-      const trimmedId = studentIdSearch.trim();
-      
-      // Try to find by student_id first
-      let { data: studentData, error: studentError } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
-        .select("id")
-        .eq("student_id", trimmedId)
+        .select("id, full_name, student_id")
+        .or(`student_id.eq.${studentIdSearch},id.eq.${studentIdSearch}`)
         .maybeSingle();
 
-      // If not found by student_id, try by user id (UUID format check)
-      if (!studentData && !studentError) {
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        if (uuidRegex.test(trimmedId)) {
-          const result = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("id", trimmedId)
-            .maybeSingle();
-          studentData = result.data;
-          studentError = result.error;
-        }
-      }
-
-      if (studentError || !studentData) {
+      if (profileError) {
         toast({
-          title: "Student not found",
-          description: "No student found with this ID. Make sure the student has an account and the ID is correct.",
+          title: "Error",
+          description: profileError.message,
           variant: "destructive",
         });
         return;
       }
 
-      // Add student to class
+      if (!profileData) {
+        toast({
+          title: "Student not found",
+          description: `No student found with ID: ${studentIdSearch}. You can select from the list of all registered students below.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from("class_students")
-        .insert({
-          class_id: selectedClass,
-          student_id: studentData.id,
+        .insert([{ class_id: selectedClass, student_id: profileData.id }]);
+
+      if (error) {
+        if (error.code === "23505") {
+          toast({
+            title: "Already enrolled",
+            description: `${profileData.full_name} is already in this class`,
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Success",
+          description: `${profileData.full_name} (${profileData.student_id}) added to class`,
         });
-
-      if (error) throw error;
-
-      toast({
-        title: "Student added successfully",
-        description: "The student has been added to the class",
-      });
-
-      setStudentIdSearch("");
-      setIsAddOpen(false);
-      fetchClassStudents();
-      fetchAvailableStudents();
+        setStudentIdSearch("");
+        setIsAddOpen(false);
+        fetchClassStudents();
+        fetchAvailableStudents();
+      }
     } catch (error: any) {
       toast({
-        title: "Error adding student",
+        title: "Error",
         description: error.message,
         variant: "destructive",
       });
@@ -415,68 +404,92 @@ export const StudentTracking = () => {
                     Add Student
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Add Student to Class</DialogTitle>
-                    <DialogDescription>
-                      Search by ID or select from all registered students below
-                    </DialogDescription>
+                    <DialogTitle className="text-xl">Add Student to Class</DialogTitle>
+                    <DialogDescription>Search by Student ID or select from the registered students list</DialogDescription>
                   </DialogHeader>
-                  <div className="space-y-4 py-4">
+
+                  {/* Search by Student ID - Enhanced UI */}
+                  <div className="space-y-4 p-4 bg-primary/5 rounded-lg border-2 border-primary/20 mt-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Search className="w-5 h-5 text-primary" />
+                      <h4 className="font-semibold text-primary">Quick Search by ID</h4>
+                    </div>
                     <div className="space-y-2">
-                      <Label htmlFor="student-id">Quick Add by Student ID</Label>
+                      <Label htmlFor="student-id" className="text-sm">
+                        Enter Student ID or User ID
+                      </Label>
                       <div className="flex gap-2">
                         <Input
                           id="student-id"
-                          placeholder="e.g., JEE2025XXXXX"
+                          placeholder="e.g., JEE2025XXXXX or user UUID"
                           value={studentIdSearch}
                           onChange={(e) => setStudentIdSearch(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && studentIdSearch.trim()) {
+                              addStudentByStudentId();
+                            }
+                          }}
+                          className="flex-1"
                         />
-                        <Button onClick={addStudentByStudentId}>
-                          <Search className="h-4 w-4 mr-2" />
-                          Add
+                        <Button 
+                          onClick={addStudentByStudentId} 
+                          disabled={!studentIdSearch.trim()}
+                          className="gap-2"
+                        >
+                          <Search className="w-4 h-4" />
+                          Search & Add
                         </Button>
                       </div>
+                      <p className="text-xs text-muted-foreground">
+                        Press Enter or click the button to search and add the student
+                      </p>
                     </div>
-                    
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">
-                          All Registered Students
-                        </span>
+                  </div>
+
+                  {/* Available Students List - Enhanced UI */}
+                  <div className="space-y-4 mt-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-lg">All Registered Students</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {availableStudents.length} student{availableStudents.length !== 1 ? 's' : ''} available to add
+                        </p>
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Select from available students</Label>
-                      {availableStudents.length === 0 ? (
-                        <div className="text-center py-4 text-muted-foreground text-sm">
-                          No available students to add. All registered students are already in this class.
+                    {availableStudents.length === 0 ? (
+                      <div className="text-center py-12 bg-muted/30 rounded-lg border-2 border-dashed">
+                        <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                          <Plus className="w-12 h-12 opacity-50" />
+                          <p className="font-medium">No available students</p>
+                          <p className="text-sm">All registered students are already enrolled in this class</p>
                         </div>
-                      ) : (
-                        <div className="border rounded-lg">
+                      </div>
+                    ) : (
+                      <div className="border-2 rounded-lg overflow-hidden shadow-sm">
+                        <div className="max-h-[300px] overflow-y-auto">
                           <Table>
-                            <TableHeader>
+                            <TableHeader className="sticky top-0 bg-muted z-10">
                               <TableRow>
-                                <TableHead>Student Name</TableHead>
-                                <TableHead>Student ID</TableHead>
-                                <TableHead className="w-[100px]">Action</TableHead>
+                                <TableHead className="font-semibold">Student Name</TableHead>
+                                <TableHead className="font-semibold">Student ID</TableHead>
+                                <TableHead className="text-right font-semibold">Action</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {availableStudents.map((student) => (
-                                <TableRow key={student.id}>
+                                <TableRow key={student.id} className="hover:bg-muted/50 transition-colors">
                                   <TableCell className="font-medium">{student.full_name}</TableCell>
                                   <TableCell>
-                                    <Badge variant="outline">{student.student_id}</Badge>
+                                    <Badge variant="outline" className="font-mono">
+                                      {student.student_id}
+                                    </Badge>
                                   </TableCell>
-                                  <TableCell>
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline"
+                                  <TableCell className="text-right">
+                                    <Button
+                                      size="sm"
                                       onClick={async () => {
                                         try {
                                           const { error } = await supabase
@@ -501,9 +514,10 @@ export const StudentTracking = () => {
                                           });
                                         }
                                       }}
+                                      className="gap-1"
                                     >
-                                      <Plus className="h-3 w-3 mr-1" />
-                                      Add
+                                      <Plus className="w-4 h-4" />
+                                      Add to Class
                                     </Button>
                                   </TableCell>
                                 </TableRow>
@@ -511,11 +525,14 @@ export const StudentTracking = () => {
                             </TableBody>
                           </Table>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsAddOpen(false)}>
+                  <DialogFooter className="mt-6">
+                    <Button variant="outline" onClick={() => {
+                      setIsAddOpen(false);
+                      setStudentIdSearch("");
+                    }}>
                       Close
                     </Button>
                   </DialogFooter>

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { CheckCircle2, XCircle, Clock } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, User, Award } from "lucide-react";
 
 interface JoinRequest {
   id: string;
@@ -103,53 +103,82 @@ export function JoinRequestsManagement() {
   const pendingRequests = requests.filter(r => r.status === "pending");
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Join Requests</CardTitle>
-        <CardDescription>
-          Manage student requests to join tuition classes
-        </CardDescription>
+    <Card className="border-2">
+      <CardHeader className="bg-gradient-subtle border-b">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <Clock className="w-5 h-5 text-primary" />
+              Join Requests Management
+            </CardTitle>
+            <CardDescription className="mt-1">
+              Review and approve student requests to join tuition classes
+            </CardDescription>
+          </div>
+          {pendingRequests.length > 0 && (
+            <Badge className="bg-primary text-lg px-3 py-1">
+              {pendingRequests.length} Pending
+            </Badge>
+          )}
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         {pendingRequests.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>No pending join requests</p>
+          <div className="text-center py-16">
+            <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="w-10 h-10 text-muted-foreground" />
+            </div>
+            <p className="text-lg font-medium mb-2">All caught up!</p>
+            <p className="text-muted-foreground">No pending join requests at the moment</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {pendingRequests.map((request) => (
               <div
                 key={request.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition"
+                className="flex items-center justify-between p-5 border-2 rounded-lg hover:border-primary/50 transition-all hover:shadow-md bg-card"
               >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{request.profiles.full_name}</span>
-                    <Badge variant="outline">{request.profiles.student_id}</Badge>
+                <div className="space-y-2 flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <User className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-lg">{request.profiles.full_name}</span>
+                        <Badge variant="outline" className="font-mono text-xs">
+                          {request.profiles.student_id}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        wants to join: <span className="font-semibold text-foreground">{request.tuition_classes.name}</span>
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    wants to join: <span className="font-medium">{request.tuition_classes.name}</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Requested: {new Date(request.created_at).toLocaleDateString()}
+                  <p className="text-xs text-muted-foreground ml-[52px]">
+                    Requested on: {new Date(request.created_at).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
                   </p>
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    size="sm"
+                    size="default"
                     onClick={() => handleApprove(request.id, request.student_id, request.class_id)}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-success hover:bg-success/90 text-success-foreground gap-2"
                   >
-                    <CheckCircle2 className="w-4 h-4 mr-1" />
+                    <CheckCircle2 className="w-4 h-4" />
                     Approve
                   </Button>
                   <Button
-                    size="sm"
+                    size="default"
                     variant="destructive"
                     onClick={() => handleReject(request.id)}
+                    className="gap-2"
                   >
-                    <XCircle className="w-4 h-4 mr-1" />
+                    <XCircle className="w-4 h-4" />
                     Reject
                   </Button>
                 </div>
@@ -160,8 +189,11 @@ export function JoinRequestsManagement() {
 
         {/* Show recent approved/rejected requests */}
         {requests.filter(r => r.status !== "pending").length > 0 && (
-          <div className="mt-8">
-            <h4 className="font-semibold mb-4">Recent Actions</h4>
+          <div className="mt-8 pt-6 border-t">
+            <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
+              <Award className="w-5 h-5 text-primary" />
+              Recent Actions
+            </h4>
             <div className="space-y-2">
               {requests
                 .filter(r => r.status !== "pending")
@@ -169,12 +201,17 @@ export function JoinRequestsManagement() {
                 .map((request) => (
                   <div
                     key={request.id}
-                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg text-sm"
+                    className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border hover:bg-muted/50 transition-colors"
                   >
-                    <span>
-                      {request.profiles.full_name} - {request.tuition_classes.name}
-                    </span>
-                    <Badge className={request.status === "approved" ? "bg-green-600" : "bg-red-600"}>
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium">{request.profiles.full_name}</span>
+                      <span className="text-muted-foreground">→</span>
+                      <span className="text-sm text-muted-foreground">{request.tuition_classes.name}</span>
+                    </div>
+                    <Badge 
+                      variant={request.status === "approved" ? "default" : "destructive"}
+                      className={request.status === "approved" ? "bg-success" : ""}
+                    >
                       {request.status}
                     </Badge>
                   </div>
