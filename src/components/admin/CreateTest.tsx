@@ -11,13 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Save, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Trash2, Save, ChevronLeft, ChevronRight, Upload, X, Image as ImageIcon } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const questionSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),
   options: z.array(z.string().min(1, "Option cannot be empty")).length(4, "Must have exactly 4 options"),
   correctAnswer: z.number().min(0).max(3, "Must select a correct answer"),
+  imageUrl: z.string().optional(),
 });
 
 const testSchema = z.object({
@@ -36,6 +37,7 @@ const emptyQuestion: QuestionFormData = {
   question: "",
   options: ["", "", "", ""],
   correctAnswer: 0,
+  imageUrl: undefined,
 };
 
 export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) => {
@@ -44,6 +46,7 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
     Array(40).fill(null).map(() => ({ ...emptyQuestion }))
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<TestFormData>({
@@ -76,6 +79,63 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
     newQuestions[questionIndex].options = newOptions;
     setQuestions(newQuestions);
     form.setValue("questions", newQuestions);
+  };
+
+  const handleImageUpload = async (questionIndex: number, file: File) => {
+    setUploadingImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('test-questions')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('test-questions')
+        .getPublicUrl(filePath);
+
+      updateQuestion(questionIndex, 'imageUrl', publicUrl);
+
+      toast({
+        title: "Success",
+        description: "Image uploaded successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = async (questionIndex: number) => {
+    const imageUrl = questions[questionIndex].imageUrl;
+    if (!imageUrl) return;
+
+    try {
+      const fileName = imageUrl.split('/').pop();
+      if (fileName) {
+        await supabase.storage.from('test-questions').remove([fileName]);
+      }
+      updateQuestion(questionIndex, 'imageUrl', undefined);
+      toast({
+        title: "Success",
+        description: "Image removed successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const onSubmit = async (data: TestFormData) => {
@@ -280,6 +340,54 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
                   onChange={(e) => updateQuestion(currentQuestionIndex, "question", e.target.value)}
                   className="mt-2 min-h-[100px]"
                 />
+              </div>
+
+              {/* Image Upload Section */}
+              <div className="space-y-3">
+                <Label>Question Image (Optional)</Label>
+                {currentQuestion.imageUrl ? (
+                  <div className="relative border rounded-lg p-4 bg-muted/50">
+                    <img 
+                      src={currentQuestion.imageUrl} 
+                      alt="Question diagram"
+                      className="max-h-64 mx-auto rounded-lg"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => handleRemoveImage(currentQuestionIndex)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                    <ImageIcon className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Upload an image for diagrams or mathematical problems
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={uploadingImage}
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.onchange = (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0];
+                          if (file) handleImageUpload(currentQuestionIndex, file);
+                        };
+                        input.click();
+                      }}
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      {uploadingImage ? "Uploading..." : "Upload Image"}
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3">

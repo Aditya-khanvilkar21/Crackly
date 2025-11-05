@@ -21,6 +21,7 @@ import {
 interface Question {
   question: string;
   options: string[];
+  imageUrl?: string;
 }
 
 interface Test {
@@ -228,6 +229,17 @@ export default function TakeTest() {
                   {currentQuestion.question}
                 </h2>
               </div>
+
+              {/* Question Image */}
+              {currentQuestion.imageUrl && (
+                <div className="mb-6 p-4 bg-muted/50 rounded-lg">
+                  <img 
+                    src={currentQuestion.imageUrl} 
+                    alt="Question diagram"
+                    className="max-h-96 mx-auto rounded-lg"
+                  />
+                </div>
+              )}
 
               <RadioGroup
                 value={answers[currentQuestionIndex]?.toString()}

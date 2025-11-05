@@ -11,6 +11,7 @@ interface Question {
   question: string;
   options: string[];
   correctAnswer: number;
+  imageUrl?: string;
 }
 
 interface TestResult {
@@ -173,6 +174,17 @@ export default function TestResult() {
                   </div>
                   
                   <p className="font-medium mb-4">{question.question}</p>
+                  
+                  {/* Question Image */}
+                  {question.imageUrl && (
+                    <div className="mb-4 p-3 bg-muted/30 rounded-lg">
+                      <img 
+                        src={question.imageUrl} 
+                        alt="Question diagram"
+                        className="max-h-64 mx-auto rounded-lg"
+                      />
+                    </div>
+                  )}
                   
                   <div className="space-y-2">
                     {question.options.map((option, optIndex) => {
