@@ -105,16 +105,8 @@ const Dashboard = () => {
       .eq("student_id", session.user.id);
 
     if (!classData || classData.length === 0) {
-      // If student is not in any class, show all tests
-      const { data, error } = await supabase
-        .from("tests")
-        .select("*")
-        .eq("is_active", true)
-        .order("created_at", { ascending: false });
-
-      if (!error && data) {
-        setTests(data as unknown as Test[]);
-      }
+      // If student is not in any class, show NO tests
+      setTests([]);
       return;
     }
 
@@ -306,8 +298,10 @@ const Dashboard = () => {
                   <CardContent className="pt-6">
                     <div className="text-center py-12 text-muted-foreground">
                       <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>No tests available yet</p>
-                      <p className="text-sm mt-2">Check back later or contact your admin</p>
+                      <p className="font-semibold text-lg mb-2">Join a Tuition Class to Access Tests</p>
+                      <p className="text-sm mt-2">You need to be enrolled in at least one tuition class to see and attempt tests.</p>
+                      <p className="text-sm mt-1">Your Student ID: <span className="font-mono font-semibold text-primary">{profile?.student_id}</span></p>
+                      <p className="text-sm mt-4">Share your Student ID with your admin to get added to a class.</p>
                     </div>
                   </CardContent>
                 </Card>

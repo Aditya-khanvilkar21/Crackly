@@ -100,7 +100,7 @@ export type Database = {
           full_name: string
           id: string
           state: string | null
-          student_id: string | null
+          student_id: string
           updated_at: string
         }
         Insert: {
@@ -110,7 +110,7 @@ export type Database = {
           full_name: string
           id: string
           state?: string | null
-          student_id?: string | null
+          student_id: string
           updated_at?: string
         }
         Update: {
@@ -120,7 +120,7 @@ export type Database = {
           full_name?: string
           id?: string
           state?: string | null
-          student_id?: string | null
+          student_id?: string
           updated_at?: string
         }
         Relationships: []
