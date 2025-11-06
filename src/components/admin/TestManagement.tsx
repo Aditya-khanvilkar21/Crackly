@@ -8,16 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BookOpen, Clock, Target, Unlock, Lock } from "lucide-react";
 import { CreateTest } from "./CreateTest";
+import { CreateMockTest } from "./CreateMockTest";
 
 interface Test {
   id: string;
   title: string;
-  subject: string;
-  chapter: string;
+  subject: string | null;
+  chapter: string | null;
   difficulty: string;
   duration_minutes: number;
   created_at: string;
   questions: any;
+  test_type: 'chapter_test' | 'mock_test';
 }
 
 interface TuitionClass {
@@ -191,10 +193,16 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
   return (
     <div className="space-y-6">
       {userRole === "super_admin" ? (
-        <CreateTest onTestCreated={() => {
-          fetchTests();
-          fetchTestAvailability();
-        }} />
+        <>
+          <CreateTest onTestCreated={() => {
+            fetchTests();
+            fetchTestAvailability();
+          }} />
+          <CreateMockTest onTestCreated={() => {
+            fetchTests();
+            fetchTestAvailability();
+          }} />
+        </>
       ) : (
         <Card>
           <CardHeader>
@@ -210,15 +218,99 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
               </div>
             ) : (
               <div className="space-y-8">
+                {/* Mock Tests */}
+                {tests.filter(t => t.test_type === 'mock_test').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <div className="w-1 h-6 bg-gradient-to-r from-blue-500 via-green-500 to-purple-500 rounded-full"></div>
+                      Mock Tests (Full Syllabus)
+                    </h3>
+                    <div className="space-y-4">
+                      {tests.filter(t => t.test_type === 'mock_test').map((test) => (
+                        <Card key={test.id} className="border-l-4 border-l-orange-500">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <CardTitle className="text-lg">{test.title}</CardTitle>
+                                <CardDescription>Full Syllabus Mock Test - 75 Questions</CardDescription>
+                              </div>
+                              <div className="flex gap-2">
+                                <Badge className={getDifficultyColor(test.difficulty)}>
+                                  {test.difficulty}
+                                </Badge>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {test.duration_minutes} min
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Target className="h-4 w-4" />
+                                75 questions (25 each: Physics, Chemistry, Math)
+                              </span>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <p className="text-sm font-medium">Unlock for Classes:</p>
+                              {classes.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">No classes available. Create a class first.</p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {classes.map((cls) => {
+                                    const availability = testAvailability[test.id]?.find(
+                                      (a) => a.class_id === cls.id
+                                    );
+                                    const isLocked = availability?.is_locked !== false;
+
+                                    return (
+                                      <div key={cls.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                        <span className="text-sm">{cls.name}</span>
+                                        <Button
+                                          size="sm"
+                                          variant={isLocked ? "default" : "outline"}
+                                          onClick={() =>
+                                            isLocked
+                                              ? handleUnlockTest(test.id, cls.id)
+                                              : handleLockTest(test.id, cls.id)
+                                          }
+                                        >
+                                          {isLocked ? (
+                                            <>
+                                              <Unlock className="h-4 w-4 mr-2" />
+                                              Unlock
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Lock className="h-4 w-4 mr-2" />
+                                              Lock
+                                            </>
+                                          )}
+                                        </Button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Physics Tests */}
-                {tests.filter(t => t.subject.toLowerCase() === 'physics').length > 0 && (
+                {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'physics').length > 0 && (
                   <div>
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                       <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
                       Physics Tests
                     </h3>
                     <div className="space-y-4">
-                      {tests.filter(t => t.subject.toLowerCase() === 'physics').map((test) => (
+                      {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'physics').map((test) => (
                         <Card key={test.id} className="border-l-4 border-l-blue-500">
                           <CardHeader>
                             <div className="flex items-start justify-between">
@@ -295,14 +387,14 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
                 )}
 
                 {/* Chemistry Tests */}
-                {tests.filter(t => t.subject.toLowerCase() === 'chemistry').length > 0 && (
+                {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'chemistry').length > 0 && (
                   <div>
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                       <div className="w-1 h-6 bg-green-500 rounded-full"></div>
                       Chemistry Tests
                     </h3>
                     <div className="space-y-4">
-                      {tests.filter(t => t.subject.toLowerCase() === 'chemistry').map((test) => (
+                      {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'chemistry').map((test) => (
                         <Card key={test.id} className="border-l-4 border-l-green-500">
                           <CardHeader>
                             <div className="flex items-start justify-between">
@@ -379,14 +471,14 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
                 )}
 
                 {/* Mathematics Tests */}
-                {tests.filter(t => t.subject.toLowerCase() === 'mathematics').length > 0 && (
+                {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'mathematics').length > 0 && (
                   <div>
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                       <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
                       Mathematics Tests
                     </h3>
                     <div className="space-y-4">
-                      {tests.filter(t => t.subject.toLowerCase() === 'mathematics').map((test) => (
+                      {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'mathematics').map((test) => (
                         <Card key={test.id} className="border-l-4 border-l-purple-500">
                           <CardHeader>
                             <div className="flex items-start justify-between">

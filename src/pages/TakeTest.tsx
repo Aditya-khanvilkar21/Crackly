@@ -22,15 +22,17 @@ interface Question {
   question: string;
   options: string[];
   imageUrl?: string;
+  subject?: 'physics' | 'chemistry' | 'mathematics';
 }
 
 interface Test {
   id: string;
   title: string;
-  subject: string;
-  chapter: string;
+  subject: string | null;
+  chapter: string | null;
   duration_minutes: number;
   questions: Question[];
+  test_type?: 'chapter_test' | 'mock_test';
 }
 
 export default function TakeTest() {
@@ -80,10 +82,20 @@ export default function TakeTest() {
 
     setTest(data as unknown as Test);
     
-    // Select 25 random questions from the 40 available
-    const allQuestions = data.questions as unknown as Question[];
-    const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
-    setSelectedQuestions(shuffled.slice(0, 25));
+    const isMockTest = data.test_type === 'mock_test';
+    
+    if (isMockTest) {
+      // For mock tests, use all 75 questions in order
+      const allQuestions = data.questions as unknown as Question[];
+      setSelectedQuestions(allQuestions);
+      setTimeLeft(data.duration_minutes * 60);
+    } else {
+      // Select 25 random questions from the 40 available for chapter tests
+      const allQuestions = data.questions as unknown as Question[];
+      const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+      setSelectedQuestions(shuffled.slice(0, 25));
+      setTimeLeft(data.duration_minutes * 60);
+    }
   };
 
   const handleAutoSubmit = async () => {
@@ -136,7 +148,9 @@ export default function TakeTest() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const allQuestionsAttempted = Object.keys(answers).length === 25;
+  const isMockTest = test?.test_type === 'mock_test';
+  const totalQuestions = isMockTest ? 75 : 25;
+  const allQuestionsAttempted = Object.keys(answers).length === totalQuestions;
 
   if (!test || selectedQuestions.length === 0) {
     return (
@@ -147,6 +161,14 @@ export default function TakeTest() {
   }
 
   const currentQuestion = selectedQuestions[currentQuestionIndex];
+  
+  // Get subject for the current question in mock test
+  const getCurrentSubject = () => {
+    if (!isMockTest) return null;
+    if (currentQuestionIndex < 25) return 'Physics';
+    if (currentQuestionIndex < 50) return 'Chemistry';
+    return 'Mathematics';
+  };
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -157,7 +179,7 @@ export default function TakeTest() {
             <div>
               <h1 className="text-xl font-bold">{test.title}</h1>
               <p className="text-sm text-muted-foreground">
-                {test.subject} - {test.chapter}
+                {isMockTest ? 'Full Syllabus Mock Test' : `${test.subject} - ${test.chapter}`}
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -184,23 +206,97 @@ export default function TakeTest() {
           {/* Question Navigation Panel */}
           <Card className="p-6 lg:col-span-1 h-fit">
             <h3 className="font-semibold mb-4">Questions</h3>
-            <div className="grid grid-cols-5 gap-2">
-              {selectedQuestions.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentQuestionIndex(index)}
-                  className={`w-10 h-10 rounded-lg font-medium transition-all ${
-                    currentQuestionIndex === index
-                      ? "bg-primary text-primary-foreground"
-                      : answers[index] !== undefined
-                      ? "bg-green-500 text-white"
-                      : "bg-muted hover:bg-muted/80"
-                  }`}
-                >
-                  {index + 1}
-                </button>
-              ))}
-            </div>
+            {isMockTest ? (
+              <div className="space-y-4">
+                {/* Physics Section */}
+                <div>
+                  <h4 className="text-xs font-semibold text-blue-600 mb-2">Physics (1-25)</h4>
+                  <div className="grid grid-cols-5 gap-1">
+                    {Array.from({ length: 25 }).map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentQuestionIndex(index)}
+                        className={`w-8 h-8 text-xs rounded-lg font-medium transition-all ${
+                          currentQuestionIndex === index
+                            ? "bg-primary text-primary-foreground"
+                            : answers[index] !== undefined
+                            ? "bg-green-500 text-white"
+                            : "bg-muted hover:bg-muted/80"
+                        }`}
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Chemistry Section */}
+                <div>
+                  <h4 className="text-xs font-semibold text-green-600 mb-2">Chemistry (26-50)</h4>
+                  <div className="grid grid-cols-5 gap-1">
+                    {Array.from({ length: 25 }).map((_, i) => {
+                      const index = i + 25;
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentQuestionIndex(index)}
+                          className={`w-8 h-8 text-xs rounded-lg font-medium transition-all ${
+                            currentQuestionIndex === index
+                              ? "bg-primary text-primary-foreground"
+                              : answers[index] !== undefined
+                              ? "bg-green-500 text-white"
+                              : "bg-muted hover:bg-muted/80"
+                          }`}
+                        >
+                          {index + 1}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                {/* Mathematics Section */}
+                <div>
+                  <h4 className="text-xs font-semibold text-purple-600 mb-2">Mathematics (51-75)</h4>
+                  <div className="grid grid-cols-5 gap-1">
+                    {Array.from({ length: 25 }).map((_, i) => {
+                      const index = i + 50;
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentQuestionIndex(index)}
+                          className={`w-8 h-8 text-xs rounded-lg font-medium transition-all ${
+                            currentQuestionIndex === index
+                              ? "bg-primary text-primary-foreground"
+                              : answers[index] !== undefined
+                              ? "bg-green-500 text-white"
+                              : "bg-muted hover:bg-muted/80"
+                          }`}
+                        >
+                          {index + 1}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-5 gap-2">
+                {selectedQuestions.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentQuestionIndex(index)}
+                    className={`w-10 h-10 rounded-lg font-medium transition-all ${
+                      currentQuestionIndex === index
+                        ? "bg-primary text-primary-foreground"
+                        : answers[index] !== undefined
+                        ? "bg-green-500 text-white"
+                        : "bg-muted hover:bg-muted/80"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="mt-6 space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -208,7 +304,7 @@ export default function TakeTest() {
               </div>
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-muted-foreground" />
-                <span>Not Answered: {25 - Object.keys(answers).length}</span>
+                <span>Not Answered: {totalQuestions - Object.keys(answers).length}</span>
               </div>
             </div>
           </Card>
@@ -218,8 +314,19 @@ export default function TakeTest() {
             <Card className="p-8">
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-4">
+                  {isMockTest && (
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      getCurrentSubject() === 'Physics' 
+                        ? 'bg-blue-500/10 text-blue-700 dark:text-blue-400'
+                        : getCurrentSubject() === 'Chemistry'
+                        ? 'bg-green-500/10 text-green-700 dark:text-green-400'
+                        : 'bg-purple-500/10 text-purple-700 dark:text-purple-400'
+                    }`}>
+                      {getCurrentSubject()}
+                    </span>
+                  )}
                   <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                    Question {currentQuestionIndex + 1} of 25
+                    Question {currentQuestionIndex + 1} of {totalQuestions}
                   </span>
                   <span className="text-sm text-muted-foreground">
                     (1 mark)
@@ -281,9 +388,9 @@ export default function TakeTest() {
                 </Button>
                 <Button
                   onClick={() =>
-                    setCurrentQuestionIndex((prev) => Math.min(24, prev + 1))
+                    setCurrentQuestionIndex((prev) => Math.min(totalQuestions - 1, prev + 1))
                   }
-                  disabled={currentQuestionIndex === 24}
+                  disabled={currentQuestionIndex === totalQuestions - 1}
                 >
                   Next
                 </Button>
@@ -303,9 +410,9 @@ export default function TakeTest() {
                 "You have answered all questions. Are you sure you want to submit?"
               ) : (
                 <>
-                  You have answered {Object.keys(answers).length} out of 25 questions.{" "}
+                  You have answered {Object.keys(answers).length} out of {totalQuestions} questions.{" "}
                   <span className="text-destructive font-medium">
-                    {25 - Object.keys(answers).length} questions are unanswered.
+                    {totalQuestions - Object.keys(answers).length} questions are unanswered.
                   </span>{" "}
                   Are you sure you want to submit?
                 </>

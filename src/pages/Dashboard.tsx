@@ -23,10 +23,11 @@ interface UserRole {
 interface Test {
   id: string;
   title: string;
-  subject: string;
-  chapter: string;
+  subject: string | null;
+  chapter: string | null;
   difficulty: string;
   duration_minutes: number;
+  test_type?: 'chapter_test' | 'mock_test';
 }
 
 interface TestResult {
@@ -307,15 +308,56 @@ const Dashboard = () => {
                 </Card>
               ) : (
                 <div className="space-y-8">
+                  {/* Mock Tests */}
+                  {tests.filter(t => t.test_type === 'mock_test').length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-gradient-to-r from-blue-500 via-green-500 to-purple-500 rounded-full"></div>
+                        Mock Tests (Full Syllabus)
+                      </h4>
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {tests.filter(t => t.test_type === 'mock_test').map((test) => (
+                          <Card key={test.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-orange-500">
+                            <CardHeader>
+                              <div className="flex items-start justify-between mb-2">
+                                <Badge className={getDifficultyColor(test.difficulty)}>
+                                  {test.difficulty}
+                                </Badge>
+                              </div>
+                              <CardTitle className="text-lg">{test.title}</CardTitle>
+                              <CardDescription>Full Syllabus - Physics, Chemistry, Math</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                                <span className="flex items-center gap-1">
+                                  <BookOpen className="w-4 h-4" />
+                                  75 Questions
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-4 h-4" />
+                                  {test.duration_minutes} min
+                                </span>
+                              </div>
+                              <Button onClick={() => navigate(`/take-test/${test.id}`)} className="w-full">
+                                <PlayCircle className="w-4 h-4 mr-2" />
+                                Start Mock Test
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Physics Tests */}
-                  {tests.filter(t => t.subject.toLowerCase() === 'physics').length > 0 && (
+                  {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'physics').length > 0 && (
                     <div>
                       <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
                         Physics Tests
                       </h4>
                       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {tests.filter(t => t.subject.toLowerCase() === 'physics').map((test) => (
+                        {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'physics').map((test) => (
                           <Card key={test.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
                             <CardHeader>
                               <div className="flex items-start justify-between mb-2">
@@ -349,14 +391,14 @@ const Dashboard = () => {
                   )}
 
                   {/* Chemistry Tests */}
-                  {tests.filter(t => t.subject.toLowerCase() === 'chemistry').length > 0 && (
+                  {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'chemistry').length > 0 && (
                     <div>
                       <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <div className="w-1 h-6 bg-green-500 rounded-full"></div>
                         Chemistry Tests
                       </h4>
                       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {tests.filter(t => t.subject.toLowerCase() === 'chemistry').map((test) => (
+                        {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'chemistry').map((test) => (
                           <Card key={test.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-green-500">
                             <CardHeader>
                               <div className="flex items-start justify-between mb-2">
@@ -390,14 +432,14 @@ const Dashboard = () => {
                   )}
 
                   {/* Mathematics Tests */}
-                  {tests.filter(t => t.subject.toLowerCase() === 'mathematics').length > 0 && (
+                  {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'mathematics').length > 0 && (
                     <div>
                       <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
                         Mathematics Tests
                       </h4>
                       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {tests.filter(t => t.subject.toLowerCase() === 'mathematics').map((test) => (
+                        {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'mathematics').map((test) => (
                           <Card key={test.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-purple-500">
                             <CardHeader>
                               <div className="flex items-start justify-between mb-2">

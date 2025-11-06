@@ -214,38 +214,41 @@ export type Database = {
       }
       tests: {
         Row: {
-          chapter: string
+          chapter: string | null
           created_at: string
           difficulty: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes: number
           id: string
           is_active: boolean | null
           questions: Json
-          subject: Database["public"]["Enums"]["test_subject"]
+          subject: Database["public"]["Enums"]["test_subject"] | null
+          test_type: Database["public"]["Enums"]["test_type"]
           title: string
           updated_at: string
         }
         Insert: {
-          chapter: string
+          chapter?: string | null
           created_at?: string
           difficulty: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes?: number
           id?: string
           is_active?: boolean | null
           questions: Json
-          subject: Database["public"]["Enums"]["test_subject"]
+          subject?: Database["public"]["Enums"]["test_subject"] | null
+          test_type?: Database["public"]["Enums"]["test_type"]
           title: string
           updated_at?: string
         }
         Update: {
-          chapter?: string
+          chapter?: string | null
           created_at?: string
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes?: number
           id?: string
           is_active?: boolean | null
           questions?: Json
-          subject?: Database["public"]["Enums"]["test_subject"]
+          subject?: Database["public"]["Enums"]["test_subject"] | null
+          test_type?: Database["public"]["Enums"]["test_type"]
           title?: string
           updated_at?: string
         }
@@ -338,6 +341,7 @@ export type Database = {
       app_role: "student" | "admin" | "super_admin"
       difficulty_level: "easy" | "medium" | "hard"
       test_subject: "physics" | "chemistry" | "mathematics"
+      test_type: "chapter_test" | "mock_test"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -468,6 +472,7 @@ export const Constants = {
       app_role: ["student", "admin", "super_admin"],
       difficulty_level: ["easy", "medium", "hard"],
       test_subject: ["physics", "chemistry", "mathematics"],
+      test_type: ["chapter_test", "mock_test"],
     },
   },
 } as const
