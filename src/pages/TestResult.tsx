@@ -26,9 +26,17 @@ interface TestResult {
 interface Test {
   id: string;
   title: string;
-  subject: string;
-  chapter: string;
+  subject: string | null;
+  chapter: string | null;
+  test_type: 'chapter_test' | 'mock_test';
   questions: Question[];
+}
+
+interface SubjectBreakdown {
+  subject: string;
+  correct: number;
+  total: number;
+  percentage: number;
 }
 
 export default function TestResult() {
@@ -86,6 +94,34 @@ export default function TestResult() {
     return ((result.score / result.total_questions) * 100).toFixed(1);
   };
 
+  const getSubjectBreakdown = (): SubjectBreakdown[] => {
+    if (!test || test.test_type !== 'mock_test') return [];
+    
+    const subjects = ['physics', 'chemistry', 'mathematics'];
+    const breakdown: SubjectBreakdown[] = [];
+    
+    subjects.forEach((subject, subjectIndex) => {
+      const startIdx = subjectIndex * 25;
+      const endIdx = startIdx + 25;
+      let correct = 0;
+      
+      for (let i = startIdx; i < endIdx; i++) {
+        if (result.answers[i] === test.questions[i].correctAnswer) {
+          correct++;
+        }
+      }
+      
+      breakdown.push({
+        subject: subject.charAt(0).toUpperCase() + subject.slice(1),
+        correct,
+        total: 25,
+        percentage: (correct / 25) * 100
+      });
+    });
+    
+    return breakdown;
+  };
+
   if (!result || !test) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -93,6 +129,9 @@ export default function TestResult() {
       </div>
     );
   }
+
+  const subjectBreakdown = getSubjectBreakdown();
+  const isMockTest = test.test_type === 'mock_test';
 
   return (
     <div className="min-h-screen bg-gradient-subtle py-12">
@@ -103,7 +142,7 @@ export default function TestResult() {
             <Award className="w-16 h-16 mx-auto mb-4" />
             <h1 className="text-3xl font-bold mb-2">Test Completed!</h1>
             <p className="text-lg opacity-90 mb-6">
-              {test.title} - {test.subject}
+              {test.title} {isMockTest ? '- Mock Test' : `- ${test.subject}`}
             </p>
             
             <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
@@ -145,6 +184,44 @@ export default function TestResult() {
             </div>
           </div>
         </Card>
+
+        {/* Subject-wise Breakdown for Mock Tests */}
+        {isMockTest && subjectBreakdown.length > 0 && (
+          <Card className="p-6 mb-6">
+            <h2 className="text-xl font-bold mb-4">Subject-wise Performance</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {subjectBreakdown.map((subject) => (
+                <div key={subject.subject} className="p-4 border rounded-lg bg-muted/20">
+                  <h3 className="font-semibold text-lg mb-2">{subject.subject}</h3>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>Score:</span>
+                      <span className="font-medium">{subject.correct}/{subject.total}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Percentage:</span>
+                      <span className={`font-bold ${
+                        subject.percentage >= 80 ? 'text-green-600' : 
+                        subject.percentage >= 60 ? 'text-yellow-600' : 'text-red-600'
+                      }`}>
+                        {subject.percentage.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2 mt-2">
+                      <div 
+                        className={`h-2 rounded-full transition-all ${
+                          subject.percentage >= 80 ? 'bg-green-600' : 
+                          subject.percentage >= 60 ? 'bg-yellow-600' : 'bg-red-600'
+                        }`}
+                        style={{ width: `${subject.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* Detailed Review */}
         <Card className="p-6 mb-6">

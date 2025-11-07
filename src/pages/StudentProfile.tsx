@@ -7,9 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { User, ArrowLeft, Save, Send, BookOpen } from "lucide-react";
+import { User, ArrowLeft, Save, Send, BookOpen, TrendingUp, BarChart3 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { StudentAnalytics } from "@/components/analytics/StudentAnalytics";
+import { MockTestAnalytics } from "@/components/analytics/MockTestAnalytics";
 
 interface Profile {
   id: string;
@@ -161,13 +164,33 @@ export default function StudentProfile() {
 
   return (
     <div className="min-h-screen bg-gradient-subtle py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="container mx-auto px-4 max-w-6xl">
         <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Dashboard
         </Button>
 
-        <div className="space-y-6">
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="profile">
+              <User className="w-4 h-4 mr-2" />
+              Profile
+            </TabsTrigger>
+            <TabsTrigger value="classes">
+              <BookOpen className="w-4 h-4 mr-2" />
+              Classes
+            </TabsTrigger>
+            <TabsTrigger value="analytics">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Chapter Analytics
+            </TabsTrigger>
+            <TabsTrigger value="mock-analytics">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Mock Test Analytics
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="profile" className="space-y-6">
           {/* Profile Information */}
           <Card>
             <CardHeader>
@@ -241,7 +264,9 @@ export default function StudentProfile() {
               </Button>
             </CardContent>
           </Card>
+          </TabsContent>
 
+          <TabsContent value="classes" className="space-y-6">
           {/* Tuition Classes - Enhanced UI */}
           <Card className="border-2">
             <CardHeader className="bg-gradient-subtle">
@@ -399,7 +424,16 @@ export default function StudentProfile() {
               </CardContent>
             </Card>
           )}
-        </div>
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <StudentAnalytics />
+          </TabsContent>
+
+          <TabsContent value="mock-analytics">
+            <MockTestAnalytics />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

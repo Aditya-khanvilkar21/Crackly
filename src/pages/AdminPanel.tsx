@@ -11,6 +11,8 @@ import { StudentTracking } from "@/components/admin/StudentTracking";
 import { TestManagement } from "@/components/admin/TestManagement";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { JoinRequestsManagement } from "@/components/admin/JoinRequestsManagement";
+import { AdminAnalytics } from "@/components/analytics/AdminAnalytics";
+import { AdminMockTestAnalytics } from "@/components/analytics/AdminMockTestAnalytics";
 import { ArrowLeft } from "lucide-react";
 
 interface UserRole {
@@ -114,12 +116,14 @@ const AdminPanel = () => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="classes">Classes</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
-            <TabsTrigger value="requests">Join Requests</TabsTrigger>
+            <TabsTrigger value="requests">Requests</TabsTrigger>
             <TabsTrigger value="tests">Tests</TabsTrigger>
+            <TabsTrigger value="analytics">Chapter Analytics</TabsTrigger>
+            <TabsTrigger value="mock-analytics">Mock Analytics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -140,6 +144,14 @@ const AdminPanel = () => {
 
           <TabsContent value="tests" className="mt-6">
             <TestManagement userRole={userRole} />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="mt-6">
+            <AdminAnalytics userRole={userRole} />
+          </TabsContent>
+
+          <TabsContent value="mock-analytics" className="mt-6">
+            <AdminMockTestAnalytics userRole={userRole} />
           </TabsContent>
         </Tabs>
       </main>
