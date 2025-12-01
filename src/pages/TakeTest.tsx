@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Timer, CheckCircle2, AlertCircle } from "lucide-react";
+import { Timer, CheckCircle2, AlertCircle, Eye } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,10 +47,42 @@ export default function TakeTest() {
   const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [showTabWarning, setShowTabWarning] = useState(false);
+  const MAX_TAB_SWITCHES = 3;
 
   useEffect(() => {
     fetchTest();
   }, [testId]);
+
+  // Tab switching detection for anti-cheating
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && selectedQuestions.length > 0) {
+        setTabSwitchCount((prev) => {
+          const newCount = prev + 1;
+          
+          if (newCount >= MAX_TAB_SWITCHES) {
+            toast.error("Maximum tab switches exceeded! Test will be auto-submitted.");
+            setTimeout(() => {
+              handleAutoSubmit();
+            }, 2000);
+          } else {
+            setShowTabWarning(true);
+            toast.warning(`Warning ${newCount}/${MAX_TAB_SWITCHES}: Do not switch tabs during the test!`, {
+              duration: 5000,
+            });
+            setTimeout(() => setShowTabWarning(false), 5000);
+          }
+          
+          return newCount;
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [selectedQuestions]);
 
   useEffect(() => {
     if (selectedQuestions.length > 0 && timeLeft > 0) {
@@ -68,33 +101,40 @@ export default function TakeTest() {
   }, [selectedQuestions, timeLeft]);
 
   const fetchTest = async () => {
-    const { data, error } = await supabase
-      .from("tests")
-      .select("*")
-      .eq("id", testId)
-      .single();
+    try {
+      // Use secure database function that strips correct answers
+      const { data, error } = await supabase.rpc('get_test_for_taking', {
+        test_id_param: testId
+      });
 
-    if (error) {
+      if (error) throw error;
+      if (!data) {
+        toast.error("Test not found or not available");
+        navigate("/dashboard");
+        return;
+      }
+
+      const testData = data as unknown as Test;
+      setTest(testData);
+      
+      const isMockTest = testData.test_type === 'mock_test';
+      
+      if (isMockTest) {
+        // For mock tests, use all 75 questions in order
+        const allQuestions = testData.questions as Question[];
+        setSelectedQuestions(allQuestions);
+        setTimeLeft(testData.duration_minutes * 60);
+      } else {
+        // Select 25 random questions from the 40 available for chapter tests
+        const allQuestions = testData.questions as Question[];
+        const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+        setSelectedQuestions(shuffled.slice(0, 25));
+        setTimeLeft(testData.duration_minutes * 60);
+      }
+    } catch (error) {
+      console.error("Error fetching test:", error);
       toast.error("Failed to load test");
       navigate("/dashboard");
-      return;
-    }
-
-    setTest(data as unknown as Test);
-    
-    const isMockTest = data.test_type === 'mock_test';
-    
-    if (isMockTest) {
-      // For mock tests, use all 75 questions in order
-      const allQuestions = data.questions as unknown as Question[];
-      setSelectedQuestions(allQuestions);
-      setTimeLeft(data.duration_minutes * 60);
-    } else {
-      // Select 25 random questions from the 40 available for chapter tests
-      const allQuestions = data.questions as unknown as Question[];
-      const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
-      setSelectedQuestions(shuffled.slice(0, 25));
-      setTimeLeft(data.duration_minutes * 60);
     }
   };
 
@@ -183,6 +223,12 @@ export default function TakeTest() {
               </p>
             </div>
             <div className="flex items-center gap-4">
+              {tabSwitchCount > 0 && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive text-sm">
+                  <Eye className="w-4 h-4" />
+                  <span className="font-medium">Tab Switches: {tabSwitchCount}/{MAX_TAB_SWITCHES}</span>
+                </div>
+              )}
               <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
                 timeLeft < 300 ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
               }`}>
@@ -200,6 +246,21 @@ export default function TakeTest() {
           </div>
         </div>
       </header>
+
+      {/* Tab Switch Warning */}
+      {showTabWarning && (
+        <div className="container mx-auto px-4 py-4">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Warning!</strong> Switching tabs is not allowed during the test. 
+              {tabSwitchCount < MAX_TAB_SWITCHES && (
+                <> You have {MAX_TAB_SWITCHES - tabSwitchCount} warning(s) remaining before auto-submission.</>
+              )}
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

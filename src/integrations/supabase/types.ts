@@ -321,6 +321,7 @@ export type Database = {
     }
     Functions: {
       generate_student_id: { Args: never; Returns: string }
+      get_test_for_taking: { Args: { test_id_param: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
