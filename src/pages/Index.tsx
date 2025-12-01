@@ -15,10 +15,10 @@ const Index = () => {
               <GraduationCap className="w-10 h-10" />
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Master Your JEE Preparation
+              CRACKLY
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-white/90">
-              Practice with JEE-style tests, track your progress, and excel in your exams
+              Master your JEE & NEET preparation with comprehensive test practice
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/auth">
@@ -38,8 +38,8 @@ const Index = () => {
       <section className="py-20 bg-gradient-subtle">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Our Platform?</h2>
-            <p className="text-xl text-muted-foreground">Everything you need for JEE success</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose CRACKLY?</h2>
+            <p className="text-xl text-muted-foreground">Everything you need for JEE & NEET success</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -48,14 +48,14 @@ const Index = () => {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                   <Target className="w-6 h-6 text-primary" />
                 </div>
-                <CardTitle>JEE-Style Tests</CardTitle>
+                <CardTitle>JEE & NEET Style Tests</CardTitle>
                 <CardDescription>
-                  Practice with authentic JEE Main pattern MCQ tests
+                  Practice with authentic exam pattern MCQ tests
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  40 questions per test covering Physics, Chemistry, and Mathematics with proper difficulty levels.
+                  Comprehensive tests covering Physics, Chemistry, Mathematics, and Biology with proper difficulty levels.
                 </p>
               </CardContent>
             </Card>
@@ -89,7 +89,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Practice with timer to improve speed and time management for actual JEE exams.
+                  Practice with timer to improve speed and time management for actual exams.
                 </p>
               </CardContent>
             </Card>
@@ -156,7 +156,7 @@ const Index = () => {
               Ready to Begin Your Journey?
             </h2>
             <p className="text-xl text-muted-foreground mb-8">
-              Join thousands of students preparing for JEE with our platform
+              Join thousands of students preparing for JEE & NEET with CRACKLY
             </p>
             <Link to="/auth">
               <Button size="lg" className="text-lg px-8">
@@ -170,7 +170,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-card border-t py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; 2025 JEE Prep Platform. All rights reserved.</p>
+          <p>&copy; 2025 CRACKLY. All rights reserved.</p>
         </div>
       </footer>
     </div>

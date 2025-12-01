@@ -164,8 +164,8 @@ const Auth = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
             <GraduationCap className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">JEE Prep Platform</h1>
-          <p className="text-muted-foreground">Master your JEE preparation</p>
+          <h1 className="text-3xl font-bold mb-2">CRACKLY</h1>
+          <p className="text-muted-foreground">Master your JEE & NEET preparation</p>
         </div>
 
         <Tabs defaultValue="signup" className="w-full">
@@ -185,7 +185,7 @@ const Auth = () => {
             <Card className="border-2">
               <CardHeader className="bg-gradient-subtle">
                 <CardTitle className="text-xl">Create Student Account</CardTitle>
-                <CardDescription>Start your JEE preparation journey today</CardDescription>
+                <CardDescription>Start your JEE & NEET preparation journey today</CardDescription>
               </CardHeader>
               <form onSubmit={handleSignup}>
                 <CardContent className="space-y-4 pt-6">

@@ -20,7 +20,7 @@ const questionSchema = z.object({
   options: z.array(z.string().min(1, "Option cannot be empty")).length(4, "Must have exactly 4 options"),
   correctAnswer: z.number().min(0).max(3, "Must select a correct answer"),
   imageUrl: z.string().optional(),
-  subject: z.enum(["physics", "chemistry", "mathematics"]),
+  subject: z.enum(["physics", "chemistry", "mathematics", "biology"]),
 });
 
 const mockTestSchema = z.object({
@@ -33,7 +33,7 @@ const mockTestSchema = z.object({
 type MockTestFormData = z.infer<typeof mockTestSchema>;
 type QuestionFormData = z.infer<typeof questionSchema>;
 
-const emptyQuestion = (subject: "physics" | "chemistry" | "mathematics"): QuestionFormData => ({
+const emptyQuestion = (subject: "physics" | "chemistry" | "mathematics" | "biology"): QuestionFormData => ({
   question: "",
   options: ["", "", "", ""],
   correctAnswer: 0,

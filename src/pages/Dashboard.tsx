@@ -194,7 +194,7 @@ const Dashboard = () => {
       <header className="border-b bg-card shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-primary">JEE Prep Platform</h1>
+            <h1 className="text-2xl font-bold text-primary">CRACKLY</h1>
             <p className="text-sm text-muted-foreground">Welcome, {profile?.full_name}</p>
           </div>
           <div className="flex items-center gap-4">
@@ -441,6 +441,47 @@ const Dashboard = () => {
                       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'mathematics').map((test) => (
                           <Card key={test.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-purple-500">
+                            <CardHeader>
+                              <div className="flex items-start justify-between mb-2">
+                                <Badge className={getDifficultyColor(test.difficulty)}>
+                                  {test.difficulty}
+                                </Badge>
+                              </div>
+                              <CardTitle className="text-lg">{test.title}</CardTitle>
+                              <CardDescription>{test.chapter}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                                <span className="flex items-center gap-1">
+                                  <BookOpen className="w-4 h-4" />
+                                  25 Questions
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-4 h-4" />
+                                  {test.duration_minutes} min
+                                </span>
+                              </div>
+                              <Button onClick={() => navigate(`/take-test/${test.id}`)} className="w-full">
+                                <PlayCircle className="w-4 h-4 mr-2" />
+                                Start Test
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Biology Tests */}
+                  {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'biology').length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-orange-500 rounded-full"></div>
+                        Biology Tests
+                      </h4>
+                      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'biology').map((test) => (
+                          <Card key={test.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-orange-500">
                             <CardHeader>
                               <div className="flex items-start justify-between mb-2">
                                 <Badge className={getDifficultyColor(test.difficulty)}>
