@@ -24,7 +24,7 @@ const questionSchema = z.object({
 const testSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   chapter: z.string().min(3, "Chapter must be at least 3 characters"),
-  subject: z.enum(["physics", "chemistry", "mathematics"]),
+  subject: z.enum(["physics", "chemistry", "mathematics", "biology"]),
   difficulty: z.enum(["easy", "medium", "hard"]),
   duration_minutes: z.number().min(10).max(180),
   questions: z.array(questionSchema).length(40, "Must have exactly 40 questions"),
@@ -239,6 +239,7 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
                         <SelectItem value="physics">Physics</SelectItem>
                         <SelectItem value="chemistry">Chemistry</SelectItem>
                         <SelectItem value="mathematics">Mathematics</SelectItem>
+                        <SelectItem value="biology">Biology</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

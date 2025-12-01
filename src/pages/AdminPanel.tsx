@@ -102,7 +102,7 @@ const AdminPanel = () => {
               Back to Dashboard
             </Button>
             <div>
-              <h1 className="text-2xl font-bold">Admin Panel</h1>
+              <h1 className="text-2xl font-bold">CRACKLY - Admin Panel</h1>
               <p className="text-sm text-muted-foreground">
                 Role: {userRole === "super_admin" ? "Super Admin" : "Admin"}
               </p>

@@ -341,7 +341,7 @@ export type Database = {
     Enums: {
       app_role: "student" | "admin" | "super_admin"
       difficulty_level: "easy" | "medium" | "hard"
-      test_subject: "physics" | "chemistry" | "mathematics"
+      test_subject: "physics" | "chemistry" | "mathematics" | "biology"
       test_type: "chapter_test" | "mock_test"
     }
     CompositeTypes: {
@@ -472,7 +472,7 @@ export const Constants = {
     Enums: {
       app_role: ["student", "admin", "super_admin"],
       difficulty_level: ["easy", "medium", "hard"],
-      test_subject: ["physics", "chemistry", "mathematics"],
+      test_subject: ["physics", "chemistry", "mathematics", "biology"],
       test_type: ["chapter_test", "mock_test"],
     },
   },
