@@ -101,32 +101,59 @@ export default function TestResult() {
     return test.test_type === 'chapter_test' ? 25 : result?.total_questions || 0;
   };
 
+  const isNEETMockTest = () => {
+    if (!test || test.test_type !== 'mock_test') return false;
+    return test.chapter === 'NEET' || (test.questions && test.questions.length === 180);
+  };
+
   const getSubjectBreakdown = (): SubjectBreakdown[] => {
-    if (!test || test.test_type !== 'mock_test') return [];
+    if (!test || test.test_type !== 'mock_test' || !result) return [];
     
-    const subjects = ['physics', 'chemistry', 'mathematics'];
-    const breakdown: SubjectBreakdown[] = [];
+    const isNEET = isNEETMockTest();
     
-    subjects.forEach((subject, subjectIndex) => {
-      const startIdx = subjectIndex * 25;
-      const endIdx = startIdx + 25;
-      let correct = 0;
+    if (isNEET) {
+      // NEET: 45 Physics, 45 Chemistry, 90 Biology
+      const subjectsConfig = [
+        { subject: 'Physics', start: 0, count: 45 },
+        { subject: 'Chemistry', start: 45, count: 45 },
+        { subject: 'Biology', start: 90, count: 90 },
+      ];
       
-      for (let i = startIdx; i < endIdx; i++) {
-        if (result.answers[i] === test.questions[i].correctAnswer) {
-          correct++;
+      return subjectsConfig.map(({ subject, start, count }) => {
+        let correct = 0;
+        for (let i = start; i < start + count; i++) {
+          if (result.answers[i] === test.questions[i]?.correctAnswer) {
+            correct++;
+          }
         }
-      }
-      
-      breakdown.push({
-        subject: subject.charAt(0).toUpperCase() + subject.slice(1),
-        correct,
-        total: 25,
-        percentage: (correct / 25) * 100
+        return {
+          subject,
+          correct,
+          total: count,
+          percentage: (correct / count) * 100
+        };
       });
-    });
-    
-    return breakdown;
+    } else {
+      // JEE: 25 Physics, 25 Chemistry, 25 Mathematics
+      const subjects = ['Physics', 'Chemistry', 'Mathematics'];
+      return subjects.map((subject, subjectIndex) => {
+        const startIdx = subjectIndex * 25;
+        let correct = 0;
+        
+        for (let i = startIdx; i < startIdx + 25; i++) {
+          if (result.answers[i] === test.questions[i]?.correctAnswer) {
+            correct++;
+          }
+        }
+        
+        return {
+          subject,
+          correct,
+          total: 25,
+          percentage: (correct / 25) * 100
+        };
+      });
+    }
   };
 
   if (!result || !test) {
@@ -149,7 +176,7 @@ export default function TestResult() {
             <Award className="w-16 h-16 mx-auto mb-4" />
             <h1 className="text-3xl font-bold mb-2">Test Completed!</h1>
             <p className="text-lg opacity-90 mb-6">
-              {test.title} {isMockTest ? '- Mock Test' : `- ${test.subject}`}
+              {test.title} {isMockTest ? (isNEETMockTest() ? '- NEET Mock Test' : '- JEE Mock Test') : `- ${test.subject}`}
             </p>
             
             <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">

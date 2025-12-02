@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BookOpen, Clock, Target, Unlock, Lock } from "lucide-react";
 import { CreateTest } from "./CreateTest";
 import { CreateMockTest } from "./CreateMockTest";
+import { CreateNEETMockTest } from "./CreateNEETMockTest";
 import { EditTest } from "./EditTest";
 
 interface Test {
@@ -203,6 +204,10 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
             fetchTests();
             fetchTestAvailability();
           }} />
+          <CreateNEETMockTest onTestCreated={() => {
+            fetchTests();
+            fetchTestAvailability();
+          }} />
           
           {/* Super Admin Test List with Edit/Delete */}
           <Card>
@@ -215,20 +220,47 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
                 <p className="text-center py-8 text-muted-foreground">No tests created yet.</p>
               ) : (
                 <div className="space-y-8">
-                  {/* Mock Tests */}
-                  {tests.filter(t => t.test_type === 'mock_test').length > 0 && (
+                  {/* JEE Mock Tests */}
+                  {tests.filter(t => t.test_type === 'mock_test' && t.chapter !== 'NEET').length > 0 && (
                     <div>
                       <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <div className="w-1 h-6 bg-gradient-to-r from-blue-500 via-green-500 to-purple-500 rounded-full"></div>
-                        Mock Tests
+                        JEE Mock Tests (75 Questions)
                       </h3>
                       <div className="space-y-3">
-                        {tests.filter(t => t.test_type === 'mock_test').map((test) => (
-                          <div key={test.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        {tests.filter(t => t.test_type === 'mock_test' && t.chapter !== 'NEET').map((test) => (
+                          <div key={test.id} className="flex items-center justify-between p-4 border rounded-lg border-l-4 border-l-orange-500">
                             <div>
                               <h4 className="font-medium">{test.title}</h4>
                               <p className="text-sm text-muted-foreground">
                                 {Array.isArray(test.questions) ? test.questions.length : 0} questions • {test.duration_minutes} min • {test.difficulty}
+                              </p>
+                            </div>
+                            <EditTest 
+                              test={test as any} 
+                              onTestUpdated={fetchTests} 
+                              onTestDeleted={fetchTests} 
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* NEET Mock Tests */}
+                  {tests.filter(t => t.test_type === 'mock_test' && t.chapter === 'NEET').length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
+                        NEET Mock Tests (180 Questions)
+                      </h3>
+                      <div className="space-y-3">
+                        {tests.filter(t => t.test_type === 'mock_test' && t.chapter === 'NEET').map((test) => (
+                          <div key={test.id} className="flex items-center justify-between p-4 border rounded-lg border-l-4 border-l-pink-500">
+                            <div>
+                              <h4 className="font-medium">{test.title}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                180 questions (45P + 45C + 90B) • {test.duration_minutes} min • {test.difficulty}
                               </p>
                             </div>
                             <EditTest 
@@ -369,21 +401,21 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
               </div>
             ) : (
               <div className="space-y-8">
-                {/* Mock Tests */}
-                {tests.filter(t => t.test_type === 'mock_test').length > 0 && (
+                {/* JEE Mock Tests */}
+                {tests.filter(t => t.test_type === 'mock_test' && t.chapter !== 'NEET').length > 0 && (
                   <div>
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                       <div className="w-1 h-6 bg-gradient-to-r from-blue-500 via-green-500 to-purple-500 rounded-full"></div>
-                      Mock Tests (Full Syllabus)
+                      JEE Mock Tests (75 Questions)
                     </h3>
                     <div className="space-y-4">
-                      {tests.filter(t => t.test_type === 'mock_test').map((test) => (
+                      {tests.filter(t => t.test_type === 'mock_test' && t.chapter !== 'NEET').map((test) => (
                         <Card key={test.id} className="border-l-4 border-l-orange-500">
                           <CardHeader>
                             <div className="flex items-start justify-between">
                               <div>
                                 <CardTitle className="text-lg">{test.title}</CardTitle>
-                                <CardDescription>Full Syllabus Mock Test - 75 Questions</CardDescription>
+                                <CardDescription>JEE Mock Test - 75 Questions (25P + 25C + 25M)</CardDescription>
                               </div>
                               <div className="flex gap-2">
                                 <Badge className={getDifficultyColor(test.difficulty)}>
@@ -401,6 +433,91 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
                               <span className="flex items-center gap-1">
                                 <Target className="h-4 w-4" />
                                 75 questions (25 each: Physics, Chemistry, Math)
+                              </span>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <p className="text-sm font-medium">Unlock for Classes:</p>
+                              {classes.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">No classes available. Create a class first.</p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {classes.map((cls) => {
+                                    const availability = testAvailability[test.id]?.find(
+                                      (a) => a.class_id === cls.id
+                                    );
+                                    const isLocked = availability?.is_locked !== false;
+
+                                    return (
+                                      <div key={cls.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                        <span className="text-sm">{cls.name}</span>
+                                        <Button
+                                          size="sm"
+                                          variant={isLocked ? "default" : "outline"}
+                                          onClick={() =>
+                                            isLocked
+                                              ? handleUnlockTest(test.id, cls.id)
+                                              : handleLockTest(test.id, cls.id)
+                                          }
+                                        >
+                                          {isLocked ? (
+                                            <>
+                                              <Unlock className="h-4 w-4 mr-2" />
+                                              Unlock
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Lock className="h-4 w-4 mr-2" />
+                                              Lock
+                                            </>
+                                          )}
+                                        </Button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* NEET Mock Tests */}
+                {tests.filter(t => t.test_type === 'mock_test' && t.chapter === 'NEET').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <div className="w-1 h-6 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
+                      NEET Mock Tests (180 Questions)
+                    </h3>
+                    <div className="space-y-4">
+                      {tests.filter(t => t.test_type === 'mock_test' && t.chapter === 'NEET').map((test) => (
+                        <Card key={test.id} className="border-l-4 border-l-pink-500">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <CardTitle className="text-lg">{test.title}</CardTitle>
+                                <CardDescription>NEET Mock Test - 180 Questions (45P + 45C + 90B)</CardDescription>
+                              </div>
+                              <div className="flex gap-2">
+                                <Badge className="bg-pink-500">NEET</Badge>
+                                <Badge className={getDifficultyColor(test.difficulty)}>
+                                  {test.difficulty}
+                                </Badge>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {test.duration_minutes} min
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Target className="h-4 w-4" />
+                                180 questions (45 Physics, 45 Chemistry, 90 Biology)
                               </span>
                             </div>
                             
