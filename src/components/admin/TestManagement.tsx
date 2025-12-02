@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BookOpen, Clock, Target, Unlock, Lock } from "lucide-react";
 import { CreateTest } from "./CreateTest";
 import { CreateMockTest } from "./CreateMockTest";
+import { EditTest } from "./EditTest";
 
 interface Test {
   id: string;
@@ -202,6 +203,156 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
             fetchTests();
             fetchTestAvailability();
           }} />
+          
+          {/* Super Admin Test List with Edit/Delete */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Manage All Tests</CardTitle>
+              <CardDescription>Edit or delete existing tests</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {tests.length === 0 ? (
+                <p className="text-center py-8 text-muted-foreground">No tests created yet.</p>
+              ) : (
+                <div className="space-y-8">
+                  {/* Mock Tests */}
+                  {tests.filter(t => t.test_type === 'mock_test').length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-gradient-to-r from-blue-500 via-green-500 to-purple-500 rounded-full"></div>
+                        Mock Tests
+                      </h3>
+                      <div className="space-y-3">
+                        {tests.filter(t => t.test_type === 'mock_test').map((test) => (
+                          <div key={test.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <h4 className="font-medium">{test.title}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {Array.isArray(test.questions) ? test.questions.length : 0} questions • {test.duration_minutes} min • {test.difficulty}
+                              </p>
+                            </div>
+                            <EditTest 
+                              test={test as any} 
+                              onTestUpdated={fetchTests} 
+                              onTestDeleted={fetchTests} 
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Physics Tests */}
+                  {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'physics').length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+                        Physics Tests
+                      </h3>
+                      <div className="space-y-3">
+                        {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'physics').map((test) => (
+                          <div key={test.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <h4 className="font-medium">{test.title}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {test.chapter} • {Array.isArray(test.questions) ? test.questions.length : 0}/25 questions • {test.difficulty}
+                              </p>
+                            </div>
+                            <EditTest 
+                              test={test as any} 
+                              onTestUpdated={fetchTests} 
+                              onTestDeleted={fetchTests} 
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Chemistry Tests */}
+                  {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'chemistry').length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-green-500 rounded-full"></div>
+                        Chemistry Tests
+                      </h3>
+                      <div className="space-y-3">
+                        {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'chemistry').map((test) => (
+                          <div key={test.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <h4 className="font-medium">{test.title}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {test.chapter} • {Array.isArray(test.questions) ? test.questions.length : 0}/25 questions • {test.difficulty}
+                              </p>
+                            </div>
+                            <EditTest 
+                              test={test as any} 
+                              onTestUpdated={fetchTests} 
+                              onTestDeleted={fetchTests} 
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Mathematics Tests */}
+                  {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'mathematics').length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+                        Mathematics Tests
+                      </h3>
+                      <div className="space-y-3">
+                        {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'mathematics').map((test) => (
+                          <div key={test.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <h4 className="font-medium">{test.title}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {test.chapter} • {Array.isArray(test.questions) ? test.questions.length : 0}/25 questions • {test.difficulty}
+                              </p>
+                            </div>
+                            <EditTest 
+                              test={test as any} 
+                              onTestUpdated={fetchTests} 
+                              onTestDeleted={fetchTests} 
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Biology Tests */}
+                  {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'biology').length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <div className="w-1 h-6 bg-pink-500 rounded-full"></div>
+                        Biology Tests
+                      </h3>
+                      <div className="space-y-3">
+                        {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'biology').map((test) => (
+                          <div key={test.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <h4 className="font-medium">{test.title}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {test.chapter} • {Array.isArray(test.questions) ? test.questions.length : 0}/25 questions • {test.difficulty}
+                              </p>
+                            </div>
+                            <EditTest 
+                              test={test as any} 
+                              onTestUpdated={fetchTests} 
+                              onTestDeleted={fetchTests} 
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </>
       ) : (
         <Card>
@@ -501,7 +652,91 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
                               </span>
                               <span className="flex items-center gap-1">
                                 <Target className="h-4 w-4" />
-                                {Array.isArray(test.questions) ? test.questions.length : 0} questions
+                                {Array.isArray(test.questions) ? test.questions.length : 0}/25 questions
+                              </span>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <p className="text-sm font-medium">Unlock for Classes:</p>
+                              {classes.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">No classes available. Create a class first.</p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {classes.map((cls) => {
+                                    const availability = testAvailability[test.id]?.find(
+                                      (a) => a.class_id === cls.id
+                                    );
+                                    const isLocked = availability?.is_locked !== false;
+
+                                    return (
+                                      <div key={cls.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                        <span className="text-sm">{cls.name}</span>
+                                        <Button
+                                          size="sm"
+                                          variant={isLocked ? "default" : "outline"}
+                                          onClick={() =>
+                                            isLocked
+                                              ? handleUnlockTest(test.id, cls.id)
+                                              : handleLockTest(test.id, cls.id)
+                                          }
+                                        >
+                                          {isLocked ? (
+                                            <>
+                                              <Unlock className="h-4 w-4 mr-2" />
+                                              Unlock
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Lock className="h-4 w-4 mr-2" />
+                                              Lock
+                                            </>
+                                          )}
+                                        </Button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Biology Tests */}
+                {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'biology').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <div className="w-1 h-6 bg-pink-500 rounded-full"></div>
+                      Biology Tests (NEET)
+                    </h3>
+                    <div className="space-y-4">
+                      {tests.filter(t => t.test_type !== 'mock_test' && t.subject?.toLowerCase() === 'biology').map((test) => (
+                        <Card key={test.id} className="border-l-4 border-l-pink-500">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <CardTitle className="text-lg">{test.title}</CardTitle>
+                                <CardDescription>{test.chapter}</CardDescription>
+                              </div>
+                              <div className="flex gap-2">
+                                <Badge className={getDifficultyColor(test.difficulty)}>
+                                  {test.difficulty}
+                                </Badge>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {test.duration_minutes} min
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Target className="h-4 w-4" />
+                                {Array.isArray(test.questions) ? test.questions.length : 0}/25 questions
                               </span>
                             </div>
                             

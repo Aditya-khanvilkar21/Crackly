@@ -90,8 +90,15 @@ export default function TestResult() {
   };
 
   const getPercentage = () => {
-    if (!result) return 0;
-    return ((result.score / result.total_questions) * 100).toFixed(1);
+    if (!result || !test) return 0;
+    // For chapter tests, always calculate out of 25
+    const totalQuestions = test.test_type === 'chapter_test' ? 25 : result.total_questions;
+    return ((result.score / totalQuestions) * 100).toFixed(1);
+  };
+
+  const getDisplayTotal = () => {
+    if (!test) return 0;
+    return test.test_type === 'chapter_test' ? 25 : result?.total_questions || 0;
   };
 
   const getSubjectBreakdown = (): SubjectBreakdown[] => {
@@ -147,7 +154,7 @@ export default function TestResult() {
             
             <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
               <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-4xl font-bold">{result.score}</div>
+                <div className="text-4xl font-bold">{result.score}/{getDisplayTotal()}</div>
                 <div className="text-sm opacity-90">Score</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
