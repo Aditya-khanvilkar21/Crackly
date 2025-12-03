@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Target, BarChart3, Clock, CheckCircle2, Users } from "lucide-react";
+import { Target, BarChart3, Clock, CheckCircle2, Users, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
+import logo from "@/assets/logo.jpeg";
 
 const Index = () => {
   return (
@@ -9,27 +10,54 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden gradient-hero text-white">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]" />
-        <div className="relative container mx-auto px-4 py-20 md:py-32">
+        {/* Light rays effect */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-radial from-white/10 via-transparent to-transparent" />
+        </div>
+        <div className="relative container mx-auto px-4 py-16 md:py-24">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm mb-6">
-              <GraduationCap className="w-10 h-10" />
+            {/* Logo */}
+            <div className="mb-6">
+              <img 
+                src={logo} 
+                alt="CRACKLY - Crack Your Limits" 
+                className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-2xl shadow-2xl object-cover"
+              />
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight tracking-tight">
               CRACKLY
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-white/90">
-              Master your JEE & NEET preparation with comprehensive test practice
+            <p className="text-2xl md:text-3xl font-semibold mb-2 text-white/95">
+              Crack Your Limits,
+            </p>
+            <p className="text-2xl md:text-3xl font-semibold mb-6 text-white/95">
+              Unlock Your Future.
+            </p>
+            <p className="text-lg md:text-xl mb-8 text-white/80">
+              Your Gateway to JEE & NEET Success
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/auth">
-                <Button size="lg" variant="secondary" className="w-full sm:w-auto text-lg px-8">
+                <Button size="lg" variant="secondary" className="w-full sm:w-auto text-lg px-8 font-semibold">
                   Get Started
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 border-white text-white hover:bg-white hover:text-primary">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 border-white/30 text-white hover:bg-white/10 hover:border-white/50">
                 Learn More
               </Button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Inspirational Quote Section */}
+      <section className="py-12 bg-muted/30 border-b">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <blockquote className="text-xl md:text-2xl italic text-muted-foreground">
+              "Success is not final, failure is not fatal: 
+              <span className="text-primary font-medium"> it is the courage to continue that counts.</span>"
+            </blockquote>
           </div>
         </div>
       </section>
@@ -43,7 +71,7 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="border-2 hover:border-primary transition-smooth">
+            <Card className="border-2 hover:border-primary transition-smooth hover:shadow-lg">
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                   <Target className="w-6 h-6 text-primary" />
@@ -60,7 +88,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-primary transition-smooth">
+            <Card className="border-2 hover:border-primary transition-smooth hover:shadow-lg">
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                   <BarChart3 className="w-6 h-6 text-primary" />
@@ -77,7 +105,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-primary transition-smooth">
+            <Card className="border-2 hover:border-primary transition-smooth hover:shadow-lg">
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                   <Clock className="w-6 h-6 text-primary" />
@@ -94,7 +122,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-primary transition-smooth">
+            <Card className="border-2 hover:border-primary transition-smooth hover:shadow-lg">
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                   <CheckCircle2 className="w-6 h-6 text-primary" />
@@ -111,7 +139,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-primary transition-smooth">
+            <Card className="border-2 hover:border-primary transition-smooth hover:shadow-lg">
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                   <Users className="w-6 h-6 text-primary" />
@@ -128,7 +156,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-primary transition-smooth">
+            <Card className="border-2 hover:border-primary transition-smooth hover:shadow-lg">
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                   <GraduationCap className="w-6 h-6 text-primary" />
@@ -152,6 +180,11 @@ const Index = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
+            <img 
+              src={logo} 
+              alt="CRACKLY" 
+              className="w-20 h-20 mx-auto mb-6 rounded-xl shadow-lg object-cover"
+            />
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
               Ready to Begin Your Journey?
             </h2>
@@ -159,7 +192,7 @@ const Index = () => {
               Join thousands of students preparing for JEE & NEET with CRACKLY
             </p>
             <Link to="/auth">
-              <Button size="lg" className="text-lg px-8">
+              <Button size="lg" className="text-lg px-8 font-semibold">
                 Start Practicing Now
               </Button>
             </Link>
@@ -169,8 +202,14 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="bg-card border-t py-8">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; 2025 CRACKLY. All rights reserved.</p>
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="CRACKLY" className="w-10 h-10 rounded-lg object-cover" />
+              <span className="font-bold text-lg">CRACKLY</span>
+            </div>
+            <p className="text-muted-foreground text-sm">&copy; 2025 CRACKLY. All rights reserved.</p>
+          </div>
         </div>
       </footer>
     </div>

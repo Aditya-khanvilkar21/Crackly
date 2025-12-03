@@ -14,6 +14,7 @@ import { AdminAnalytics } from "@/components/analytics/AdminAnalytics";
 import { AdminMockTestAnalytics } from "@/components/analytics/AdminMockTestAnalytics";
 import { JEENEETComparison } from "@/components/analytics/JEENEETComparison";
 import { ArrowLeft } from "lucide-react";
+import logo from "@/assets/logo.jpeg";
 
 interface UserRole {
   role: string;
@@ -92,7 +93,7 @@ const AdminPanel = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
+      <header className="border-b bg-card shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <Button
@@ -101,12 +102,13 @@ const AdminPanel = () => {
               onClick={() => navigate("/dashboard")}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
+              Back
             </Button>
+            <img src={logo} alt="CRACKLY" className="w-10 h-10 rounded-lg object-cover shadow-sm" />
             <div>
-              <h1 className="text-2xl font-bold">CRACKLY - Admin Panel</h1>
+              <h1 className="text-2xl font-bold text-primary">CRACKLY Admin</h1>
               <p className="text-sm text-muted-foreground">
-                Role: {isSuperAdmin ? "Super Admin" : "Admin"}
+                {isSuperAdmin ? "Super Admin Panel" : "Admin Panel"}
               </p>
             </div>
           </div>

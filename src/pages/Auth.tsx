@@ -10,8 +10,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { signIn, signUp, signOut } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { GraduationCap, UserCircle, Shield } from "lucide-react";
+import { UserCircle, Shield } from "lucide-react";
 import { emailSchema, passwordSchema, fullNameSchema } from "@/lib/validation";
+import logo from "@/assets/logo.jpeg";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -161,11 +162,13 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center gradient-subtle px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-            <GraduationCap className="w-8 h-8 text-primary" />
-          </div>
+          <img 
+            src={logo} 
+            alt="CRACKLY" 
+            className="w-20 h-20 mx-auto mb-4 rounded-xl shadow-lg object-cover"
+          />
           <h1 className="text-3xl font-bold mb-2">CRACKLY</h1>
-          <p className="text-muted-foreground">Master your JEE & NEET preparation</p>
+          <p className="text-muted-foreground">Crack Your Limits, Unlock Your Future</p>
         </div>
 
         <Tabs defaultValue="signup" className="w-full">
