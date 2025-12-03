@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { signOut } from "@/lib/auth";
@@ -13,6 +12,7 @@ import { AdminOverview } from "@/components/admin/AdminOverview";
 import { JoinRequestsManagement } from "@/components/admin/JoinRequestsManagement";
 import { AdminAnalytics } from "@/components/analytics/AdminAnalytics";
 import { AdminMockTestAnalytics } from "@/components/analytics/AdminMockTestAnalytics";
+import { JEENEETComparison } from "@/components/analytics/JEENEETComparison";
 import { ArrowLeft } from "lucide-react";
 
 interface UserRole {
@@ -88,6 +88,8 @@ const AdminPanel = () => {
     );
   }
 
+  const isSuperAdmin = userRole === "super_admin";
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
@@ -104,7 +106,7 @@ const AdminPanel = () => {
             <div>
               <h1 className="text-2xl font-bold">CRACKLY - Admin Panel</h1>
               <p className="text-sm text-muted-foreground">
-                Role: {userRole === "super_admin" ? "Super Admin" : "Admin"}
+                Role: {isSuperAdmin ? "Super Admin" : "Admin"}
               </p>
             </div>
           </div>
@@ -116,14 +118,15 @@ const AdminPanel = () => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className={`grid w-full ${isSuperAdmin ? 'grid-cols-7' : 'grid-cols-8'}`}>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="classes">Classes</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
-            <TabsTrigger value="requests">Requests</TabsTrigger>
+            {!isSuperAdmin && <TabsTrigger value="requests">Requests</TabsTrigger>}
             <TabsTrigger value="tests">Tests</TabsTrigger>
             <TabsTrigger value="analytics">Chapter Analytics</TabsTrigger>
             <TabsTrigger value="mock-analytics">Mock Analytics</TabsTrigger>
+            <TabsTrigger value="comparison">JEE vs NEET</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -138,9 +141,11 @@ const AdminPanel = () => {
             <StudentTracking />
           </TabsContent>
 
-          <TabsContent value="requests" className="mt-6">
-            <JoinRequestsManagement />
-          </TabsContent>
+          {!isSuperAdmin && (
+            <TabsContent value="requests" className="mt-6">
+              <JoinRequestsManagement />
+            </TabsContent>
+          )}
 
           <TabsContent value="tests" className="mt-6">
             <TestManagement userRole={userRole} />
@@ -152,6 +157,10 @@ const AdminPanel = () => {
 
           <TabsContent value="mock-analytics" className="mt-6">
             <AdminMockTestAnalytics userRole={userRole} />
+          </TabsContent>
+
+          <TabsContent value="comparison" className="mt-6">
+            <JEENEETComparison userRole={userRole} />
           </TabsContent>
         </Tabs>
       </main>
