@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Target, BarChart3, Clock, CheckCircle2, Users, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
-import logo from "@/assets/logo.jpeg";
+import logo from "@/assets/logo.png";
 
 const Index = () => {
   return (
@@ -21,7 +21,7 @@ const Index = () => {
               <img 
                 src={logo} 
                 alt="CRACKLY - Crack Your Limits" 
-                className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-2xl shadow-2xl object-cover"
+                className="w-48 h-32 md:w-64 md:h-40 mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.3)] object-contain"
               />
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight tracking-tight">
@@ -183,7 +183,7 @@ const Index = () => {
             <img 
               src={logo} 
               alt="CRACKLY" 
-              className="w-20 h-20 mx-auto mb-6 rounded-xl shadow-lg object-cover"
+              className="w-40 h-24 mx-auto mb-6 drop-shadow-lg object-contain"
             />
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
               Ready to Begin Your Journey?
@@ -205,7 +205,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="CRACKLY" className="w-10 h-10 rounded-lg object-cover" />
+              <img src={logo} alt="CRACKLY" className="w-16 h-10 object-contain" />
               <span className="font-bold text-lg">CRACKLY</span>
             </div>
             <p className="text-muted-foreground text-sm">&copy; 2025 CRACKLY. All rights reserved.</p>

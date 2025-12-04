@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LogOut, BookOpen, Clock, Target, PlayCircle, Award, TrendingUp } from "lucide-react";
-import logo from "@/assets/logo.jpeg";
+import logo from "@/assets/logo.png";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StudentAnalytics } from "@/components/analytics/StudentAnalytics";
@@ -195,7 +195,7 @@ const Dashboard = () => {
       <header className="border-b bg-card shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logo} alt="CRACKLY" className="w-10 h-10 rounded-lg object-cover shadow-sm" />
+            <img src={logo} alt="CRACKLY" className="w-16 h-10 object-contain" />
             <div>
               <h1 className="text-2xl font-bold text-primary">CRACKLY</h1>
               <p className="text-sm text-muted-foreground">Welcome, {profile?.full_name}</p>
