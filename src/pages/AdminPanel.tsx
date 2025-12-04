@@ -14,7 +14,7 @@ import { AdminAnalytics } from "@/components/analytics/AdminAnalytics";
 import { AdminMockTestAnalytics } from "@/components/analytics/AdminMockTestAnalytics";
 import { JEENEETComparison } from "@/components/analytics/JEENEETComparison";
 import { ArrowLeft } from "lucide-react";
-import logo from "@/assets/logo.jpeg";
+import logo from "@/assets/logo.png";
 
 interface UserRole {
   role: string;
@@ -104,7 +104,7 @@ const AdminPanel = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
-            <img src={logo} alt="CRACKLY" className="w-10 h-10 rounded-lg object-cover shadow-sm" />
+            <img src={logo} alt="CRACKLY" className="w-16 h-10 object-contain" />
             <div>
               <h1 className="text-2xl font-bold text-primary">CRACKLY Admin</h1>
               <p className="text-sm text-muted-foreground">

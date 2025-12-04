@@ -12,7 +12,7 @@ import { signIn, signUp, signOut } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { UserCircle, Shield } from "lucide-react";
 import { emailSchema, passwordSchema, fullNameSchema } from "@/lib/validation";
-import logo from "@/assets/logo.jpeg";
+import logo from "@/assets/logo.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -165,7 +165,7 @@ const Auth = () => {
           <img 
             src={logo} 
             alt="CRACKLY" 
-            className="w-20 h-20 mx-auto mb-4 rounded-xl shadow-lg object-cover"
+            className="w-40 h-24 mx-auto mb-4 drop-shadow-lg object-contain"
           />
           <h1 className="text-3xl font-bold mb-2">CRACKLY</h1>
           <p className="text-muted-foreground">Crack Your Limits, Unlock Your Future</p>
