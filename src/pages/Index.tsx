@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Target, BarChart3, Clock, CheckCircle2, Users, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import logo from "@/assets/logo.png";
 
 const Index = () => {
@@ -76,8 +77,26 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Navigation Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src={logo} alt="Crackly" className="w-12 h-8 object-contain" />
+            <span className="font-bold text-lg text-foreground">Crackly</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Link to="/auth">
+              <Button size="sm" className="font-medium">
+                Login
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[hsl(217,91%,45%)] text-white">
+      <section className="relative overflow-hidden bg-primary text-white pt-16">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]" />
         {/* Light rays effect */}
         <div className="absolute inset-0 overflow-hidden">
