@@ -27,6 +27,7 @@ const mockTestSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   difficulty: z.enum(["easy", "medium", "hard"]),
   duration_minutes: z.number().min(30).max(300),
+  exam_type: z.enum(["JEE", "CET"]),
   questions: z.array(questionSchema).length(75, "Must have exactly 75 questions (25 per subject)"),
 });
 
@@ -59,6 +60,7 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
       title: "",
       difficulty: "medium",
       duration_minutes: 180,
+      exam_type: "JEE",
       questions: questions,
     },
   });
@@ -161,6 +163,7 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
         test_type: 'mock_test',
         difficulty: data.difficulty,
         duration_minutes: data.duration_minutes,
+        exam_type: data.exam_type,
         questions: data.questions,
         is_active: true,
         chapter: null,
@@ -269,6 +272,28 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
                         onChange={(e) => field.onChange(parseInt(e.target.value))}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="exam_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Exam Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select exam type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="JEE">JEE</SelectItem>
+                        <SelectItem value="CET">CET</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

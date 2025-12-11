@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { TrendingUp, Target, Award, Calendar } from "lucide-react";
 
+type ExamType = 'JEE' | 'NEET' | 'CET';
+
 interface TestResult {
   score: number;
   total_questions: number;
@@ -16,26 +18,45 @@ interface PerformanceTrend {
   percentage: number;
 }
 
-export const StudentAnalytics = () => {
+interface StudentAnalyticsProps {
+  examType?: ExamType;
+}
+
+export const StudentAnalytics = ({ examType }: StudentAnalyticsProps = {}) => {
   const [results, setResults] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchResults();
-  }, []);
+  }, [examType]);
 
   const fetchResults = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
-    const { data, error } = await supabase
-      .from("test_results")
-      .select("*")
-      .eq("student_id", session.user.id)
-      .order("completed_at", { ascending: true });
+    if (examType) {
+      // Fetch results filtered by exam type
+      const { data, error } = await supabase
+        .from("test_results")
+        .select("*, tests!inner(exam_type)")
+        .eq("student_id", session.user.id)
+        .order("completed_at", { ascending: true });
 
-    if (!error && data) {
-      setResults(data as TestResult[]);
+      if (!error && data) {
+        const filteredResults = data.filter((r: any) => r.tests?.exam_type === examType);
+        setResults(filteredResults as TestResult[]);
+      }
+    } else {
+      // Fetch all results
+      const { data, error } = await supabase
+        .from("test_results")
+        .select("*")
+        .eq("student_id", session.user.id)
+        .order("completed_at", { ascending: true });
+
+      if (!error && data) {
+        setResults(data as TestResult[]);
+      }
     }
     setLoading(false);
   };

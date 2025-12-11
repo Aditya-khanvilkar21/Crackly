@@ -162,6 +162,7 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
         test_type: 'mock_test',
         difficulty: data.difficulty,
         duration_minutes: data.duration_minutes,
+        exam_type: 'NEET',
         questions: data.questions,
         is_active: true,
         chapter: 'NEET',

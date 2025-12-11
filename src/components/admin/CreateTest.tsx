@@ -27,6 +27,7 @@ const testSchema = z.object({
   subject: z.enum(["physics", "chemistry", "mathematics", "biology"]),
   difficulty: z.enum(["easy", "medium", "hard"]),
   duration_minutes: z.number().min(10).max(180),
+  exam_type: z.enum(["JEE", "NEET", "CET"]),
   questions: z.array(questionSchema).length(40, "Must have exactly 40 questions"),
 });
 
@@ -57,6 +58,7 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
       subject: "physics",
       difficulty: "medium",
       duration_minutes: 30,
+      exam_type: "JEE",
       questions: questions,
     },
   });
@@ -147,6 +149,7 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
         subject: data.subject,
         difficulty: data.difficulty,
         duration_minutes: data.duration_minutes,
+        exam_type: data.exam_type,
         questions: data.questions,
         is_active: true,
       });
@@ -284,6 +287,29 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
                         onChange={(e) => field.onChange(parseInt(e.target.value))}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="exam_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Exam Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select exam type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="JEE">JEE</SelectItem>
+                        <SelectItem value="NEET">NEET</SelectItem>
+                        <SelectItem value="CET">CET</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
