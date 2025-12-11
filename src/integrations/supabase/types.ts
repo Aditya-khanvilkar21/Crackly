@@ -218,6 +218,7 @@ export type Database = {
           created_at: string
           difficulty: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes: number
+          exam_type: Database["public"]["Enums"]["exam_type"]
           id: string
           is_active: boolean | null
           questions: Json
@@ -231,6 +232,7 @@ export type Database = {
           created_at?: string
           difficulty: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes?: number
+          exam_type?: Database["public"]["Enums"]["exam_type"]
           id?: string
           is_active?: boolean | null
           questions: Json
@@ -244,6 +246,7 @@ export type Database = {
           created_at?: string
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes?: number
+          exam_type?: Database["public"]["Enums"]["exam_type"]
           id?: string
           is_active?: boolean | null
           questions?: Json
@@ -341,6 +344,7 @@ export type Database = {
     Enums: {
       app_role: "student" | "admin" | "super_admin"
       difficulty_level: "easy" | "medium" | "hard"
+      exam_type: "JEE" | "NEET" | "CET"
       test_subject: "physics" | "chemistry" | "mathematics" | "biology"
       test_type: "chapter_test" | "mock_test"
     }
@@ -472,6 +476,7 @@ export const Constants = {
     Enums: {
       app_role: ["student", "admin", "super_admin"],
       difficulty_level: ["easy", "medium", "hard"],
+      exam_type: ["JEE", "NEET", "CET"],
       test_subject: ["physics", "chemistry", "mathematics", "biology"],
       test_type: ["chapter_test", "mock_test"],
     },
