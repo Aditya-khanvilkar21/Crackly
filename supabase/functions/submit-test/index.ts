@@ -47,6 +47,7 @@ Deno.serve(async (req) => {
 
     // Calculate score server-side
     const questions = test.questions as Array<{ correctAnswer: number }>;
+    const totalQuestions = questions.length;
     let score = 0;
     
     // Iterate through each submitted answer
@@ -56,8 +57,6 @@ Deno.serve(async (req) => {
         score++;
       }
     });
-    
-    const totalQuestionsAnswered = Object.keys(answers).length;
 
     // Insert result using service role (bypasses RLS)
     const { data: result, error: insertError } = await supabase
@@ -66,7 +65,7 @@ Deno.serve(async (req) => {
         test_id: testId,
         student_id: user.id,
         score,
-        total_questions: totalQuestionsAnswered,
+        total_questions: totalQuestions,
         answers,
         time_taken_seconds: timeInSeconds,
       })
@@ -82,7 +81,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         score,
-        totalQuestions: totalQuestionsAnswered,
+        totalQuestions: totalQuestions,
         resultId: result.id
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
