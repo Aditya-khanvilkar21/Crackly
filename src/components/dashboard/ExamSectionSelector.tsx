@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { GraduationCap, Atom, Stethoscope, BookOpen } from "lucide-react";
+import { Atom, Stethoscope, BookOpen, ChevronRight } from "lucide-react";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 
@@ -14,38 +14,32 @@ const examDetails = {
   JEE: {
     title: "JEE",
     subtitle: "Joint Entrance Examination",
-    description: "Physics, Chemistry, Mathematics",
     icon: Atom,
     gradient: "from-blue-500 to-indigo-600",
     bgGradient: "from-blue-500/10 to-indigo-500/10",
-    borderColor: "border-blue-500",
-    subjects: ["Physics", "Chemistry", "Mathematics"],
+    subjects: ["Physics", "Chemistry", "Maths"],
   },
   NEET: {
     title: "NEET",
     subtitle: "National Eligibility cum Entrance Test",
-    description: "Physics, Chemistry, Biology",
     icon: Stethoscope,
     gradient: "from-green-500 to-emerald-600",
     bgGradient: "from-green-500/10 to-emerald-500/10",
-    borderColor: "border-green-500",
     subjects: ["Physics", "Chemistry", "Biology"],
   },
   CET: {
     title: "CET",
     subtitle: "Common Entrance Test",
-    description: "State Level Engineering Entrance",
     icon: BookOpen,
     gradient: "from-purple-500 to-pink-600",
     bgGradient: "from-purple-500/10 to-pink-500/10",
-    borderColor: "border-purple-500",
-    subjects: ["Physics", "Chemistry", "Mathematics"],
+    subjects: ["Physics", "Chemistry", "Maths"],
   },
 };
 
 export const ExamSectionSelector = ({ selectedExam, onSelect }: ExamSectionSelectorProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="space-y-3">
       {(Object.keys(examDetails) as ExamType[]).map((exam, index) => {
         const details = examDetails[exam];
         const Icon = details.icon;
@@ -54,38 +48,34 @@ export const ExamSectionSelector = ({ selectedExam, onSelect }: ExamSectionSelec
         return (
           <motion.div
             key={exam}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
           >
             <Card
-              className={`cursor-pointer transition-all duration-300 hover:shadow-xl ${
+              className={`cursor-pointer transition-all duration-300 active:scale-[0.98] ${
                 isSelected 
-                  ? `ring-2 ring-offset-2 ring-offset-background ${details.borderColor} shadow-lg` 
-                  : 'hover:scale-[1.02]'
-              } bg-gradient-to-br ${details.bgGradient}`}
+                  ? 'ring-2 ring-primary shadow-lg' 
+                  : 'hover:shadow-md'
+              } bg-gradient-to-r ${details.bgGradient}`}
               onClick={() => onSelect(exam)}
             >
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`p-3 rounded-xl bg-gradient-to-br ${details.gradient}`}>
-                    <Icon className="h-6 w-6 text-white" />
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className={`p-3 rounded-xl bg-gradient-to-br ${details.gradient} shrink-0`}>
+                  <Icon className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-bold">{details.title}</h3>
+                  <p className="text-xs text-muted-foreground truncate">{details.subtitle}</p>
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {details.subjects.map((subject) => (
+                      <Badge key={subject} variant="secondary" className="text-[10px] px-1.5 py-0">
+                        {subject}
+                      </Badge>
+                    ))}
                   </div>
-                  {isSelected && (
-                    <Badge className={`bg-gradient-to-r ${details.gradient} text-white border-0`}>
-                      Selected
-                    </Badge>
-                  )}
                 </div>
-                <h3 className="text-2xl font-bold mb-1">{details.title}</h3>
-                <p className="text-sm text-muted-foreground mb-3">{details.subtitle}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {details.subjects.map((subject) => (
-                    <Badge key={subject} variant="secondary" className="text-xs">
-                      {subject}
-                    </Badge>
-                  ))}
-                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
               </CardContent>
             </Card>
           </motion.div>
