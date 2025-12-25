@@ -163,9 +163,9 @@ export default function StudentProfile() {
   return (
     <div className="min-h-screen bg-gradient-subtle py-8">
       <div className="container mx-auto px-4 max-w-6xl">
-        <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-6">
+        <Button variant="ghost" onClick={() => navigate("/")} className="mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
+          Back to Home
         </Button>
 
         <Tabs defaultValue="profile" className="space-y-6">

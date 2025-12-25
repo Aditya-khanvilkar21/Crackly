@@ -77,7 +77,7 @@ export default function TestResult() {
       setTest(testData as unknown as Test);
     } catch (error) {
       toast.error("Failed to load test result");
-      navigate("/dashboard");
+      navigate("/");
     }
   };
 
@@ -332,8 +332,8 @@ export default function TestResult() {
 
         {/* Actions */}
         <div className="flex gap-4 justify-center">
-          <Button onClick={() => navigate("/dashboard")} variant="outline" size="lg">
-            Back to Dashboard
+          <Button onClick={() => navigate("/")} variant="outline" size="lg">
+            Back to Home
           </Button>
           <Button onClick={() => navigate(`/take-test/${testId}`)} size="lg">
             Retake Test

@@ -26,7 +26,7 @@ const Auth = () => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/dashboard");
+        navigate("/");
       }
     };
     checkUser();
@@ -76,7 +76,7 @@ const Auth = () => {
           if (isAdmin) {
             navigate("/admin");
           } else if (isStudent) {
-            navigate("/dashboard");
+            navigate("/");
           } else {
             toast.error("No role assigned to your account. Contact support.");
             navigate("/");
@@ -145,7 +145,7 @@ const Auth = () => {
         // Refresh session to ensure role is available
         await supabase.auth.refreshSession();
         
-        navigate("/dashboard");
+        navigate("/");
       }
     } catch (error) {
       toast.error("An error occurred during signup");

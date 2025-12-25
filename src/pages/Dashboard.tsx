@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, BookOpen, Menu, User, Settings } from "lucide-react";
+import { LogOut, BookOpen, Menu, User, Settings, Sparkles } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { toast } from "sonner";
 import { ExamSectionSelector } from "@/components/dashboard/ExamSectionSelector";
@@ -38,15 +38,19 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedExam, setSelectedExam] = useState<ExamType | null>(null);
   const [isInClass, setIsInClass] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        navigate("/auth");
+        setIsAuthenticated(false);
+        setLoading(false);
         return;
       }
+
+      setIsAuthenticated(true);
 
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
@@ -85,23 +89,123 @@ const Dashboard = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT" || !session) {
-        navigate("/auth");
+        setIsAuthenticated(false);
+        setProfile(null);
+        setRoles([]);
+      } else if (session) {
+        setIsAuthenticated(true);
+        // Refetch user data
+        initAuth();
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
     toast.success("Logged out successfully");
-    navigate("/");
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  // Show welcome screen for unauthenticated users
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle">
+        <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <img src={logo} alt="Crackly" className="w-10 h-8 object-contain" />
+                <h1 className="text-lg font-bold text-primary leading-tight">Crackly</h1>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" onClick={() => navigate("/auth")}>
+                  Login
+                </Button>
+                <Button onClick={() => navigate("/auth")}>
+                  Sign Up
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-lg mx-auto text-center space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-4"
+            >
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
+                <Sparkles className="w-4 h-4" />
+                Crack JEE, NEET & CET
+              </div>
+              <h2 className="text-3xl font-bold">Welcome to Crackly</h2>
+              <p className="text-muted-foreground">
+                Your ultimate test preparation platform. Practice chapter tests, take mock exams, and track your progress.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card>
+                <CardContent className="p-6 space-y-4">
+                  <h3 className="font-semibold text-lg">Get Started</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Login or create an account to access tests and track your progress.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => navigate("/auth")}
+                    >
+                      Login
+                    </Button>
+                    <Button 
+                      className="flex-1"
+                      onClick={() => navigate("/auth")}
+                    >
+                      Sign Up
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="grid grid-cols-3 gap-4 pt-4"
+            >
+              <div className="text-center p-4 rounded-lg bg-card border">
+                <div className="text-2xl font-bold text-primary">JEE</div>
+                <div className="text-xs text-muted-foreground">Engineering</div>
+              </div>
+              <div className="text-center p-4 rounded-lg bg-card border">
+                <div className="text-2xl font-bold text-primary">NEET</div>
+                <div className="text-xs text-muted-foreground">Medical</div>
+              </div>
+              <div className="text-center p-4 rounded-lg bg-card border">
+                <div className="text-2xl font-bold text-primary">CET</div>
+                <div className="text-xs text-muted-foreground">State Exams</div>
+              </div>
+            </motion.div>
+          </div>
+        </main>
       </div>
     );
   }

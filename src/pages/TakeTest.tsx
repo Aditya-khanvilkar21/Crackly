@@ -110,7 +110,7 @@ export default function TakeTest() {
       if (error) throw error;
       if (!data) {
         toast.error("Test not found or not available");
-        navigate("/dashboard");
+        navigate("/");
         return;
       }
 
@@ -134,7 +134,7 @@ export default function TakeTest() {
     } catch (error) {
       console.error("Error fetching test:", error);
       toast.error("Failed to load test");
-      navigate("/dashboard");
+      navigate("/");
     }
   };
 
