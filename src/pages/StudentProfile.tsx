@@ -9,10 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { User, ArrowLeft, Save, Send, BookOpen, TrendingUp, BarChart3 } from "lucide-react";
+import { User, ArrowLeft, Save, Send, BookOpen } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { StudentAnalytics } from "@/components/analytics/StudentAnalytics";
-import { MockTestAnalytics } from "@/components/analytics/MockTestAnalytics";
 
 interface Profile {
   id: string;
@@ -171,7 +169,7 @@ export default function StudentProfile() {
         </Button>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="profile">
               <User className="w-4 h-4 mr-2" />
               Profile
@@ -179,14 +177,6 @@ export default function StudentProfile() {
             <TabsTrigger value="classes">
               <BookOpen className="w-4 h-4 mr-2" />
               Classes
-            </TabsTrigger>
-            <TabsTrigger value="analytics">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Chapter Analytics
-            </TabsTrigger>
-            <TabsTrigger value="mock-analytics">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Mock Test Analytics
             </TabsTrigger>
           </TabsList>
 
@@ -424,14 +414,6 @@ export default function StudentProfile() {
               </CardContent>
             </Card>
           )}
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <StudentAnalytics />
-          </TabsContent>
-
-          <TabsContent value="mock-analytics">
-            <MockTestAnalytics />
           </TabsContent>
         </Tabs>
       </div>
