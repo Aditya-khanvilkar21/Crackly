@@ -59,7 +59,7 @@ const Auth = () => {
         toast.error("Invalid email or password");
         setLoading(false);
       } else {
-        // Check user role after successful login
+        // Check user role after successful login and route based on actual roles
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           const { data: roles } = await supabase
@@ -70,22 +70,17 @@ const Auth = () => {
           const isAdmin = roles?.some(r => r.role === "admin" || r.role === "super_admin");
           const isStudent = roles?.some(r => r.role === "student");
 
-          if (loginType === "admin" && !isAdmin) {
-            toast.error("You don't have admin access. Please login as a student.");
-            await signOut();
-            setLoading(false);
-            return;
-          }
-
-          if (loginType === "student" && !isStudent) {
-            toast.error("This account doesn't have student access. Please login as admin.");
-            await signOut();
-            setLoading(false);
-            return;
-          }
-
           toast.success("Successfully logged in!");
-          navigate(isAdmin && loginType === "admin" ? "/admin" : "/dashboard");
+          
+          // Route based on actual roles - backend RLS enforces real access control
+          if (isAdmin) {
+            navigate("/admin");
+          } else if (isStudent) {
+            navigate("/dashboard");
+          } else {
+            toast.error("No role assigned to your account. Contact support.");
+            navigate("/");
+          }
         }
       }
     } catch (error) {
