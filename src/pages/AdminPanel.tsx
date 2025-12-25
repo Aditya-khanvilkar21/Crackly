@@ -80,7 +80,7 @@ const AdminPanel = () => {
           description: "You don't have permission to access the admin panel",
           variant: "destructive",
         });
-        navigate("/dashboard");
+        navigate("/");
         return;
       }
 
@@ -164,7 +164,7 @@ const AdminPanel = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => activeView === 'menu' ? navigate("/dashboard") : setActiveView('menu')}
+                onClick={() => activeView === 'menu' ? navigate("/") : setActiveView('menu')}
                 className="shrink-0"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -187,8 +187,8 @@ const AdminPanel = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
-                    Dashboard
+                  <DropdownMenuItem onClick={() => navigate("/")}>
+                    Home
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
