@@ -172,7 +172,15 @@ const Dashboard = () => {
   }, []);
 
   const handleSignOut = async () => {
-    await signOut();
+    const { error } = await signOut();
+    if (error) {
+      console.error("Logout error:", error);
+    }
+    // Explicitly reset state to show landing page
+    setIsAuthenticated(false);
+    setProfile(null);
+    setRoles([]);
+    setSelectedExam(null);
     toast.success("Logged out successfully");
   };
 
