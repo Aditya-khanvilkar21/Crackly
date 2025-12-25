@@ -66,14 +66,12 @@ export default function TestResult() {
 
       if (resultError) throw resultError;
 
-      // Fetch test details
+      // Fetch test details using secure RPC that only returns data if student has submitted
       const { data: testData, error: testError } = await supabase
-        .from("tests")
-        .select("*")
-        .eq("id", testId)
-        .single();
+        .rpc("get_test_result_with_questions", { test_id_param: testId });
 
       if (testError) throw testError;
+      if (!testData) throw new Error("Test not found or access denied");
 
       setResult(resultData as unknown as TestResult);
       setTest(testData as unknown as Test);
