@@ -10,7 +10,7 @@ import { ClassManagement } from "@/components/admin/ClassManagement";
 import { StudentTracking } from "@/components/admin/StudentTracking";
 import { TestManagement } from "@/components/admin/TestManagement";
 import { JoinRequestsManagement } from "@/components/admin/JoinRequestsManagement";
-import { AdminExamDashboard } from "@/components/admin/AdminExamDashboard";
+
 import { 
   ArrowLeft, 
   Users, 
@@ -19,10 +19,7 @@ import {
   Inbox,
   Menu,
   LogOut,
-  ChevronRight,
-  GraduationCap,
-  FlaskConical,
-  Leaf
+  ChevronRight
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { motion, AnimatePresence } from "framer-motion";
@@ -38,8 +35,7 @@ interface UserRole {
   role: string;
 }
 
-type AdminView = 'menu' | 'classes' | 'students' | 'requests' | 'tests' | 'jee' | 'neet' | 'cet';
-type ExamType = 'JEE' | 'NEET' | 'CET';
+type AdminView = 'menu' | 'classes' | 'students' | 'requests' | 'tests';
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -121,34 +117,6 @@ const AdminPanel = () => {
     { id: 'tests', title: 'Tests', description: 'Manage tests', icon: FileText },
   ];
 
-  // Exam analytics items
-  const examItems = [
-    { 
-      id: 'jee', 
-      title: 'JEE Analytics', 
-      description: 'Chapter & Mock test analysis', 
-      icon: GraduationCap,
-      gradient: 'from-blue-500 to-indigo-600',
-      bgClass: 'bg-gradient-to-br from-blue-500/10 to-indigo-600/10 border-blue-500/20'
-    },
-    { 
-      id: 'neet', 
-      title: 'NEET Analytics', 
-      description: 'Chapter & Mock test analysis', 
-      icon: Leaf,
-      gradient: 'from-green-500 to-emerald-600',
-      bgClass: 'bg-gradient-to-br from-green-500/10 to-emerald-600/10 border-green-500/20'
-    },
-    { 
-      id: 'cet', 
-      title: 'CET Analytics', 
-      description: 'Chapter & Mock test analysis', 
-      icon: FlaskConical,
-      gradient: 'from-purple-500 to-pink-600',
-      bgClass: 'bg-gradient-to-br from-purple-500/10 to-pink-600/10 border-purple-500/20'
-    },
-  ];
-
   const renderContent = () => {
     switch (activeView) {
       case 'classes':
@@ -159,20 +127,13 @@ const AdminPanel = () => {
         return <JoinRequestsManagement />;
       case 'tests':
         return <TestManagement userRole={userRole} />;
-      case 'jee':
-        return <AdminExamDashboard examType="JEE" userRole={userRole} onBack={() => setActiveView('menu')} />;
-      case 'neet':
-        return <AdminExamDashboard examType="NEET" userRole={userRole} onBack={() => setActiveView('menu')} />;
-      case 'cet':
-        return <AdminExamDashboard examType="CET" userRole={userRole} onBack={() => setActiveView('menu')} />;
       default:
         return null;
     }
   };
 
   const getViewTitle = () => {
-    const allItems = [...managementItems, ...examItems];
-    const item = allItems.find(m => m.id === activeView);
+    const item = managementItems.find(m => m.id === activeView);
     return item?.title || 'Admin';
   };
 
@@ -242,45 +203,8 @@ const AdminPanel = () => {
                 </p>
               </div>
 
-              {/* Exam Analytics Section */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
-                  Exam Analytics
-                </h3>
-                {examItems.map((item, index) => {
-                  const Icon = item.icon;
-                  return (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <Card
-                        className={`cursor-pointer hover:shadow-md active:scale-[0.98] transition-all border ${item.bgClass}`}
-                        onClick={() => setActiveView(item.id as AdminView)}
-                      >
-                        <CardContent className="p-4 flex items-center gap-4">
-                          <div className={`p-2.5 rounded-xl bg-gradient-to-br ${item.gradient} shrink-0`}>
-                            <Icon className="h-5 w-5 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm">{item.title}</h3>
-                            <p className="text-xs text-muted-foreground">{item.description}</p>
-                          </div>
-                          <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
-              </div>
-
               {/* Management Section */}
               <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
-                  Management
-                </h3>
                 {managementItems.map((item, index) => {
                   const Icon = item.icon;
                   return (
@@ -288,7 +212,7 @@ const AdminPanel = () => {
                       key={item.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: (index + examItems.length) * 0.05 }}
+                      transition={{ delay: index * 0.05 }}
                     >
                       <Card
                         className="cursor-pointer hover:shadow-md active:scale-[0.98] transition-all"
