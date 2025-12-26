@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, FileText, ChevronRight } from "lucide-react";
+import { ArrowLeft, BookOpen, FileText, MessageSquare, ChevronRight } from "lucide-react";
 import { AdminChapterAnalytics } from "@/components/analytics/AdminChapterAnalytics";
 import { ExamMockAnalytics } from "@/components/analytics/ExamMockAnalytics";
+import { PostTestDiscussion } from "@/components/admin/PostTestDiscussion";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
-type ViewMode = 'menu' | 'chapters' | 'mocks';
+type ViewMode = 'menu' | 'chapters' | 'mocks' | 'discussion';
 
 interface AdminExamDashboardProps {
   examType: ExamType;
@@ -40,6 +41,12 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
       title: 'Mock Test Analytics',
       description: 'Full mock test performance with subject breakdown',
       icon: FileText,
+    },
+    {
+      id: 'discussion',
+      title: 'Post-Test Discussion',
+      description: 'Review all questions with answers & explanations',
+      icon: MessageSquare,
     },
   ];
 
@@ -118,6 +125,21 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
           exit={{ opacity: 0, x: -20 }}
         >
           <ExamMockAnalytics
+            examType={examType}
+            userRole={userRole}
+            onBack={() => setViewMode('menu')}
+          />
+        </motion.div>
+      )}
+
+      {viewMode === 'discussion' && (
+        <motion.div
+          key="discussion"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+        >
+          <PostTestDiscussion
             examType={examType}
             userRole={userRole}
             onBack={() => setViewMode('menu')}
