@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     // Fetch test with correct answers (server-side only)
     const { data: test, error: testError } = await supabase
       .from('tests')
-      .select('id, questions, title')
+      .select('id, questions, title, test_type')
       .eq('id', testId)
       .single();
 
@@ -47,7 +47,11 @@ Deno.serve(async (req) => {
 
     // Calculate score server-side
     const questions = test.questions as Array<{ correctAnswer: number }>;
-    const totalQuestions = questions.length;
+    const isChapterTest = test.test_type === 'chapter_test';
+    
+    // For chapter tests, we only have 25 questions (randomly selected by frontend)
+    // For mock tests, use all questions
+    const totalQuestions = isChapterTest ? 25 : questions.length;
     let score = 0;
     
     // Iterate through each submitted answer

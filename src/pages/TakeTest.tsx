@@ -235,13 +235,20 @@ export default function TakeTest() {
                 <Timer className="w-5 h-5" />
                 <span className="text-lg font-mono font-bold">{formatTime(timeLeft)}</span>
               </div>
-              <Button
-                onClick={() => setShowSubmitDialog(true)}
-                disabled={isSubmitting}
-                variant={allQuestionsAttempted ? "default" : "outline"}
-              >
-                Submit Test
-              </Button>
+              {/* For chapter tests, only show submit button if all questions are attempted */}
+              {(isMockTest || allQuestionsAttempted) ? (
+                <Button
+                  onClick={() => setShowSubmitDialog(true)}
+                  disabled={isSubmitting}
+                  variant={allQuestionsAttempted ? "default" : "outline"}
+                >
+                  Submit Test
+                </Button>
+              ) : (
+                <div className="text-sm text-muted-foreground px-4 py-2 bg-muted rounded-lg">
+                  Answer all {totalQuestions} questions to submit
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -209,7 +209,7 @@ export default function TestResult() {
               <XCircle className="w-8 h-8 text-red-600" />
               <div>
                 <div className="text-2xl font-bold text-red-600">
-                  {result.total_questions - result.score}
+                  {getDisplayTotal() - result.score}
                 </div>
                 <div className="text-sm text-muted-foreground">Incorrect</div>
               </div>
