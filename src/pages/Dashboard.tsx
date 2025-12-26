@@ -5,7 +5,8 @@ import { signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, BookOpen, Menu, User, Settings, Target, BarChart3, Clock, CheckCircle2, Users, GraduationCap } from "lucide-react";
+import { LogOut, BookOpen, Menu, User, Settings, Target, BarChart3, Clock, CheckCircle2, Users, GraduationCap, Leaf, FlaskConical, ChevronRight, ArrowLeft } from "lucide-react";
+import { AdminExamDashboard } from "@/components/admin/AdminExamDashboard";
 import logo from "@/assets/logo.png";
 import { toast } from "sonner";
 import { ExamSectionSelector } from "@/components/dashboard/ExamSectionSelector";
@@ -31,6 +32,7 @@ interface UserRole {
 }
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
+type AdminView = 'menu' | 'jee' | 'neet' | 'cet';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -40,6 +42,7 @@ const Dashboard = () => {
   const [selectedExam, setSelectedExam] = useState<ExamType | null>(null);
   const [isInClass, setIsInClass] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminView, setAdminView] = useState<AdminView>('menu');
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -500,23 +503,95 @@ const Dashboard = () => {
 
         {(isAdmin || isSuperAdmin) && (
           <div className="max-w-lg mx-auto space-y-4">
-            <div className="text-center py-2">
-              <h2 className="text-xl font-bold mb-1">Admin Dashboard</h2>
-              <p className="text-sm text-muted-foreground">Manage students and tests</p>
-            </div>
+            <AnimatePresence mode="wait">
+              {adminView === 'menu' ? (
+                <motion.div
+                  key="admin-menu"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-4"
+                >
+                  <div className="text-center py-2">
+                    <h2 className="text-xl font-bold mb-1">Admin Dashboard</h2>
+                    <p className="text-sm text-muted-foreground">Analytics & Management</p>
+                  </div>
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="text-center space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    Access the Admin Panel for full control
-                  </p>
-                  <Button onClick={() => navigate("/admin")} className="w-full">
-                    Go to Admin Panel
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  {/* Exam Analytics Section */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
+                      Exam Analytics
+                    </h3>
+                    {[
+                      { id: 'jee', title: 'JEE Analytics', description: 'Chapter & Mock test analysis', icon: GraduationCap, gradient: 'from-blue-500 to-indigo-600', bgClass: 'bg-gradient-to-br from-blue-500/10 to-indigo-600/10 border-blue-500/20' },
+                      { id: 'neet', title: 'NEET Analytics', description: 'Chapter & Mock test analysis', icon: Leaf, gradient: 'from-green-500 to-emerald-600', bgClass: 'bg-gradient-to-br from-green-500/10 to-emerald-600/10 border-green-500/20' },
+                      { id: 'cet', title: 'CET Analytics', description: 'Chapter & Mock test analysis', icon: FlaskConical, gradient: 'from-purple-500 to-pink-600', bgClass: 'bg-gradient-to-br from-purple-500/10 to-pink-600/10 border-purple-500/20' },
+                    ].map((item, index) => {
+                      const Icon = item.icon;
+                      return (
+                        <motion.div
+                          key={item.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                        >
+                          <Card
+                            className={`cursor-pointer hover:shadow-md active:scale-[0.98] transition-all border ${item.bgClass}`}
+                            onClick={() => setAdminView(item.id as AdminView)}
+                          >
+                            <CardContent className="p-4 flex items-center gap-4">
+                              <div className={`p-2.5 rounded-xl bg-gradient-to-br ${item.gradient} shrink-0`}>
+                                <Icon className="h-5 w-5 text-white" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-sm">{item.title}</h3>
+                                <p className="text-xs text-muted-foreground">{item.description}</p>
+                              </div>
+                              <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Admin Panel Link */}
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">
+                      Management
+                    </h3>
+                    <Card
+                      className="cursor-pointer hover:shadow-md active:scale-[0.98] transition-all"
+                      onClick={() => navigate("/admin")}
+                    >
+                      <CardContent className="p-4 flex items-center gap-4">
+                        <div className="p-2.5 rounded-xl bg-primary/10 shrink-0">
+                          <Settings className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm">Admin Panel</h3>
+                          <p className="text-xs text-muted-foreground">Classes, Students & Tests</p>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={adminView}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                >
+                  <AdminExamDashboard
+                    examType={adminView.toUpperCase() as ExamType}
+                    userRole={isSuperAdmin ? 'super_admin' : 'admin'}
+                    onBack={() => setAdminView('menu')}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </main>
