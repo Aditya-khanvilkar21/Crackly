@@ -19,6 +19,7 @@ const questionSchema = z.object({
   options: z.array(z.string().min(1, "Option cannot be empty")).length(4, "Must have exactly 4 options"),
   correctAnswer: z.number().min(0).max(3, "Must select a correct answer"),
   imageUrl: z.string().optional(),
+  explanation: z.string().optional(),
 });
 
 const testSchema = z.object({
@@ -39,6 +40,7 @@ const emptyQuestion: QuestionFormData = {
   options: ["", "", "", ""],
   correctAnswer: 0,
   imageUrl: undefined,
+  explanation: "",
 };
 
 export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) => {
@@ -437,6 +439,20 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
                 </RadioGroup>
                 <p className="text-sm text-muted-foreground">
                   Selected correct answer: <span className="font-medium">Option {String.fromCharCode(65 + currentQuestion.correctAnswer)}</span>
+                </p>
+              </div>
+
+              {/* Explanation Section */}
+              <div>
+                <Label>Explanation (Optional)</Label>
+                <Textarea
+                  placeholder="Enter the explanation for the correct answer..."
+                  value={currentQuestion.explanation || ""}
+                  onChange={(e) => updateQuestion(currentQuestionIndex, "explanation", e.target.value)}
+                  className="mt-2 min-h-[80px]"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  This explanation will be shown to students after they submit the test.
                 </p>
               </div>
 

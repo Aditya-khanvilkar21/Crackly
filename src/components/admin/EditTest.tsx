@@ -16,6 +16,7 @@ interface Question {
   options: string[];
   correctAnswer: number;
   imageUrl?: string;
+  explanation?: string;
   subject?: string;
 }
 
@@ -302,6 +303,16 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
                           <SelectItem value="3">Option D</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    <div>
+                      <Label>Explanation (Optional)</Label>
+                      <Textarea
+                        placeholder="Enter explanation for the correct answer..."
+                        value={q.explanation || ""}
+                        onChange={(e) => handleUpdateQuestion(qIndex, "explanation", e.target.value)}
+                        rows={2}
+                      />
                     </div>
                   </CardContent>
                 </Card>
