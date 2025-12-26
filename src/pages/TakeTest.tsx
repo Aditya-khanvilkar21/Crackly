@@ -3,8 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Timer, CheckCircle2, AlertCircle, Eye } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -416,35 +414,31 @@ export default function TakeTest() {
                 </div>
               )}
 
-              <RadioGroup
-                value={answers[currentQuestionIndex]?.toString()}
-                onValueChange={(value) =>
-                  handleAnswerSelect(currentQuestionIndex, parseInt(value))
-                }
-                className="space-y-4"
-              >
+              <div className="space-y-4">
                 {currentQuestion.options.map((option, index) => (
                   <div
                     key={index}
-                    className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                    onClick={() => handleAnswerSelect(currentQuestionIndex, index)}
+                    className={`flex items-center p-4 rounded-lg border-2 transition-all cursor-pointer ${
                       answers[currentQuestionIndex] === index
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-primary/50 hover:bg-muted/50"
                     }`}
                   >
-                    <RadioGroupItem value={index.toString()} id={`option-${index}`} />
-                    <Label
-                      htmlFor={`option-${index}`}
-                      className="flex-1 cursor-pointer text-base"
-                    >
-                      <span className="font-medium mr-2">
-                        {String.fromCharCode(97 + index)})
-                      </span>
-                      {option}
-                    </Label>
+                    <span className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 font-semibold text-sm ${
+                      answers[currentQuestionIndex] === index
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    }`}>
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                    <span className="flex-1 text-base">{option}</span>
+                    {answers[currentQuestionIndex] === index && (
+                      <CheckCircle2 className="w-5 h-5 text-primary ml-2" />
+                    )}
                   </div>
                 ))}
-              </RadioGroup>
+              </div>
 
               <div className="flex justify-between mt-8">
                 <Button
