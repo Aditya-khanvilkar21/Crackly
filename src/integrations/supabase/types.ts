@@ -262,6 +262,7 @@ export type Database = {
           admin_id: string
           created_at: string
           id: string
+          is_disabled: boolean | null
           name: string
           updated_at: string
         }
@@ -269,6 +270,7 @@ export type Database = {
           admin_id: string
           created_at?: string
           id?: string
+          is_disabled?: boolean | null
           name: string
           updated_at?: string
         }
@@ -276,6 +278,7 @@ export type Database = {
           admin_id?: string
           created_at?: string
           id?: string
+          is_disabled?: boolean | null
           name?: string
           updated_at?: string
         }
