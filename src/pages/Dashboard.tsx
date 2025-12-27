@@ -404,7 +404,7 @@ const Dashboard = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              {profile?.student_id && (
+              {profile?.student_id && isStudent && !hasAdminAccess && (
                 <Badge variant="outline" className="text-xs hidden sm:flex">
                   {profile.student_id}
                 </Badge>
@@ -419,17 +419,21 @@ const Dashboard = () => {
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-2 py-1.5">
                     <p className="font-medium text-sm">{profile?.full_name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {profile?.student_id && `ID: ${profile.student_id}`}
-                    </p>
+                    {isStudent && !hasAdminAccess && profile?.student_id && (
+                      <p className="text-xs text-muted-foreground">
+                        ID: {profile.student_id}
+                      </p>
+                    )}
                     {isSuperAdmin && <Badge className="mt-1 bg-accent text-[10px]">Super Admin</Badge>}
                     {isAdmin && !isSuperAdmin && <Badge className="mt-1 bg-primary text-[10px]">Admin</Badge>}
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/profile")}>
-                    <User className="h-4 w-4 mr-2" />
-                    My Profile
-                  </DropdownMenuItem>
+                  {isStudent && !hasAdminAccess && (
+                    <DropdownMenuItem onClick={() => navigate("/profile")}>
+                      <User className="h-4 w-4 mr-2" />
+                      My Profile
+                    </DropdownMenuItem>
+                  )}
                   {hasAdminAccess && (
                     <DropdownMenuItem onClick={() => navigate("/admin")}>
                       <Settings className="h-4 w-4 mr-2" />
