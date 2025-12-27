@@ -5,6 +5,47 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function validateSubmission(testId: unknown, answers: unknown, timeInSeconds: unknown): void {
+  // Validate testId format
+  if (typeof testId !== 'string' || !UUID_REGEX.test(testId)) {
+    throw new Error('Invalid test ID format');
+  }
+  
+  // Validate timeInSeconds range (0 to 2 hours max)
+  if (typeof timeInSeconds !== 'number' || timeInSeconds < 0 || timeInSeconds > 7200 || !Number.isFinite(timeInSeconds)) {
+    throw new Error('Invalid time value');
+  }
+  
+  // Validate answers structure
+  if (!answers || typeof answers !== 'object' || Array.isArray(answers)) {
+    throw new Error('Invalid answers format');
+  }
+  
+  // Validate each answer entry
+  const answersObj = answers as Record<string, unknown>;
+  for (const [questionIndex, optionIndex] of Object.entries(answersObj)) {
+    const qIdx = parseInt(questionIndex, 10);
+    
+    // Question index must be a valid non-negative integer within reasonable range
+    if (!Number.isInteger(qIdx) || qIdx < 0 || qIdx >= 100) {
+      throw new Error('Invalid question index');
+    }
+    
+    // Option index must be 0-3 (4 options per question)
+    if (typeof optionIndex !== 'number' || !Number.isInteger(optionIndex) || optionIndex < 0 || optionIndex > 3) {
+      throw new Error('Invalid option index');
+    }
+  }
+  
+  // Validate answer count (at least 0, max 75 for mock tests)
+  const answerCount = Object.keys(answersObj).length;
+  if (answerCount > 75) {
+    throw new Error('Too many answers');
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -30,9 +71,8 @@ Deno.serve(async (req) => {
 
     const { testId, answers, timeInSeconds } = await req.json();
 
-    if (!testId || !answers || typeof timeInSeconds !== 'number') {
-      throw new Error('Invalid request data');
-    }
+    // Comprehensive input validation
+    validateSubmission(testId, answers, timeInSeconds);
 
     // Fetch test with correct answers (server-side only)
     const { data: test, error: testError } = await supabase
