@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, BookOpen, ChevronDown, ChevronUp, CheckCircle2, Lightbulb, FileText } from "lucide-react";
+import { ArrowLeft, BookOpen, ChevronRight, CheckCircle2, Lightbulb, FileText, FolderOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Accordion,
@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 type TestType = 'chapter' | 'mock';
@@ -41,6 +42,18 @@ interface Test {
   questions: Question[];
 }
 
+interface ChapterGroup {
+  chapter: string;
+  tests: Test[];
+  totalQuestions: number;
+}
+
+interface SubjectGroup {
+  subject: string;
+  chapters: ChapterGroup[];
+  totalQuestions: number;
+}
+
 interface PostTestDiscussionProps {
   examType: ExamType;
   userRole: string;
@@ -57,15 +70,25 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
   const [loading, setLoading] = useState(true);
   const [tests, setTests] = useState<Test[]>([]);
   const [testType, setTestType] = useState<TestType>('chapter');
-  const [selectedSubject, setSelectedSubject] = useState<string>('all');
-  const [expandedTest, setExpandedTest] = useState<string | null>(null);
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<ChapterGroup | null>(null);
+  const [selectedTest, setSelectedTest] = useState<Test | null>(null);
+  const [subjectGroups, setSubjectGroups] = useState<SubjectGroup[]>([]);
 
   useEffect(() => {
     fetchTests();
   }, [examType, testType]);
 
+  useEffect(() => {
+    groupTestsBySubjectAndChapter();
+  }, [tests]);
+
   const fetchTests = async () => {
     setLoading(true);
+    setSelectedSubject(null);
+    setSelectedChapter(null);
+    setSelectedTest(null);
+    
     try {
       const { data, error } = await supabase
         .from('tests')
@@ -93,9 +116,38 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
     }
   };
 
-  const filteredTests = selectedSubject === 'all' 
-    ? tests 
-    : tests.filter(test => test.subject === selectedSubject);
+  const groupTestsBySubjectAndChapter = () => {
+    const groups: Record<string, Record<string, Test[]>> = {};
+    
+    tests.forEach(test => {
+      const subject = test.subject || 'general';
+      const chapter = test.chapter || 'General';
+      
+      if (!groups[subject]) {
+        groups[subject] = {};
+      }
+      if (!groups[subject][chapter]) {
+        groups[subject][chapter] = [];
+      }
+      groups[subject][chapter].push(test);
+    });
+
+    const subjectGroupsArray: SubjectGroup[] = Object.entries(groups).map(([subject, chapters]) => {
+      const chapterGroups: ChapterGroup[] = Object.entries(chapters).map(([chapter, chapterTests]) => ({
+        chapter,
+        tests: chapterTests,
+        totalQuestions: chapterTests.reduce((sum, t) => sum + t.questions.length, 0)
+      }));
+      
+      return {
+        subject,
+        chapters: chapterGroups,
+        totalQuestions: chapterGroups.reduce((sum, c) => sum + c.totalQuestions, 0)
+      };
+    });
+
+    setSubjectGroups(subjectGroupsArray);
+  };
 
   const getSubjectColor = (subject: string | null) => {
     switch (subject) {
@@ -107,8 +159,44 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
     }
   };
 
+  const getSubjectIcon = (subject: string) => {
+    return subject.charAt(0).toUpperCase() + subject.slice(1);
+  };
+
   const getOptionLabel = (index: number) => {
     return String.fromCharCode(65 + index);
+  };
+
+  const handleBack = () => {
+    if (selectedTest) {
+      setSelectedTest(null);
+    } else if (selectedChapter) {
+      setSelectedChapter(null);
+    } else if (selectedSubject) {
+      setSelectedSubject(null);
+    } else {
+      onBack();
+    }
+  };
+
+  const renderBreadcrumb = () => {
+    const items = ['Subjects'];
+    if (selectedSubject) items.push(getSubjectIcon(selectedSubject));
+    if (selectedChapter) items.push(selectedChapter.chapter);
+    if (selectedTest) items.push(selectedTest.title);
+
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 flex-wrap">
+        {items.map((item, index) => (
+          <span key={index} className="flex items-center gap-2">
+            {index > 0 && <ChevronRight className="h-3 w-3" />}
+            <span className={index === items.length - 1 ? 'text-foreground font-medium' : ''}>
+              {item}
+            </span>
+          </span>
+        ))}
+      </div>
+    );
   };
 
   if (loading) {
@@ -127,6 +215,191 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
     );
   }
 
+  // Render Questions View
+  if (selectedTest) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={handleBack} className="shrink-0">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h2 className="text-xl font-bold">{selectedTest.title}</h2>
+            <p className="text-sm text-muted-foreground">
+              {selectedTest.questions.length} questions with explanations
+            </p>
+          </div>
+        </div>
+
+        {renderBreadcrumb()}
+
+        <ScrollArea className="h-[calc(100vh-280px)]">
+          <div className="space-y-6 pr-4">
+            {selectedTest.questions.map((question, qIndex) => (
+              <Card key={question.id || qIndex}>
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex gap-3">
+                    <Badge className="shrink-0 bg-primary/10 text-primary border-primary/30">
+                      Q{qIndex + 1}
+                    </Badge>
+                    <p className="text-sm font-medium leading-relaxed">{question.question}</p>
+                  </div>
+
+                  <div className="ml-8 space-y-2">
+                    {question.options.map((option, oIndex) => (
+                      <div
+                        key={oIndex}
+                        className={`flex items-start gap-2 p-3 rounded-lg text-sm ${
+                          oIndex === question.correctAnswer
+                            ? 'bg-green-500/10 border border-green-500/30'
+                            : 'bg-muted/50'
+                        }`}
+                      >
+                        <span className={`font-bold shrink-0 ${
+                          oIndex === question.correctAnswer ? 'text-green-600' : ''
+                        }`}>
+                          {getOptionLabel(oIndex)}.
+                        </span>
+                        <span className="flex-1">{option}</span>
+                        {oIndex === question.correctAnswer && (
+                          <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {question.explanation && (
+                    <div className="ml-8 mt-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <Lightbulb className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="text-xs font-bold text-amber-600 uppercase tracking-wide">
+                            Explanation
+                          </span>
+                          <p className="text-sm mt-1 leading-relaxed">{question.explanation}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+    );
+  }
+
+  // Render Chapter Tests View
+  if (selectedChapter) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={handleBack} className="shrink-0">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h2 className="text-xl font-bold">{selectedChapter.chapter}</h2>
+            <p className="text-sm text-muted-foreground">
+              {selectedChapter.tests.length} tests • {selectedChapter.totalQuestions} questions
+            </p>
+          </div>
+        </div>
+
+        {renderBreadcrumb()}
+
+        <ScrollArea className="h-[calc(100vh-280px)]">
+          <div className="grid gap-3 pr-4">
+            {selectedChapter.tests.map((test) => (
+              <Card 
+                key={test.id} 
+                className="cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => setSelectedTest(test)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <FileText className="h-5 w-5 text-primary" />
+                      <div>
+                        <h3 className="font-semibold">{test.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {test.questions.length} questions
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+    );
+  }
+
+  // Render Chapters View
+  if (selectedSubject) {
+    const subjectGroup = subjectGroups.find(s => s.subject === selectedSubject);
+    
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={handleBack} className="shrink-0">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h2 className="text-xl font-bold">{getSubjectIcon(selectedSubject)}</h2>
+            <p className="text-sm text-muted-foreground">
+              {subjectGroup?.chapters.length || 0} chapters • {subjectGroup?.totalQuestions || 0} questions
+            </p>
+          </div>
+        </div>
+
+        {renderBreadcrumb()}
+
+        <ScrollArea className="h-[calc(100vh-280px)]">
+          <div className="grid gap-3 pr-4">
+            {subjectGroup?.chapters.map((chapter) => (
+              <Card 
+                key={chapter.chapter} 
+                className="cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => setSelectedChapter(chapter)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${getSubjectColor(selectedSubject)}`}>
+                        <FolderOpen className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{chapter.chapter}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {chapter.tests.length} tests • {chapter.totalQuestions} questions
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {(!subjectGroup || subjectGroup.chapters.length === 0) && (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <BookOpen className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
+                  <p className="text-muted-foreground">No chapters found for this subject</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </ScrollArea>
+      </div>
+    );
+  }
+
+  // Render Subjects View (Main)
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
@@ -135,153 +408,59 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
         </Button>
         <div>
           <h2 className="text-xl font-bold">{examType} Post-Test Discussion</h2>
-          <p className="text-sm text-muted-foreground">Review questions with answers & explanations</p>
+          <p className="text-sm text-muted-foreground">View chapter-wise question bank with explanations</p>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-3">
-        <Select value={testType} onValueChange={(value) => setTestType(value as TestType)}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Test Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="chapter">Chapter Tests</SelectItem>
-            <SelectItem value="mock">Mock Tests</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Subject" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Subjects</SelectItem>
-            {SUBJECTS[examType].map(subject => (
-              <SelectItem key={subject} value={subject}>
-                {subject.charAt(0).toUpperCase() + subject.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {/* Test Type Tabs */}
+      <Tabs value={testType} onValueChange={(v) => setTestType(v as TestType)}>
+        <TabsList className="grid w-full max-w-xs grid-cols-2">
+          <TabsTrigger value="chapter">Chapter Tests</TabsTrigger>
+          <TabsTrigger value="mock">Mock Tests</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {/* Summary */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <FileText className="h-4 w-4" />
-        <span>{filteredTests.length} {testType === 'chapter' ? 'Chapter Tests' : 'Mock Tests'} found</span>
+        <span>
+          {subjectGroups.length} subjects • {subjectGroups.reduce((sum, s) => sum + s.totalQuestions, 0)} total questions
+        </span>
       </div>
 
-      {/* Tests List */}
-      <ScrollArea className="h-[calc(100vh-280px)]">
-        <div className="space-y-3 pr-4">
-          {filteredTests.length === 0 ? (
-            <Card>
+      {/* Subjects Grid */}
+      <ScrollArea className="h-[calc(100vh-320px)]">
+        <div className="grid gap-4 pr-4 sm:grid-cols-2 lg:grid-cols-3">
+          {subjectGroups.length === 0 ? (
+            <Card className="col-span-full">
               <CardContent className="p-8 text-center">
                 <BookOpen className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
                 <p className="text-muted-foreground">No tests found for this selection</p>
               </CardContent>
             </Card>
           ) : (
-            filteredTests.map((test) => (
-              <Card key={test.id} className="overflow-hidden">
-                <div
-                  className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => setExpandedTest(expandedTest === test.id ? null : test.id)}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="outline" className={getSubjectColor(test.subject)}>
-                          {test.subject || 'General'}
-                        </Badge>
-                        {test.chapter && (
-                          <span className="text-xs text-muted-foreground truncate">
-                            {test.chapter}
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="font-semibold text-sm truncate">{test.title}</h3>
-                      <p className="text-xs text-muted-foreground">
-                        {test.questions.length} questions
-                      </p>
-                    </div>
-                    {expandedTest === test.id ? (
-                      <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0" />
-                    ) : (
-                      <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
-                    )}
+            subjectGroups.map((group) => (
+              <Card 
+                key={group.subject} 
+                className="cursor-pointer hover:bg-muted/50 transition-colors group"
+                onClick={() => setSelectedSubject(group.subject)}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className={getSubjectColor(group.subject)}>
+                      {getSubjectIcon(group.subject)}
+                    </Badge>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
                   </div>
-                </div>
-
-                <AnimatePresence>
-                  {expandedTest === test.id && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div className="border-t">
-                        <ScrollArea className="max-h-[60vh]">
-                          <div className="p-4 space-y-6">
-                            {test.questions.map((question, qIndex) => (
-                              <div key={question.id || qIndex} className="space-y-3">
-                                <div className="flex gap-3">
-                                  <span className="font-bold text-primary shrink-0">
-                                    Q{qIndex + 1}.
-                                  </span>
-                                  <p className="text-sm font-medium">{question.question}</p>
-                                </div>
-
-                                <div className="ml-8 space-y-2">
-                                  {question.options.map((option, oIndex) => (
-                                    <div
-                                      key={oIndex}
-                                      className={`flex items-start gap-2 p-2 rounded-lg text-sm ${
-                                        oIndex === question.correctAnswer
-                                          ? 'bg-green-500/10 border border-green-500/30'
-                                          : 'bg-muted/50'
-                                      }`}
-                                    >
-                                      <span className={`font-semibold shrink-0 ${
-                                        oIndex === question.correctAnswer ? 'text-green-600' : ''
-                                      }`}>
-                                        {getOptionLabel(oIndex)}.
-                                      </span>
-                                      <span className="flex-1">{option}</span>
-                                      {oIndex === question.correctAnswer && (
-                                        <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-
-                                {question.explanation && (
-                                  <div className="ml-8 mt-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                                    <div className="flex items-start gap-2">
-                                      <Lightbulb className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                                      <div>
-                                        <span className="text-xs font-semibold text-amber-600 uppercase">
-                                          Explanation
-                                        </span>
-                                        <p className="text-sm mt-1">{question.explanation}</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-
-                                {qIndex < test.questions.length - 1 && (
-                                  <div className="border-b border-dashed pt-3" />
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-1">
+                    <p className="text-2xl font-bold">{group.chapters.length}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Chapters • {group.totalQuestions} questions
+                    </p>
+                  </div>
+                </CardContent>
               </Card>
             ))
           )}

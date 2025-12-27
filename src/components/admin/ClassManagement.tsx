@@ -5,15 +5,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Edit, Users } from "lucide-react";
+import { Plus, Trash2, Edit, Users, Ban, CheckCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 interface TuitionClass {
   id: string;
   name: string;
   created_at: string;
   student_count?: number;
+  is_disabled?: boolean;
 }
 
 interface ClassManagementProps {
@@ -158,6 +160,31 @@ export const ClassManagement = ({ userRole }: ClassManagementProps) => {
     }
   };
 
+  const handleToggleDisable = async (cls: TuitionClass) => {
+    try {
+      const newStatus = !cls.is_disabled;
+      const { error } = await supabase
+        .from("tuition_classes")
+        .update({ is_disabled: newStatus })
+        .eq("id", cls.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Class ${newStatus ? 'disabled' : 'enabled'} successfully`,
+      });
+
+      fetchClasses();
+    } catch (error: any) {
+      toast({
+        title: "Error updating class status",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center p-8">Loading...</div>;
   }
@@ -214,6 +241,7 @@ export const ClassManagement = ({ userRole }: ClassManagementProps) => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Class Name</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Students</TableHead>
                   <TableHead>Created</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -221,8 +249,21 @@ export const ClassManagement = ({ userRole }: ClassManagementProps) => {
               </TableHeader>
               <TableBody>
                 {classes.map((cls) => (
-                  <TableRow key={cls.id}>
+                  <TableRow key={cls.id} className={cls.is_disabled ? 'opacity-60' : ''}>
                     <TableCell className="font-medium">{cls.name}</TableCell>
+                    <TableCell>
+                      {cls.is_disabled ? (
+                        <Badge variant="destructive" className="gap-1">
+                          <Ban className="h-3 w-3" />
+                          Disabled
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="gap-1 border-green-500/30 text-green-600 bg-green-500/10">
+                          <CheckCircle className="h-3 w-3" />
+                          Active
+                        </Badge>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-muted-foreground" />
@@ -234,6 +275,20 @@ export const ClassManagement = ({ userRole }: ClassManagementProps) => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        {userRole === 'super_admin' && (
+                          <Button
+                            size="sm"
+                            variant={cls.is_disabled ? "outline" : "secondary"}
+                            onClick={() => handleToggleDisable(cls)}
+                            title={cls.is_disabled ? "Enable Class" : "Disable Class"}
+                          >
+                            {cls.is_disabled ? (
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <Ban className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           variant="outline"
