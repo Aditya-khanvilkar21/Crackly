@@ -13,8 +13,6 @@ interface ResultData {
   percentage: number;
   timeTaken: string;
   completedAt: string;
-  rank?: number;
-  totalStudents?: number;
   subjectBreakdown?: {
     subject: string;
     correct: number;
@@ -86,22 +84,9 @@ export const downloadResultAsPDF = (data: ResultData) => {
   doc.setFont('helvetica', 'normal');
   doc.text(`Time Taken: ${data.timeTaken}`, pageWidth / 2, scoreBoxY + 45, { align: 'center' });
   
-  // Ranking (if available)
-  if (data.rank && data.totalStudents) {
-    const rankBoxY = scoreBoxY + 60;
-    doc.setFillColor(254, 249, 195);
-    doc.setDrawColor(234, 179, 8);
-    doc.roundedRect(14, rankBoxY, pageWidth - 28, 30, 5, 5, 'FD');
-    
-    doc.setTextColor(161, 98, 7);
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Rank: #${data.rank} out of ${data.totalStudents} students`, pageWidth / 2, rankBoxY + 18, { align: 'center' });
-  }
-  
   // Subject Breakdown for Mock Tests
   if (data.subjectBreakdown && data.subjectBreakdown.length > 0) {
-    const tableY = data.rank ? scoreBoxY + 100 : scoreBoxY + 65;
+    const tableY = scoreBoxY + 65;
     
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(14);
