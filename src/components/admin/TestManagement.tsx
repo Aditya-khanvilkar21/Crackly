@@ -10,6 +10,7 @@ import { BookOpen, Clock, Unlock, Lock } from "lucide-react";
 import { CreateTest } from "./CreateTest";
 import { CreateMockTest } from "./CreateMockTest";
 import { CreateNEETMockTest } from "./CreateNEETMockTest";
+import { CreateCETMockTest } from "./CreateCETMockTest";
 import { EditTest } from "./EditTest";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
@@ -295,11 +296,14 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
           {userRole === "super_admin" && (
             <>
               <CreateTest onTestCreated={fetchTests} />
-              {selectedExamType !== 'NEET' && (
+              {selectedExamType === 'JEE' && (
                 <CreateMockTest onTestCreated={fetchTests} />
               )}
               {selectedExamType === 'NEET' && (
                 <CreateNEETMockTest onTestCreated={fetchTests} />
+              )}
+              {selectedExamType === 'CET' && (
+                <CreateCETMockTest onTestCreated={fetchTests} />
               )}
             </>
           )}

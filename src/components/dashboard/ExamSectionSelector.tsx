@@ -33,7 +33,7 @@ const examDetails = {
     icon: BookOpen,
     gradient: "from-purple-500 to-pink-600",
     bgGradient: "from-purple-500/10 to-pink-500/10",
-    subjects: ["Physics", "Chemistry", "Maths"],
+    subjects: ["Physics", "Chemistry", "Maths", "Biology"],
   },
 };
 
