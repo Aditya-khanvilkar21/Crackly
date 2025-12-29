@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, TrendingUp, Award, Download, Eye, Search } from "lucide-react";
+import { Plus, Trash2, TrendingUp, Award, Download, Eye, Search, FileDown } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { downloadClassRankingsAsPDF } from "@/lib/downloadClassRankings";
 
 interface Student {
   id: string;
@@ -371,6 +372,54 @@ export const StudentTracking = () => {
     });
   };
 
+  const downloadClassRankings = () => {
+    if (students.length === 0) {
+      toast({
+        title: "No students",
+        description: "No students in this class to generate rankings",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const selectedClassName = classes.find(c => c.id === selectedClass)?.name || "Class";
+
+    // Sort students by average score and assign ranks
+    const sortedStudents = [...students].sort((a, b) => (b.avg_score || 0) - (a.avg_score || 0));
+
+    const rankingsData = sortedStudents.map((student, index) => {
+      const totalPossible = (student.test_count || 0) * 100; // Assuming percentage basis
+      const totalScore = Math.round(((student.avg_score || 0) * (student.test_count || 0)));
+      
+      return {
+        rank: index + 1,
+        studentName: student.full_name,
+        studentId: student.student_id,
+        testsAttempted: student.test_count || 0,
+        totalScore: totalScore,
+        totalPossible: totalPossible,
+        averagePercentage: student.avg_score || 0,
+      };
+    });
+
+    downloadClassRankingsAsPDF({
+      className: selectedClassName,
+      generatedAt: new Date().toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      students: rankingsData,
+    });
+
+    toast({
+      title: "Success",
+      description: "Class rankings downloaded successfully",
+    });
+  };
+
   if (loading) {
     return <div className="flex justify-center p-8">Loading...</div>;
   }
@@ -397,6 +446,10 @@ export const StudentTracking = () => {
                   ))}
                 </SelectContent>
               </Select>
+              <Button variant="outline" onClick={downloadClassRankings} disabled={!selectedClass || students.length === 0}>
+                <FileDown className="h-4 w-4 mr-2" />
+                Download Rankings
+              </Button>
               <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                 <DialogTrigger asChild>
                   <Button disabled={!selectedClass}>
