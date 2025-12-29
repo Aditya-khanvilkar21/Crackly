@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Users, TrendingUp, BookOpen, Award, Target, ChevronRight, ArrowLeft } from "lucide-react";
+import { Users, TrendingUp, BookOpen, Award, Target, ChevronRight, ArrowLeft, Download } from "lucide-react";
+import { downloadChapterResultsAsPDF } from "@/lib/downloadChapterResults";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -275,6 +276,32 @@ export const AdminChapterAnalytics = ({ examType, userRole, onBack }: AdminChapt
     return chapterStats.filter(c => c.subject === subject);
   };
 
+  const handleDownloadChapterResults = () => {
+    if (!selectedChapter || !selectedSubject || chapterStudents.length === 0) return;
+
+    const totalAttempts = chapterStudents.reduce((sum, s) => sum + s.attempts, 0);
+    const classAverage = chapterStudents.reduce((sum, s) => sum + s.percentage, 0) / chapterStudents.length;
+    const topScore = chapterStudents[0]?.percentage || 0;
+
+    downloadChapterResultsAsPDF({
+      chapterName: selectedChapter,
+      subject: getSubjectLabel(selectedSubject),
+      examType: examType,
+      students: chapterStudents.map((s, idx) => ({
+        rank: idx + 1,
+        studentName: s.studentName,
+        studentId: s.studentId,
+        score: s.score,
+        totalQuestions: s.totalQuestions,
+        percentage: s.percentage,
+        attempts: s.attempts,
+      })),
+      classAverage,
+      topScore,
+      totalAttempts,
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -293,7 +320,7 @@ export const AdminChapterAnalytics = ({ examType, userRole, onBack }: AdminChapt
         exit={{ opacity: 0, x: -20 }}
         className="space-y-4"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-1">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -310,6 +337,12 @@ export const AdminChapterAnalytics = ({ examType, userRole, onBack }: AdminChapt
             <p className="text-sm text-muted-foreground">{getSubjectLabel(selectedSubject)} - Student Rankings</p>
           </div>
         </div>
+        {chapterStudents.length > 0 && (
+          <Button onClick={handleDownloadChapterResults} className="gap-2">
+            <Download className="h-4 w-4" />
+            Download Results
+          </Button>
+        )}
 
         {chapterLoading ? (
           <div className="flex items-center justify-center p-8">
