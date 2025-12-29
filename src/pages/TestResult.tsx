@@ -3,9 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, XCircle, Clock, Award, Lightbulb } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Award, Lightbulb, Download, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { downloadResultAsPDF } from "@/lib/downloadResult";
 
 interface Question {
   question: string;
@@ -40,11 +41,23 @@ interface SubjectBreakdown {
   percentage: number;
 }
 
+interface RankingInfo {
+  rank: number;
+  totalStudents: number;
+}
+
+interface Profile {
+  full_name: string;
+  student_id: string;
+}
+
 export default function TestResult() {
   const { testId } = useParams();
   const navigate = useNavigate();
   const [result, setResult] = useState<TestResult | null>(null);
   const [test, setTest] = useState<Test | null>(null);
+  const [ranking, setRanking] = useState<RankingInfo | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     fetchResultAndTest();
@@ -54,6 +67,17 @@ export default function TestResult() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
+
+      // Fetch profile
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("full_name, student_id")
+        .eq("id", user.id)
+        .single();
+      
+      if (profileData) {
+        setProfile(profileData);
+      }
 
       // Fetch test result
       const { data: resultData, error: resultError } = await supabase
@@ -76,6 +100,37 @@ export default function TestResult() {
 
       setResult(resultData as unknown as TestResult);
       setTest(testData as unknown as Test);
+
+      // Fetch ranking - get all results for this test and calculate rank
+      const { data: allResults } = await supabase
+        .from("test_results")
+        .select("student_id, score")
+        .eq("test_id", testId)
+        .order("score", { ascending: false });
+
+      if (allResults && allResults.length > 0) {
+        // Get unique students with their best scores
+        const studentBestScores = new Map<string, number>();
+        allResults.forEach(r => {
+          const existing = studentBestScores.get(r.student_id);
+          if (!existing || r.score > existing) {
+            studentBestScores.set(r.student_id, r.score);
+          }
+        });
+
+        // Sort by score and find rank
+        const sortedScores = Array.from(studentBestScores.entries())
+          .sort((a, b) => b[1] - a[1]);
+        
+        const userRank = sortedScores.findIndex(([id]) => id === user.id) + 1;
+        
+        if (userRank > 0) {
+          setRanking({
+            rank: userRank,
+            totalStudents: sortedScores.length
+          });
+        }
+      }
     } catch (error) {
       toast.error("Failed to load test result");
       navigate("/");
@@ -344,13 +399,68 @@ export default function TestResult() {
           </div>
         </Card>
 
+        {/* Ranking Card */}
+        {ranking && (
+          <Card className="p-6 mb-6 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-amber-200 dark:border-amber-800">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900">
+                  <Trophy className="w-8 h-8 text-amber-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-amber-800 dark:text-amber-200">Your Ranking</h2>
+                  <p className="text-amber-600 dark:text-amber-400">
+                    #{ranking.rank} out of {ranking.totalStudents} students
+                  </p>
+                </div>
+              </div>
+              <Badge className="text-lg px-4 py-2 bg-amber-500 text-white">
+                Rank #{ranking.rank}
+              </Badge>
+            </div>
+          </Card>
+        )}
+
         {/* Actions */}
-        <div className="flex gap-4 justify-center">
+        <div className="flex gap-4 justify-center flex-wrap">
           <Button onClick={() => navigate("/")} variant="outline" size="lg">
             Back to Home
           </Button>
           <Button onClick={() => navigate(`/take-test/${testId}`)} size="lg">
             Retake Test
+          </Button>
+          <Button 
+            onClick={() => {
+              if (!profile || !result || !test) return;
+              
+              downloadResultAsPDF({
+                studentName: profile.full_name,
+                studentId: profile.student_id,
+                testTitle: test.title,
+                testType: test.test_type,
+                subject: test.subject || undefined,
+                chapter: test.chapter || undefined,
+                score: result.score,
+                totalQuestions: getDisplayTotal(),
+                percentage: parseFloat(getPercentage() as string),
+                timeTaken: formatTime(result.time_taken_seconds),
+                completedAt: new Date(result.completed_at).toLocaleDateString('en-IN', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                }),
+                rank: ranking?.rank,
+                totalStudents: ranking?.totalStudents,
+                subjectBreakdown: isMockTest ? subjectBreakdown : undefined
+              });
+              toast.success("Result downloaded successfully!");
+            }}
+            variant="secondary"
+            size="lg"
+            className="gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Download Result
           </Button>
         </div>
       </div>
