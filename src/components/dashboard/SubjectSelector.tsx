@@ -17,8 +17,9 @@ interface SubjectSelectorProps {
 const getSubjectsForExam = (examType: ExamType): Subject[] => {
   switch (examType) {
     case 'JEE':
-    case 'CET':
       return ['physics', 'chemistry', 'mathematics'];
+    case 'CET':
+      return ['physics', 'chemistry', 'mathematics', 'biology'];
     case 'NEET':
       return ['physics', 'chemistry', 'biology'];
   }
