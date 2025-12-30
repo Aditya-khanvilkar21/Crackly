@@ -320,30 +320,31 @@ export const AdminChapterAnalytics = ({ examType, userRole, onBack }: AdminChapt
         exit={{ opacity: 0, x: -20 }}
         className="space-y-4"
       >
-        <div className="flex items-center gap-3 flex-1">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => {
-              setSelectedChapter(null);
-              setChapterStudents([]);
-            }}
-            className="shrink-0"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h2 className="text-xl font-bold">{selectedChapter}</h2>
-            <p className="text-sm text-muted-foreground">{getSubjectLabel(selectedSubject)} - Student Rankings</p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => {
+                setSelectedChapter(null);
+                setChapterStudents([]);
+              }}
+              className="shrink-0"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h2 className="text-xl font-bold">{selectedChapter}</h2>
+              <p className="text-sm text-muted-foreground">{getSubjectLabel(selectedSubject)} - Student Rankings</p>
+            </div>
           </div>
+          {chapterStudents.length > 0 && (
+            <Button onClick={handleDownloadChapterResults} className="gap-2">
+              <Download className="h-4 w-4" />
+              Download Results
+            </Button>
+          )}
         </div>
-        {chapterStudents.length > 0 && (
-          <Button onClick={handleDownloadChapterResults} className="gap-2">
-            <Download className="h-4 w-4" />
-            Download Results
-          </Button>
-        )}
-
         {chapterLoading ? (
           <div className="flex items-center justify-center p-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

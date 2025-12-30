@@ -29,6 +29,7 @@ const neetMockTestSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   difficulty: z.enum(["easy", "medium", "hard"]),
   duration_minutes: z.number().min(30).max(300),
+  negative_marking: z.number().min(0).max(1).default(0.25),
   questions: z.array(questionSchema).length(180, "Must have exactly 180 questions"),
 });
 
@@ -62,6 +63,7 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
       title: "",
       difficulty: "medium",
       duration_minutes: 200,
+      negative_marking: 0.25,
       questions: questions,
     },
   });
@@ -165,6 +167,7 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
         difficulty: data.difficulty,
         duration_minutes: data.duration_minutes,
         exam_type: 'NEET',
+        negative_marking: data.negative_marking,
         questions: data.questions,
         is_active: true,
         chapter: 'NEET',
@@ -276,6 +279,34 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
                         onChange={(e) => field.onChange(parseInt(e.target.value))}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="negative_marking"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Negative Marking</FormLabel>
+                    <Select 
+                      onValueChange={(v) => field.onChange(parseFloat(v))} 
+                      defaultValue={field.value?.toString() || "0.25"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select negative marking" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="0">No Negative Marking</SelectItem>
+                        <SelectItem value="0.25">-1 per wrong answer (NEET Pattern: -1 for 4 marks)</SelectItem>
+                        <SelectItem value="0.33">-1/3 per wrong answer</SelectItem>
+                        <SelectItem value="0.5">-0.5 per wrong answer</SelectItem>
+                        <SelectItem value="1">-1 per wrong answer</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
