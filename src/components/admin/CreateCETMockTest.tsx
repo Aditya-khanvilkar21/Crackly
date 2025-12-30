@@ -88,6 +88,7 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
   const [title, setTitle] = useState("");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [durationMinutes, setDurationMinutes] = useState(180);
+  const [negativeMarking, setNegativeMarking] = useState(0.25);
   const { toast } = useToast();
 
   const handleCETTypeChange = (newType: CETType) => {
@@ -215,6 +216,7 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
         difficulty,
         duration_minutes: durationMinutes,
         exam_type: 'CET',
+        negative_marking: negativeMarking,
         questions: questions.map(q => ({
           question: q.question,
           options: q.options,
@@ -355,6 +357,25 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
                 value={durationMinutes}
                 onChange={(e) => setDurationMinutes(parseInt(e.target.value) || 180)}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Negative Marking</Label>
+              <Select 
+                value={negativeMarking.toString()} 
+                onValueChange={(v) => setNegativeMarking(parseFloat(v))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select negative marking" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">No Negative Marking</SelectItem>
+                  <SelectItem value="0.25">-0.25 per wrong answer</SelectItem>
+                  <SelectItem value="0.33">-1/3 per wrong answer</SelectItem>
+                  <SelectItem value="0.5">-0.5 per wrong answer</SelectItem>
+                  <SelectItem value="1">-1 per wrong answer</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>

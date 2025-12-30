@@ -29,6 +29,7 @@ const mockTestSchema = z.object({
   difficulty: z.enum(["easy", "medium", "hard"]),
   duration_minutes: z.number().min(30).max(300),
   exam_type: z.enum(["JEE", "CET"]),
+  negative_marking: z.number().min(0).max(1).default(0.25),
   questions: z.array(questionSchema).length(75, "Must have exactly 75 questions (25 per subject)"),
 });
 
@@ -63,6 +64,7 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
       difficulty: "medium",
       duration_minutes: 180,
       exam_type: "JEE",
+      negative_marking: 0.25,
       questions: questions,
     },
   });
@@ -166,6 +168,7 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
         difficulty: data.difficulty,
         duration_minutes: data.duration_minutes,
         exam_type: data.exam_type,
+        negative_marking: data.negative_marking,
         questions: data.questions,
         is_active: true,
         chapter: null,
@@ -294,6 +297,34 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
                       <SelectContent>
                         <SelectItem value="JEE">JEE</SelectItem>
                         <SelectItem value="CET">CET</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="negative_marking"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Negative Marking</FormLabel>
+                    <Select 
+                      onValueChange={(v) => field.onChange(parseFloat(v))} 
+                      defaultValue={field.value?.toString() || "0.25"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select negative marking" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="0">No Negative Marking</SelectItem>
+                        <SelectItem value="0.25">-0.25 per wrong answer (JEE Pattern)</SelectItem>
+                        <SelectItem value="0.33">-1/3 per wrong answer</SelectItem>
+                        <SelectItem value="0.5">-0.5 per wrong answer</SelectItem>
+                        <SelectItem value="1">-1 per wrong answer</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

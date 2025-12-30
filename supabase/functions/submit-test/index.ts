@@ -13,8 +13,8 @@ function validateSubmission(testId: unknown, answers: unknown, timeInSeconds: un
     throw new Error('Invalid test ID format');
   }
   
-  // Validate timeInSeconds range (0 to 2 hours max)
-  if (typeof timeInSeconds !== 'number' || timeInSeconds < 0 || timeInSeconds > 7200 || !Number.isFinite(timeInSeconds)) {
+  // Validate timeInSeconds range (0 to 5 hours max for long mock tests)
+  if (typeof timeInSeconds !== 'number' || timeInSeconds < 0 || timeInSeconds > 18000 || !Number.isFinite(timeInSeconds)) {
     throw new Error('Invalid time value');
   }
   
@@ -28,8 +28,8 @@ function validateSubmission(testId: unknown, answers: unknown, timeInSeconds: un
   for (const [questionIndex, optionIndex] of Object.entries(answersObj)) {
     const qIdx = parseInt(questionIndex, 10);
     
-    // Question index must be a valid non-negative integer within reasonable range
-    if (!Number.isInteger(qIdx) || qIdx < 0 || qIdx >= 100) {
+    // Question index must be a valid non-negative integer within reasonable range (up to 200 for CET PCB)
+    if (!Number.isInteger(qIdx) || qIdx < 0 || qIdx >= 250) {
       throw new Error('Invalid question index');
     }
     
@@ -39,9 +39,9 @@ function validateSubmission(testId: unknown, answers: unknown, timeInSeconds: un
     }
   }
   
-  // Validate answer count (at least 0, max 75 for mock tests)
+  // Validate answer count (max 200 for CET PCB mock tests)
   const answerCount = Object.keys(answersObj).length;
-  if (answerCount > 75) {
+  if (answerCount > 200) {
     throw new Error('Too many answers');
   }
 }
@@ -74,10 +74,10 @@ Deno.serve(async (req) => {
     // Comprehensive input validation
     validateSubmission(testId, answers, timeInSeconds);
 
-    // Fetch test with correct answers (server-side only)
+    // Fetch test with correct answers and negative marking (server-side only)
     const { data: test, error: testError } = await supabase
       .from('tests')
-      .select('id, questions, title, test_type')
+      .select('id, questions, title, test_type, exam_type, negative_marking')
       .eq('id', testId)
       .single();
 
@@ -85,22 +85,48 @@ Deno.serve(async (req) => {
       throw new Error('Test not found');
     }
 
-    // Calculate score server-side
-    const questions = test.questions as Array<{ correctAnswer: number }>;
+    // Calculate score server-side with negative marking support
+    const questions = test.questions as Array<{ correctAnswer: number; marksPerQuestion?: number; subject?: string }>;
     const isChapterTest = test.test_type === 'chapter_test';
+    const negativeMarking = test.negative_marking || 0;
     
     // For chapter tests, we only have 25 questions (randomly selected by frontend)
     // For mock tests, use all questions
     const totalQuestions = isChapterTest ? 25 : questions.length;
-    let score = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let totalMarks = 0;
+    let maxMarks = 0;
+    
+    // Calculate max marks based on question weights
+    questions.forEach((q, idx) => {
+      const marksPerQ = q.marksPerQuestion || 1;
+      maxMarks += marksPerQ;
+    });
     
     // Iterate through each submitted answer
     Object.entries(answers).forEach(([questionIndex, selectedAnswer]) => {
       const index = parseInt(questionIndex);
-      if (questions[index] && questions[index].correctAnswer === selectedAnswer) {
-        score++;
+      if (questions[index]) {
+        const marksPerQ = questions[index].marksPerQuestion || 1;
+        if (questions[index].correctAnswer === selectedAnswer) {
+          correctCount++;
+          totalMarks += marksPerQ;
+        } else {
+          wrongCount++;
+          // Apply negative marking (deduct marks for wrong answers)
+          if (negativeMarking > 0) {
+            totalMarks -= negativeMarking * marksPerQ;
+          }
+        }
       }
     });
+
+    // Ensure total marks don't go below 0
+    totalMarks = Math.max(0, totalMarks);
+
+    // For backward compatibility, store correct count as score
+    // The actual marks can be calculated on display using the test's question weights
 
     // Insert result using service role (bypasses RLS)
     const { data: result, error: insertError } = await supabase
@@ -108,7 +134,7 @@ Deno.serve(async (req) => {
       .insert({
         test_id: testId,
         student_id: user.id,
-        score,
+        score: correctCount,
         total_questions: totalQuestions,
         answers,
         time_taken_seconds: timeInSeconds,
@@ -121,12 +147,18 @@ Deno.serve(async (req) => {
       throw new Error('Failed to save test result');
     }
 
+    console.log(`Test submitted: ${test.title}, Correct: ${correctCount}/${totalQuestions}, Wrong: ${wrongCount}, Marks: ${totalMarks}/${maxMarks}, Negative Marking: ${negativeMarking}`);
+
     return new Response(
       JSON.stringify({ 
         success: true, 
-        score,
+        score: correctCount,
         totalQuestions: totalQuestions,
-        resultId: result.id
+        resultId: result.id,
+        totalMarks: totalMarks,
+        maxMarks: maxMarks,
+        wrongCount: wrongCount,
+        negativeMarking: negativeMarking
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

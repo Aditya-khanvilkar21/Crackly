@@ -221,6 +221,7 @@ export type Database = {
           exam_type: Database["public"]["Enums"]["exam_type"]
           id: string
           is_active: boolean | null
+          negative_marking: number | null
           questions: Json
           subject: Database["public"]["Enums"]["test_subject"] | null
           test_type: Database["public"]["Enums"]["test_type"]
@@ -235,6 +236,7 @@ export type Database = {
           exam_type?: Database["public"]["Enums"]["exam_type"]
           id?: string
           is_active?: boolean | null
+          negative_marking?: number | null
           questions: Json
           subject?: Database["public"]["Enums"]["test_subject"] | null
           test_type?: Database["public"]["Enums"]["test_type"]
@@ -249,6 +251,7 @@ export type Database = {
           exam_type?: Database["public"]["Enums"]["exam_type"]
           id?: string
           is_active?: boolean | null
+          negative_marking?: number | null
           questions?: Json
           subject?: Database["public"]["Enums"]["test_subject"] | null
           test_type?: Database["public"]["Enums"]["test_type"]
