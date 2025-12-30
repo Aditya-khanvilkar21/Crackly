@@ -21,7 +21,8 @@ interface Question {
   question: string;
   options: string[];
   imageUrl?: string;
-  subject?: 'physics' | 'chemistry' | 'mathematics';
+  subject?: 'physics' | 'chemistry' | 'mathematics' | 'biology';
+  marksPerQuestion?: number;
 }
 
 interface Test {
@@ -32,6 +33,8 @@ interface Test {
   duration_minutes: number;
   questions: Question[];
   test_type?: 'chapter_test' | 'mock_test';
+  exam_type?: 'JEE' | 'NEET' | 'CET';
+  negative_marking?: number;
 }
 
 export default function TakeTest() {
@@ -44,6 +47,7 @@ export default function TakeTest() {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [showMarkingScheme, setShowMarkingScheme] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [showTabWarning, setShowTabWarning] = useState(false);
@@ -187,8 +191,162 @@ export default function TakeTest() {
   };
 
   const isMockTest = test?.test_type === 'mock_test';
-  const totalQuestions = isMockTest ? 75 : 25;
+  const totalQuestions = selectedQuestions.length;
   const allQuestionsAttempted = Object.keys(answers).length === totalQuestions;
+
+  // Calculate marking scheme details
+  const getMarkingScheme = () => {
+    if (!test) return null;
+    
+    const negativeMarking = test.negative_marking || 0;
+    const examType = test.exam_type || 'JEE';
+    const isCET = test.title?.includes('[CET-');
+    const isPCM = test.title?.includes('[CET-PCM]');
+    const isPCB = test.title?.includes('[CET-PCB]');
+    
+    if (test.test_type === 'chapter_test') {
+      return {
+        title: 'Chapter Test Marking Scheme',
+        totalQuestions: 25,
+        totalMarks: 25,
+        marksPerQuestion: 1,
+        negativeMarking: 0,
+        subjects: [{ name: test.subject || 'Subject', questions: 25, marksPerQ: 1 }]
+      };
+    }
+    
+    if (examType === 'NEET' || test.chapter === 'NEET') {
+      return {
+        title: 'NEET Mock Test Marking Scheme',
+        totalQuestions: 180,
+        totalMarks: 720,
+        marksPerQuestion: 4,
+        negativeMarking: negativeMarking,
+        subjects: [
+          { name: 'Physics', questions: 45, marksPerQ: 4 },
+          { name: 'Chemistry', questions: 45, marksPerQ: 4 },
+          { name: 'Biology', questions: 90, marksPerQ: 4 }
+        ]
+      };
+    }
+    
+    if (isCET && isPCM) {
+      return {
+        title: 'CET PCM Mock Test Marking Scheme',
+        totalQuestions: 150,
+        totalMarks: 200,
+        negativeMarking: negativeMarking,
+        subjects: [
+          { name: 'Physics', questions: 50, marksPerQ: 1 },
+          { name: 'Chemistry', questions: 50, marksPerQ: 1 },
+          { name: 'Mathematics', questions: 50, marksPerQ: 2 }
+        ]
+      };
+    }
+    
+    if (isCET && isPCB) {
+      return {
+        title: 'CET PCB Mock Test Marking Scheme',
+        totalQuestions: 200,
+        totalMarks: 200,
+        negativeMarking: negativeMarking,
+        subjects: [
+          { name: 'Physics', questions: 50, marksPerQ: 1 },
+          { name: 'Chemistry', questions: 50, marksPerQ: 1 },
+          { name: 'Biology', questions: 100, marksPerQ: 1 }
+        ]
+      };
+    }
+    
+    // JEE default
+    return {
+      title: 'JEE Mock Test Marking Scheme',
+      totalQuestions: 75,
+      totalMarks: 300,
+      marksPerQuestion: 4,
+      negativeMarking: negativeMarking,
+      subjects: [
+        { name: 'Physics', questions: 25, marksPerQ: 4 },
+        { name: 'Chemistry', questions: 25, marksPerQ: 4 },
+        { name: 'Mathematics', questions: 25, marksPerQ: 4 }
+      ]
+    };
+  };
+
+  const markingScheme = getMarkingScheme();
+
+  // Show marking scheme before test starts
+  if (showMarkingScheme && test && markingScheme) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
+        <Card className="max-w-2xl w-full p-8">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold mb-2">{test.title}</h1>
+            <p className="text-muted-foreground">Please review the marking scheme before starting</p>
+          </div>
+          
+          <div className="bg-primary/5 rounded-lg p-6 mb-6">
+            <h2 className="text-lg font-semibold mb-4">{markingScheme.title}</h2>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="bg-background rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold text-primary">{markingScheme.totalQuestions}</div>
+                <div className="text-sm text-muted-foreground">Total Questions</div>
+              </div>
+              <div className="bg-background rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold text-primary">{markingScheme.totalMarks}</div>
+                <div className="text-sm text-muted-foreground">Total Marks</div>
+              </div>
+              <div className="bg-background rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold text-primary">{test.duration_minutes} min</div>
+                <div className="text-sm text-muted-foreground">Duration</div>
+              </div>
+              <div className="bg-background rounded-lg p-3 text-center">
+                <div className={`text-2xl font-bold ${markingScheme.negativeMarking > 0 ? 'text-destructive' : 'text-green-600'}`}>
+                  {markingScheme.negativeMarking > 0 ? `-${markingScheme.negativeMarking}` : 'None'}
+                </div>
+                <div className="text-sm text-muted-foreground">Negative Marking</div>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="font-medium">Subject-wise Distribution:</h3>
+              {markingScheme.subjects.map((subject, idx) => (
+                <div key={idx} className="flex justify-between items-center bg-background rounded px-3 py-2">
+                  <span className="font-medium">{subject.name}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {subject.questions} Q × {subject.marksPerQ} mark{subject.marksPerQ > 1 ? 's' : ''} = {subject.questions * subject.marksPerQ} marks
+                  </span>
+                </div>
+              ))}
+            </div>
+            
+            {markingScheme.negativeMarking > 0 && (
+              <div className="mt-4 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                <p className="text-sm text-destructive font-medium">
+                  ⚠️ Negative Marking: -{markingScheme.negativeMarking} marks will be deducted for each wrong answer
+                </p>
+              </div>
+            )}
+          </div>
+          
+          <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-4 mb-6">
+            <h3 className="font-medium text-amber-800 dark:text-amber-200 mb-2">Important Instructions:</h3>
+            <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1">
+              <li>• Do not switch tabs during the test (max {MAX_TAB_SWITCHES} warnings)</li>
+              <li>• Test will auto-submit when time runs out</li>
+              <li>• All questions must be answered for chapter tests</li>
+              <li>• Your answers are automatically saved</li>
+            </ul>
+          </div>
+          
+          <Button onClick={() => setShowMarkingScheme(false)} className="w-full" size="lg">
+            Start Test
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   if (!test || selectedQuestions.length === 0) {
     return (
@@ -203,9 +361,20 @@ export default function TakeTest() {
   // Get subject for the current question in mock test
   const getCurrentSubject = () => {
     if (!isMockTest) return null;
+    const q = currentQuestion as Question;
+    if (q.subject) {
+      return q.subject.charAt(0).toUpperCase() + q.subject.slice(1);
+    }
+    // Fallback for legacy tests
     if (currentQuestionIndex < 25) return 'Physics';
     if (currentQuestionIndex < 50) return 'Chemistry';
     return 'Mathematics';
+  };
+
+  // Get marks for current question
+  const getCurrentQuestionMarks = () => {
+    const q = currentQuestion as Question;
+    return q.marksPerQuestion || markingScheme?.marksPerQuestion || 1;
   };
 
   return (
@@ -395,8 +564,13 @@ export default function TakeTest() {
                     Question {currentQuestionIndex + 1} of {totalQuestions}
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    (1 mark)
+                    ({getCurrentQuestionMarks()} mark{getCurrentQuestionMarks() > 1 ? 's' : ''})
                   </span>
+                  {markingScheme?.negativeMarking && markingScheme.negativeMarking > 0 && (
+                    <span className="text-xs text-destructive">
+                      (-{markingScheme.negativeMarking} for wrong)
+                    </span>
+                  )}
                 </div>
                 <h2 className="text-xl font-semibold leading-relaxed">
                   {currentQuestion.question}

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, XCircle, Clock, Award, Lightbulb, Download } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Award, Lightbulb, Download, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { downloadResultAsPDF } from "@/lib/downloadResult";
@@ -14,6 +14,8 @@ interface Question {
   correctAnswer: number;
   imageUrl?: string;
   explanation?: string;
+  subject?: string;
+  marksPerQuestion?: number;
 }
 
 interface TestResult {
@@ -31,6 +33,8 @@ interface Test {
   subject: string | null;
   chapter: string | null;
   test_type: 'chapter_test' | 'mock_test';
+  exam_type?: 'JEE' | 'NEET' | 'CET';
+  negative_marking?: number;
   questions: Question[];
 }
 
@@ -174,6 +178,40 @@ export default function TestResult() {
     }
   };
 
+  // Calculate detailed score with negative marking
+  const calculateDetailedScore = () => {
+    if (!result || !test) return { correct: 0, wrong: 0, unanswered: 0, totalMarks: 0, maxMarks: 0, negativeMarksDeducted: 0 };
+    
+    let correct = 0;
+    let wrong = 0;
+    let totalMarks = 0;
+    let maxMarks = 0;
+    const negativeMarking = test.negative_marking || 0;
+    
+    test.questions.forEach((q, idx) => {
+      const marksPerQ = q.marksPerQuestion || 1;
+      maxMarks += marksPerQ;
+      
+      if (result.answers[idx] !== undefined) {
+        if (result.answers[idx] === q.correctAnswer) {
+          correct++;
+          totalMarks += marksPerQ;
+        } else {
+          wrong++;
+          if (negativeMarking > 0) {
+            totalMarks -= negativeMarking * marksPerQ;
+          }
+        }
+      }
+    });
+    
+    const unanswered = test.questions.length - correct - wrong;
+    const negativeMarksDeducted = wrong * negativeMarking;
+    totalMarks = Math.max(0, totalMarks);
+    
+    return { correct, wrong, unanswered, totalMarks, maxMarks, negativeMarksDeducted };
+  };
+
   if (!result || !test) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -181,6 +219,8 @@ export default function TestResult() {
       </div>
     );
   }
+
+  const detailedScore = calculateDetailedScore();
 
   const subjectBreakdown = getSubjectBreakdown();
   const isMockTest = test.test_type === 'mock_test';
@@ -197,43 +237,70 @@ export default function TestResult() {
               {test.title} {isMockTest ? (isNEETMockTest() ? '- NEET Mock Test' : '- JEE Mock Test') : `- ${test.subject}`}
             </p>
             
-            <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
               <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-4xl font-bold">{result.score}/{getDisplayTotal()}</div>
-                <div className="text-sm opacity-90">Score</div>
+                <div className="text-3xl font-bold">{detailedScore.correct}/{getDisplayTotal()}</div>
+                <div className="text-sm opacity-90">Correct Answers</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-4xl font-bold">{getPercentage()}%</div>
+                <div className="text-3xl font-bold">{detailedScore.totalMarks.toFixed(1)}/{detailedScore.maxMarks}</div>
+                <div className="text-sm opacity-90">Total Marks</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-4">
+                <div className="text-3xl font-bold">{getPercentage()}%</div>
                 <div className="text-sm opacity-90">Percentage</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-4xl font-bold">{formatTime(result.time_taken_seconds)}</div>
+                <div className="text-3xl font-bold">{formatTime(result.time_taken_seconds)}</div>
                 <div className="text-sm opacity-90">Time Taken</div>
               </div>
             </div>
+            
+            {/* Negative Marking Summary */}
+            {test.negative_marking && test.negative_marking > 0 && detailedScore.negativeMarksDeducted > 0 && (
+              <div className="mt-4 p-3 bg-white/10 rounded-lg max-w-md mx-auto">
+                <p className="text-sm">
+                  ⚠️ Negative Marking Applied: <span className="font-bold text-red-300">-{detailedScore.negativeMarksDeducted.toFixed(2)} marks</span> deducted for {detailedScore.wrong} wrong answers
+                </p>
+              </div>
+            )}
           </div>
         </Card>
 
         {/* Performance Analysis */}
         <Card className="p-6 mb-6">
           <h2 className="text-xl font-bold mb-4">Performance Analysis</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
               <CheckCircle2 className="w-8 h-8 text-green-600" />
               <div>
-                <div className="text-2xl font-bold text-green-600">{result.score}</div>
+                <div className="text-2xl font-bold text-green-600">{detailedScore.correct}</div>
                 <div className="text-sm text-muted-foreground">Correct</div>
               </div>
             </div>
             <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950 rounded-lg">
               <XCircle className="w-8 h-8 text-red-600" />
               <div>
-                <div className="text-2xl font-bold text-red-600">
-                  {getDisplayTotal() - result.score}
-                </div>
-                <div className="text-sm text-muted-foreground">Incorrect</div>
+                <div className="text-2xl font-bold text-red-600">{detailedScore.wrong}</div>
+                <div className="text-sm text-muted-foreground">Wrong</div>
               </div>
             </div>
+            <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-950 rounded-lg">
+              <Clock className="w-8 h-8 text-gray-600" />
+              <div>
+                <div className="text-2xl font-bold text-gray-600">{detailedScore.unanswered}</div>
+                <div className="text-sm text-muted-foreground">Unanswered</div>
+              </div>
+            </div>
+            {test.negative_marking && test.negative_marking > 0 && (
+              <div className="flex items-center gap-3 p-4 bg-orange-50 dark:bg-orange-950 rounded-lg">
+                <AlertCircle className="w-8 h-8 text-orange-600" />
+                <div>
+                  <div className="text-2xl font-bold text-orange-600">-{detailedScore.negativeMarksDeducted.toFixed(1)}</div>
+                  <div className="text-sm text-muted-foreground">Marks Deducted</div>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -283,6 +350,8 @@ export default function TestResult() {
               const qIndex = parseInt(questionIndex);
               const question = test.questions[qIndex];
               const isCorrect = selectedAnswer === question.correctAnswer;
+              const marksPerQ = question.marksPerQuestion || 1;
+              const marksObtained = isCorrect ? marksPerQ : (test.negative_marking ? -(test.negative_marking * marksPerQ) : 0);
               
               return (
                 <div key={qIndex} className={`p-4 rounded-lg border-2 ${
@@ -296,10 +365,16 @@ export default function TestResult() {
                       ) : (
                         <XCircle className="w-5 h-5 text-red-600" />
                       )}
+                      <span className="text-xs text-muted-foreground">({marksPerQ} mark{marksPerQ > 1 ? 's' : ''})</span>
                     </div>
-                    <Badge className={isCorrect ? 'bg-green-600' : 'bg-red-600'}>
-                      {isCorrect ? 'Correct' : 'Incorrect'}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                        {marksObtained > 0 ? '+' : ''}{marksObtained.toFixed(1)} marks
+                      </span>
+                      <Badge className={isCorrect ? 'bg-green-600' : 'bg-red-600'}>
+                        {isCorrect ? 'Correct' : 'Incorrect'}
+                      </Badge>
+                    </div>
                   </div>
                   
                   <p className="font-medium mb-4">{question.question}</p>
