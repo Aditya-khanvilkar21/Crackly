@@ -16,6 +16,7 @@ interface Question {
   explanation?: string;
   subject?: string;
   marksPerQuestion?: number;
+  topic?: string;
 }
 
 interface TestResult {
@@ -41,6 +42,14 @@ interface Test {
 interface SubjectBreakdown {
   subject: string;
   correct: number;
+  total: number;
+  percentage: number;
+}
+
+interface TopicAnalysis {
+  topic: string;
+  correct: number;
+  wrong: number;
   total: number;
   percentage: number;
 }
@@ -212,6 +221,42 @@ export default function TestResult() {
     return { correct, wrong, unanswered, totalMarks, maxMarks, negativeMarksDeducted };
   };
 
+  // Calculate topic-wise analysis for weak areas
+  const getTopicAnalysis = (): TopicAnalysis[] => {
+    if (!result || !test) return [];
+    
+    const topicMap = new Map<string, { correct: number; wrong: number; total: number }>();
+    
+    test.questions.forEach((q, idx) => {
+      const topic = q.topic || 'General';
+      const existing = topicMap.get(topic) || { correct: 0, wrong: 0, total: 0 };
+      existing.total++;
+      
+      if (result.answers[idx] !== undefined) {
+        if (result.answers[idx] === q.correctAnswer) {
+          existing.correct++;
+        } else {
+          existing.wrong++;
+        }
+      }
+      topicMap.set(topic, existing);
+    });
+
+    return Array.from(topicMap.entries())
+      .map(([topic, data]) => ({
+        topic,
+        correct: data.correct,
+        wrong: data.wrong,
+        total: data.total,
+        percentage: (data.correct / data.total) * 100,
+      }))
+      .sort((a, b) => a.percentage - b.percentage);
+  };
+
+  const getWeakTopics = (): TopicAnalysis[] => {
+    return getTopicAnalysis().filter(t => t.percentage < 60 && t.topic !== 'General');
+  };
+
   if (!result || !test) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -221,8 +266,8 @@ export default function TestResult() {
   }
 
   const detailedScore = calculateDetailedScore();
-
   const subjectBreakdown = getSubjectBreakdown();
+  const weakTopics = getWeakTopics();
   const isMockTest = test.test_type === 'mock_test';
 
   return (
@@ -342,7 +387,25 @@ export default function TestResult() {
           </Card>
         )}
 
-        {/* Detailed Review */}
+        {/* Weak Topics Analysis */}
+        {weakTopics.length > 0 && (
+          <Card className="p-6 mb-6 border-orange-500/30 bg-orange-50/50 dark:bg-orange-950/20">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-orange-600" />
+              Areas for Improvement
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Focus on these topics where you scored below 60%:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {weakTopics.map((topic) => (
+                <Badge key={topic.topic} variant="outline" className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 border-orange-300">
+                  {topic.topic} ({topic.percentage.toFixed(0)}%)
+                </Badge>
+              ))}
+            </div>
+          </Card>
+        )}
         <Card className="p-6 mb-6">
           <h2 className="text-xl font-bold mb-6">Detailed Review</h2>
           <div className="space-y-6">
@@ -376,6 +439,13 @@ export default function TestResult() {
                       </Badge>
                     </div>
                   </div>
+                  
+                  {/* Topic Badge */}
+                  {question.topic && (
+                    <Badge variant="outline" className="mb-2 text-xs">
+                      Topic: {question.topic}
+                    </Badge>
+                  )}
                   
                   <p className="font-medium mb-4">{question.question}</p>
                   

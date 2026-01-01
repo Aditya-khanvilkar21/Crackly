@@ -27,6 +27,7 @@ interface QuestionFormData {
   explanation?: string;
   subject: Subject;
   marksPerQuestion: number;
+  topic?: string;
 }
 
 const emptyQuestion = (subject: Subject, marks: number): QuestionFormData => ({
@@ -37,6 +38,7 @@ const emptyQuestion = (subject: Subject, marks: number): QuestionFormData => ({
   explanation: "",
   subject,
   marksPerQuestion: marks,
+  topic: "",
 });
 
 // PCM: Physics 50Q (1 mark each), Chemistry 50Q (1 mark each), Maths 50Q (2 marks each) = 150Q, 200 marks
@@ -539,6 +541,20 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
                     </RadioGroup>
                     <p className="text-sm text-muted-foreground">
                       Selected correct answer: <span className="font-medium">Option {String.fromCharCode(65 + currentQuestion.correctAnswer)}</span>
+                    </p>
+                  </div>
+
+                  {/* Topic Section */}
+                  <div>
+                    <Label>Topic (Optional but Recommended)</Label>
+                    <Input
+                      placeholder="e.g., Kinematics, Organic Chemistry, Calculus..."
+                      value={currentQuestion.topic || ""}
+                      onChange={(e) => updateQuestion(absoluteIndex, "topic", e.target.value)}
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Adding topics helps identify student weak areas in result analysis.
                     </p>
                   </div>
 

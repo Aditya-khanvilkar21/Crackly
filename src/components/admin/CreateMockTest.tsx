@@ -22,6 +22,7 @@ const questionSchema = z.object({
   imageUrl: z.string().optional(),
   explanation: z.string().optional(),
   subject: z.enum(["physics", "chemistry", "mathematics", "biology"]),
+  topic: z.string().optional(),
 });
 
 const mockTestSchema = z.object({
@@ -43,6 +44,7 @@ const emptyQuestion = (subject: "physics" | "chemistry" | "mathematics" | "biolo
   imageUrl: undefined,
   explanation: "",
   subject,
+  topic: "",
 });
 
 export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }) => {
@@ -475,6 +477,20 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
                     </RadioGroup>
                     <p className="text-sm text-muted-foreground">
                       Selected correct answer: <span className="font-medium">Option {String.fromCharCode(65 + currentQuestion.correctAnswer)}</span>
+                    </p>
+                  </div>
+
+                  {/* Topic Section */}
+                  <div>
+                    <Label>Topic (Optional but Recommended)</Label>
+                    <Input
+                      placeholder="e.g., Kinematics, Thermodynamics, Organic Chemistry..."
+                      value={currentQuestion.topic || ""}
+                      onChange={(e) => updateQuestion(absoluteIndex, "topic", e.target.value)}
+                      className="mt-2"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Adding topics helps identify student weak areas in result analysis.
                     </p>
                   </div>
 
