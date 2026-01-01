@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, FileText, MessageSquare, ChevronRight } from "lucide-react";
+import { ArrowLeft, BookOpen, FileText, MessageSquare, ChevronRight, Trophy } from "lucide-react";
 import { AdminChapterAnalytics } from "@/components/analytics/AdminChapterAnalytics";
 import { ExamMockAnalytics } from "@/components/analytics/ExamMockAnalytics";
 import { PostTestDiscussion } from "@/components/admin/PostTestDiscussion";
+import { MockTestLeaderboard } from "@/components/analytics/MockTestLeaderboard";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
-type ViewMode = 'menu' | 'chapters' | 'mocks' | 'discussion';
+type ViewMode = 'menu' | 'chapters' | 'mocks' | 'discussion' | 'leaderboard';
 
 interface AdminExamDashboardProps {
   examType: ExamType;
@@ -41,6 +42,12 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
       title: 'Mock Test Analytics',
       description: 'Full mock test performance with subject breakdown',
       icon: FileText,
+    },
+    {
+      id: 'leaderboard',
+      title: 'Mock Test Leaderboard',
+      description: 'Class rankings with marks and percentile scores',
+      icon: Trophy,
     },
     {
       id: 'discussion',
@@ -125,6 +132,21 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
           exit={{ opacity: 0, x: -20 }}
         >
           <ExamMockAnalytics
+            examType={examType}
+            userRole={userRole}
+            onBack={() => setViewMode('menu')}
+          />
+        </motion.div>
+      )}
+
+      {viewMode === 'leaderboard' && (
+        <motion.div
+          key="leaderboard"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+        >
+          <MockTestLeaderboard
             examType={examType}
             userRole={userRole}
             onBack={() => setViewMode('menu')}

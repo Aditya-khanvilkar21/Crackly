@@ -31,6 +31,7 @@ interface Question {
   options: string[];
   correctAnswer: number;
   explanation?: string;
+  topic?: string;
 }
 
 interface Test {
@@ -242,7 +243,14 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
                     <Badge className="shrink-0 bg-primary/10 text-primary border-primary/30">
                       Q{qIndex + 1}
                     </Badge>
-                    <p className="text-sm font-medium leading-relaxed">{question.question}</p>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium leading-relaxed">{question.question}</p>
+                      {question.topic && (
+                        <Badge variant="outline" className="mt-2 text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">
+                          Topic: {question.topic}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
 
                   <div className="ml-8 space-y-2">

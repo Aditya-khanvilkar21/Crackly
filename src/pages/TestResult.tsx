@@ -537,7 +537,8 @@ export default function TestResult() {
                   month: 'long',
                   day: 'numeric'
                 }),
-                subjectBreakdown: isMockTest ? subjectBreakdown : undefined
+                subjectBreakdown: isMockTest ? subjectBreakdown : undefined,
+                weakTopics: weakTopics.length > 0 ? weakTopics.map(t => `${t.topic} (${t.percentage.toFixed(0)}%)`) : undefined
               });
               toast.success("Result downloaded successfully!");
             }}
