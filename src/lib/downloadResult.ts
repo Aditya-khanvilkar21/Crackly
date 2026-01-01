@@ -19,6 +19,7 @@ interface ResultData {
     total: number;
     percentage: number;
   }[];
+  weakTopics?: string[];
 }
 
 export const downloadResultAsPDF = (data: ResultData) => {
@@ -107,6 +108,25 @@ export const downloadResultAsPDF = (data: ResultData) => {
       headStyles: { fillColor: [79, 70, 229] },
       margin: { left: 14, right: 14 },
     });
+  }
+
+  // Weak Topics Section
+  if (data.weakTopics && data.weakTopics.length > 0) {
+    const finalY = (doc as any).lastAutoTable?.finalY || scoreBoxY + 65;
+    const weakTopicsY = finalY + 15;
+    
+    doc.setFillColor(255, 237, 213);
+    doc.setDrawColor(249, 115, 22);
+    doc.roundedRect(14, weakTopicsY, pageWidth - 28, 30, 3, 3, 'FD');
+    
+    doc.setTextColor(194, 65, 12);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Areas for Improvement:', 20, weakTopicsY + 10);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.weakTopics.join(', '), 20, weakTopicsY + 22, { maxWidth: pageWidth - 48 });
   }
   
   // Footer
