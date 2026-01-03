@@ -129,17 +129,7 @@ const Auth = () => {
         toast.error("Failed to create account. Email may already be in use.");
         setLoading(false);
       } else if (data?.user) {
-        // Assign student role
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .insert({ user_id: data.user.id, role: "student" });
-
-        if (roleError) {
-          toast.error("Account created but role assignment failed. Please contact support.");
-          setLoading(false);
-          return;
-        }
-
+        // Role is now automatically assigned server-side via handle_new_user trigger
         toast.success("Account created! Logging you in...");
         
         // Refresh session to ensure role is available
