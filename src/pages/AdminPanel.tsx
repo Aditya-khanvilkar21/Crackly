@@ -10,6 +10,7 @@ import { ClassManagement } from "@/components/admin/ClassManagement";
 import { StudentTracking } from "@/components/admin/StudentTracking";
 import { TestManagement } from "@/components/admin/TestManagement";
 import { JoinRequestsManagement } from "@/components/admin/JoinRequestsManagement";
+import { AdminRequestsManagement } from "@/components/admin/AdminRequestsManagement";
 
 import { 
   ArrowLeft, 
@@ -19,7 +20,8 @@ import {
   Inbox,
   Menu,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  UserPlus
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,7 +37,7 @@ interface UserRole {
   role: string;
 }
 
-type AdminView = 'menu' | 'classes' | 'students' | 'requests' | 'tests';
+type AdminView = 'menu' | 'classes' | 'students' | 'requests' | 'tests' | 'admin-requests';
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -115,6 +117,7 @@ const AdminPanel = () => {
     { id: 'students', title: 'Students', description: 'Track student progress', icon: Users },
     ...(!isSuperAdmin ? [{ id: 'requests', title: 'Join Requests', description: 'Pending approvals', icon: Inbox }] : []),
     { id: 'tests', title: 'Tests', description: 'Manage tests', icon: FileText },
+    ...(isSuperAdmin ? [{ id: 'admin-requests', title: 'Admin Requests', description: 'Approve admin signups', icon: UserPlus }] : []),
   ];
 
   const renderContent = () => {
@@ -127,6 +130,8 @@ const AdminPanel = () => {
         return <JoinRequestsManagement />;
       case 'tests':
         return <TestManagement userRole={userRole} />;
+      case 'admin-requests':
+        return <AdminRequestsManagement />;
       default:
         return null;
     }
