@@ -454,7 +454,7 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-4 pb-8">
-        {isStudent && (
+        {isStudent && !hasAdminAccess && (
           <div className="max-w-lg mx-auto">
             {!isInClass ? (
               <Card>
