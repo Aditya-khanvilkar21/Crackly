@@ -18,11 +18,11 @@ const Auth = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [loginType, setLoginType] = useState<"student" | "admin">("student");
+  const [signupType, setSignupType] = useState<"student" | "admin">("student");
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [signupForm, setSignupForm] = useState({ email: "", password: "", fullName: "", confirmPassword: "" });
 
   useEffect(() => {
-    // Check if user is already logged in
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
@@ -37,7 +37,6 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Validate inputs
       const emailValidation = emailSchema.safeParse(loginForm.email);
       const passwordValidation = passwordSchema.safeParse(loginForm.password);
 
@@ -59,7 +58,6 @@ const Auth = () => {
         toast.error("Invalid email or password");
         setLoading(false);
       } else {
-        // Check user role after successful login and route based on actual roles
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           const { data: roles } = await supabase
@@ -70,9 +68,29 @@ const Auth = () => {
           const isAdmin = roles?.some(r => r.role === "admin" || r.role === "super_admin");
           const isStudent = roles?.some(r => r.role === "student");
 
+          // Check if admin request is pending
+          if (loginType === "admin" && !isAdmin) {
+            const { data: request } = await supabase
+              .from("admin_requests")
+              .select("status")
+              .eq("user_id", session.user.id)
+              .single();
+
+            if (request?.status === "pending") {
+              toast.error("Your admin request is still pending approval.");
+              await signOut();
+              setLoading(false);
+              return;
+            } else if (request?.status === "rejected") {
+              toast.error("Your admin request was rejected.");
+              await signOut();
+              setLoading(false);
+              return;
+            }
+          }
+
           toast.success("Successfully logged in!");
           
-          // Route based on actual roles - backend RLS enforces real access control
           if (isAdmin) {
             navigate("/admin");
           } else if (isStudent) {
@@ -94,7 +112,6 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Validate inputs
       const nameValidation = fullNameSchema.safeParse(signupForm.fullName);
       const emailValidation = emailSchema.safeParse(signupForm.email);
       const passwordValidation = passwordSchema.safeParse(signupForm.password);
@@ -129,13 +146,30 @@ const Auth = () => {
         toast.error("Failed to create account. Email may already be in use.");
         setLoading(false);
       } else if (data?.user) {
-        // Role is now automatically assigned server-side via handle_new_user trigger
-        toast.success("Account created! Logging you in...");
-        
-        // Refresh session to ensure role is available
-        await supabase.auth.refreshSession();
-        
-        navigate("/");
+        if (signupType === "admin") {
+          // Create admin request for super admin approval
+          const { error: requestError } = await supabase
+            .from("admin_requests")
+            .insert({
+              user_id: data.user.id,
+              full_name: signupForm.fullName,
+              email: signupForm.email,
+              status: "pending"
+            });
+
+          if (requestError) {
+            toast.error("Account created but admin request failed. Please contact support.");
+          } else {
+            toast.success("Admin request submitted! Please wait for Super Admin approval.");
+          }
+          await signOut();
+          setLoading(false);
+        } else {
+          // Student signup - role auto-assigned by trigger
+          toast.success("Account created! Logging you in...");
+          await supabase.auth.refreshSession();
+          navigate("/");
+        }
       }
     } catch (error) {
       toast.error("An error occurred during signup");
@@ -168,15 +202,54 @@ const Auth = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Signup Tab - Student Only */}
+          {/* Signup Tab - Student or Admin Request */}
           <TabsContent value="signup">
             <Card className="border-2">
               <CardHeader className="bg-gradient-subtle">
-                <CardTitle className="text-xl">Create Student Account</CardTitle>
-                <CardDescription>Start your JEE & NEET preparation journey today</CardDescription>
+                <CardTitle className="text-xl">Create Account</CardTitle>
+                <CardDescription>
+                  {signupType === "student" 
+                    ? "Start your JEE & NEET preparation journey today" 
+                    : "Request admin access (requires Super Admin approval)"}
+                </CardDescription>
               </CardHeader>
               <form onSubmit={handleSignup}>
                 <CardContent className="space-y-4 pt-6">
+                  {/* Signup Type Selection */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Account Type</Label>
+                    <RadioGroup 
+                      value={signupType} 
+                      onValueChange={(value) => setSignupType(value as "student" | "admin")}
+                      className="grid grid-cols-2 gap-4"
+                    >
+                      <div>
+                        <RadioGroupItem value="student" id="signup-student" className="peer sr-only" />
+                        <Label
+                          htmlFor="signup-student"
+                          className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-transparent p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
+                        >
+                          <UserCircle className="mb-2 h-6 w-6" />
+                          <span className="font-semibold text-sm">Student</span>
+                        </Label>
+                      </div>
+                      <div>
+                        <RadioGroupItem value="admin" id="signup-admin" className="peer sr-only" />
+                        <Label
+                          htmlFor="signup-admin"
+                          className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-transparent p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
+                        >
+                          <Shield className="mb-2 h-6 w-6" />
+                          <span className="font-semibold text-sm">Admin</span>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                    {signupType === "admin" && (
+                      <p className="text-xs text-amber-600 bg-amber-500/10 p-2 rounded-md">
+                        ⚠️ Admin signup requires Super Admin approval before you can access admin features.
+                      </p>
+                    )}
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Full Name</Label>
                     <Input
@@ -222,7 +295,7 @@ const Auth = () => {
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading} size="lg">
-                    {loading ? "Creating account..." : "Create Student Account"}
+                    {loading ? "Creating account..." : signupType === "student" ? "Create Student Account" : "Submit Admin Request"}
                   </Button>
                 </CardFooter>
               </form>
