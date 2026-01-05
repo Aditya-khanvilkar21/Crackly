@@ -143,36 +143,60 @@ const Auth = () => {
       const { data, error } = await signUp(signupForm.email, signupForm.password, signupForm.fullName);
 
       if (error) {
-        toast.error("Failed to create account. Email may already be in use.");
-        setLoading(false);
-      } else if (data?.user) {
-        if (signupType === "admin") {
-          // Create admin request for super admin approval
-          const { error: requestError } = await supabase
-            .from("admin_requests")
-            .insert({
-              user_id: data.user.id,
-              full_name: signupForm.fullName,
-              email: signupForm.email,
-              status: "pending"
-            });
-
-          if (requestError) {
-            toast.error("Account created but admin request failed. Please contact support.");
-          } else {
-            toast.success("Admin request submitted! Please wait for Super Admin approval.");
-          }
-          await signOut();
-          setLoading(false);
+        // Handle specific error messages
+        if (error.message?.includes("already registered") || error.message?.includes("already been registered")) {
+          toast.error("This email is already registered. Please login instead.");
+        } else if (error.message?.includes("valid email")) {
+          toast.error("Please enter a valid email address.");
+        } else if (error.message?.includes("password")) {
+          toast.error("Password must be at least 6 characters.");
         } else {
-          // Student signup - role auto-assigned by trigger
-          toast.success("Account created! Logging you in...");
-          await supabase.auth.refreshSession();
-          navigate("/");
+          toast.error(error.message || "Failed to create account. Please try again.");
         }
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      toast.error("An error occurred during signup");
+      
+      // Check if user was created successfully (session might be null with auto-confirm disabled)
+      if (!data?.user) {
+        toast.error("Failed to create account. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      // Check for fake user (identities array empty means user already exists)
+      if (data.user.identities && data.user.identities.length === 0) {
+        toast.error("This email is already registered. Please login instead.");
+        setLoading(false);
+        return;
+      }
+
+      if (signupType === "admin") {
+        // Create admin request for super admin approval
+        const { error: requestError } = await supabase
+          .from("admin_requests")
+          .insert({
+            user_id: data.user.id,
+            full_name: signupForm.fullName,
+            email: signupForm.email,
+            status: "pending"
+          });
+
+        if (requestError) {
+          toast.error("Account created but admin request failed. Please contact support.");
+        } else {
+          toast.success("Admin request submitted! Please wait for Super Admin approval.");
+        }
+        await signOut();
+        setLoading(false);
+      } else {
+        // Student signup - role auto-assigned by trigger
+        toast.success("Account created successfully! Logging you in...");
+        await supabase.auth.refreshSession();
+        navigate("/");
+      }
+    } catch (error: any) {
+      toast.error(error?.message || "An error occurred during signup");
       setLoading(false);
     }
   };
