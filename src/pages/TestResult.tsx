@@ -315,7 +315,7 @@ export default function TestResult() {
         {/* Performance Analysis */}
         <Card className="p-6 mb-6">
           <h2 className="text-xl font-bold mb-4">Performance Analysis</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className={`grid grid-cols-2 ${test.negative_marking && test.negative_marking > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
             <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
               <CheckCircle2 className="w-8 h-8 text-green-600" />
               <div>
@@ -328,13 +328,6 @@ export default function TestResult() {
               <div>
                 <div className="text-2xl font-bold text-red-600">{detailedScore.wrong}</div>
                 <div className="text-sm text-muted-foreground">Wrong</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-950 rounded-lg">
-              <Clock className="w-8 h-8 text-gray-600" />
-              <div>
-                <div className="text-2xl font-bold text-gray-600">{detailedScore.unanswered}</div>
-                <div className="text-sm text-muted-foreground">Unanswered</div>
               </div>
             </div>
             {test.negative_marking && test.negative_marking > 0 && (
