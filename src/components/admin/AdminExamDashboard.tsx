@@ -2,14 +2,15 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, FileText, MessageSquare, ChevronRight, Trophy } from "lucide-react";
+import { ArrowLeft, BookOpen, FileText, MessageSquare, ChevronRight, Trophy, ClipboardList } from "lucide-react";
 import { AdminChapterAnalytics } from "@/components/analytics/AdminChapterAnalytics";
 import { ExamMockAnalytics } from "@/components/analytics/ExamMockAnalytics";
 import { PostTestDiscussion } from "@/components/admin/PostTestDiscussion";
 import { MockTestLeaderboard } from "@/components/analytics/MockTestLeaderboard";
+import { ChapterTestReview } from "@/components/analytics/ChapterTestReview";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
-type ViewMode = 'menu' | 'chapters' | 'mocks' | 'discussion' | 'leaderboard';
+type ViewMode = 'menu' | 'chapters' | 'mocks' | 'discussion' | 'leaderboard' | 'chapter-review';
 
 interface AdminExamDashboardProps {
   examType: ExamType;
@@ -31,6 +32,12 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
   const gradient = getExamGradient(examType);
 
   const menuItems = [
+    {
+      id: 'chapter-review',
+      title: 'Chapter Test Review',
+      description: 'Rank-wise student analysis with question-level details',
+      icon: ClipboardList,
+    },
     {
       id: 'chapters',
       title: 'Chapter Analytics',
@@ -147,6 +154,21 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
           exit={{ opacity: 0, x: -20 }}
         >
           <MockTestLeaderboard
+            examType={examType}
+            userRole={userRole}
+            onBack={() => setViewMode('menu')}
+          />
+        </motion.div>
+      )}
+
+      {viewMode === 'chapter-review' && (
+        <motion.div
+          key="chapter-review"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+        >
+          <ChapterTestReview
             examType={examType}
             userRole={userRole}
             onBack={() => setViewMode('menu')}
