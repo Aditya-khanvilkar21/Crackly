@@ -7,7 +7,7 @@ import { ArrowLeft, BookOpen, FileText, TrendingUp, ChevronRight } from "lucide-
 import { SubjectSelector } from "./SubjectSelector";
 import { ChapterTestsList } from "./ChapterTestsList";
 import { MockTestsList } from "./MockTestsList";
-import { StudentAnalytics } from "@/components/analytics/StudentAnalytics";
+import { NextGenStudentAnalytics } from "@/components/analytics/NextGenStudentAnalytics";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
@@ -180,7 +180,7 @@ export const ExamDashboard = ({ examType, studentId, onBack }: ExamDashboardProp
               <p className="text-sm text-muted-foreground">{examType} Performance</p>
             </div>
           </div>
-          <StudentAnalytics examType={examType} />
+          <NextGenStudentAnalytics examType={examType} />
         </motion.div>
       )}
     </AnimatePresence>
