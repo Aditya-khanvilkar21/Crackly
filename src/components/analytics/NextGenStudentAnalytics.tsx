@@ -13,12 +13,13 @@ import {
 } from "recharts";
 import {
   TrendingUp, TrendingDown, Target, Award, Clock, Brain, Zap, AlertTriangle, BookOpen,
-  ChevronRight, Download, HelpCircle, Flame, BarChart3, PieChart, Activity, Lightbulb,
+  ChevronRight, Download, HelpCircle, Flame, BarChart3, PieChart, Activity, Lightbulb, Bell,
 } from "lucide-react";
 import { useStudentAnalytics } from "@/hooks/useStudentAnalytics";
 import { motion, AnimatePresence } from "framer-motion";
 import { TopicDrillDown } from "./TopicDrillDown";
 import { TestDrillDown } from "./TestDrillDown";
+import { SpacedRepetitionReminders } from "./SpacedRepetitionReminders";
 import { jsPDF } from "jspdf";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
@@ -263,10 +264,14 @@ export const NextGenStudentAnalytics = ({ examType }: NextGenStudentAnalyticsPro
 
         {/* Tabbed Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-4">
+          <TabsList className="grid w-full grid-cols-5 mb-4">
             <TabsTrigger value="overview" className="text-xs">
               <BarChart3 className="h-3 w-3 mr-1" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="revision" className="text-xs">
+              <Bell className="h-3 w-3 mr-1" />
+              Revision
             </TabsTrigger>
             <TabsTrigger value="topics" className="text-xs">
               <BookOpen className="h-3 w-3 mr-1" />
@@ -417,6 +422,21 @@ export const NextGenStudentAnalytics = ({ examType }: NextGenStudentAnalyticsPro
                 </CardContent>
               </Card>
             )}
+
+            {/* Compact Revision Reminders */}
+            <SpacedRepetitionReminders
+              topicMastery={analytics.topicMastery}
+              onTopicClick={(topic) => setSelectedTopic(topic)}
+              compact
+            />
+          </TabsContent>
+
+          {/* Revision Tab - Spaced Repetition */}
+          <TabsContent value="revision" className="space-y-4 mt-0">
+            <SpacedRepetitionReminders
+              topicMastery={analytics.topicMastery}
+              onTopicClick={(topic) => setSelectedTopic(topic)}
+            />
           </TabsContent>
 
           {/* Topics Tab */}
