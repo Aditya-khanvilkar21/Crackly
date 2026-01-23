@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { toast } from "sonner";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
@@ -265,66 +266,81 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
   };
 
   const downloadRankListPDF = () => {
-    if (!selectedTest || studentResults.length === 0) return;
+    if (!selectedTest) {
+      toast.error("Please select a test first");
+      return;
+    }
+    
+    if (studentResults.length === 0) {
+      toast.error("No student data available to download");
+      return;
+    }
 
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Header
-    doc.setFillColor(79, 70, 229);
-    doc.rect(0, 0, pageWidth, 40, 'F');
+      // Header
+      doc.setFillColor(79, 70, 229);
+      doc.rect(0, 0, pageWidth, 40, 'F');
 
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Chapter Test Results', pageWidth / 2, 16, { align: 'center' });
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Chapter Test Results', pageWidth / 2, 16, { align: 'center' });
 
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(selectedTest.title, pageWidth / 2, 28, { align: 'center' });
-    doc.text(`${getSubjectLabel(selectedTest.subject)} - ${examType}`, pageWidth / 2, 36, { align: 'center' });
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(selectedTest.title, pageWidth / 2, 28, { align: 'center' });
+      doc.text(`${getSubjectLabel(selectedTest.subject)} - ${examType}`, pageWidth / 2, 36, { align: 'center' });
 
-    // Stats
-    const avgScore = studentResults.reduce((sum, s) => sum + s.percentage, 0) / studentResults.length;
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(10);
-    doc.text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, 14, 52);
-    doc.text(`Students: ${studentResults.length} | Avg Score: ${avgScore.toFixed(1)}% | Top Score: ${studentResults[0]?.percentage.toFixed(1)}%`, 14, 60);
+      // Stats
+      const avgScore = studentResults.reduce((sum, s) => sum + s.percentage, 0) / studentResults.length;
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+      doc.text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, 14, 52);
+      doc.text(`Students: ${studentResults.length} | Avg Score: ${avgScore.toFixed(1)}% | Top Score: ${studentResults[0]?.percentage.toFixed(1)}%`, 14, 60);
 
-    // Table
-    const tableData = studentResults.map(s => [
-      `#${s.rank}`,
-      s.studentName,
-      s.studentCode,
-      `${s.score}/${s.totalQuestions}`,
-      `${s.percentage.toFixed(1)}%`,
-    ]);
+      // Table
+      const tableData = studentResults.map(s => [
+        `#${s.rank}`,
+        s.studentName,
+        s.studentCode,
+        `${s.score}/${s.totalQuestions}`,
+        `${s.percentage.toFixed(1)}%`,
+      ]);
 
-    (doc as any).autoTable({
-      startY: 68,
-      head: [['Rank', 'Student Name', 'Student ID', 'Score', 'Percentage']],
-      body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [79, 70, 229] },
-      margin: { left: 14, right: 14 },
-      styles: { fontSize: 9 },
-      didParseCell: function(data: any) {
-        if (data.section === 'body' && data.column.index === 0) {
-          const rank = parseInt(data.cell.raw.replace('#', ''));
-          if (rank === 1) {
-            data.cell.styles.fillColor = [255, 215, 0];
-          } else if (rank === 2) {
-            data.cell.styles.fillColor = [192, 192, 192];
-          } else if (rank === 3) {
-            data.cell.styles.fillColor = [205, 127, 50];
-            data.cell.styles.textColor = [255, 255, 255];
+      (doc as any).autoTable({
+        startY: 68,
+        head: [['Rank', 'Student Name', 'Student ID', 'Score', 'Percentage']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [79, 70, 229] },
+        margin: { left: 14, right: 14 },
+        styles: { fontSize: 9 },
+        didParseCell: function(data: any) {
+          if (data.section === 'body' && data.column.index === 0) {
+            const rank = parseInt(data.cell.raw.replace('#', ''));
+            if (rank === 1) {
+              data.cell.styles.fillColor = [255, 215, 0];
+            } else if (rank === 2) {
+              data.cell.styles.fillColor = [192, 192, 192];
+            } else if (rank === 3) {
+              data.cell.styles.fillColor = [205, 127, 50];
+              data.cell.styles.textColor = [255, 255, 255];
+            }
           }
-        }
-      },
-    });
+        },
+      });
 
-    const fileName = `${selectedTest.chapter.replace(/\s+/g, '_')}_Rankings.pdf`;
-    doc.save(fileName);
+      const fileName = `${selectedTest.chapter.replace(/\s+/g, '_')}_Rankings.pdf`;
+      doc.save(fileName);
+      
+      toast.success("PDF downloaded successfully!");
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      toast.error("Failed to download PDF. Please try again.");
+    }
   };
 
   // Render loading

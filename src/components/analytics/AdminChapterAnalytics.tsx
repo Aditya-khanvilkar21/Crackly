@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
+import { toast } from "sonner";
 type ExamType = 'JEE' | 'NEET' | 'CET';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
 
@@ -277,29 +277,44 @@ export const AdminChapterAnalytics = ({ examType, userRole, onBack }: AdminChapt
   };
 
   const handleDownloadChapterResults = () => {
-    if (!selectedChapter || !selectedSubject || chapterStudents.length === 0) return;
+    if (!selectedChapter || !selectedSubject) {
+      toast.error("Please select a chapter first");
+      return;
+    }
+    
+    if (chapterStudents.length === 0) {
+      toast.error("No student data available to download");
+      return;
+    }
 
-    const totalAttempts = chapterStudents.reduce((sum, s) => sum + s.attempts, 0);
-    const classAverage = chapterStudents.reduce((sum, s) => sum + s.percentage, 0) / chapterStudents.length;
-    const topScore = chapterStudents[0]?.percentage || 0;
+    try {
+      const totalAttempts = chapterStudents.reduce((sum, s) => sum + s.attempts, 0);
+      const classAverage = chapterStudents.reduce((sum, s) => sum + s.percentage, 0) / chapterStudents.length;
+      const topScore = chapterStudents[0]?.percentage || 0;
 
-    downloadChapterResultsAsPDF({
-      chapterName: selectedChapter,
-      subject: getSubjectLabel(selectedSubject),
-      examType: examType,
-      students: chapterStudents.map((s, idx) => ({
-        rank: idx + 1,
-        studentName: s.studentName,
-        studentId: s.studentId,
-        score: s.score,
-        totalQuestions: s.totalQuestions,
-        percentage: s.percentage,
-        attempts: s.attempts,
-      })),
-      classAverage,
-      topScore,
-      totalAttempts,
-    });
+      downloadChapterResultsAsPDF({
+        chapterName: selectedChapter,
+        subject: getSubjectLabel(selectedSubject),
+        examType: examType,
+        students: chapterStudents.map((s, idx) => ({
+          rank: idx + 1,
+          studentName: s.studentName,
+          studentId: s.studentId,
+          score: s.score,
+          totalQuestions: s.totalQuestions,
+          percentage: s.percentage,
+          attempts: s.attempts,
+        })),
+        classAverage,
+        topScore,
+        totalAttempts,
+      });
+      
+      toast.success("PDF downloaded successfully!");
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      toast.error("Failed to download PDF. Please try again.");
+    }
   };
 
   if (loading) {
