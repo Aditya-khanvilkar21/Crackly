@@ -261,7 +261,7 @@ const Index = () => {
               <img src={logo} alt="Crackly" className="w-16 h-10 object-contain" />
               <span className="font-bold text-lg">Crackly</span>
             </div>
-            <p className="text-muted-foreground text-sm">&copy; 2025 Crackly. All rights reserved.</p>
+            <p className="text-muted-foreground text-sm">&copy; 2026 Crackly. All rights reserved.</p>
           </div>
         </div>
       </footer>

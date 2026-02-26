@@ -135,24 +135,30 @@ const Dashboard = () => {
       }
     };
 
-    // Timeout fallback - if auth takes too long, show landing page
-    const timeout = setTimeout(() => {
-      if (isMounted && loading) {
-        console.warn("Auth timeout - showing landing page");
+    // Primary: check session immediately
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
+      if (!session) {
+        setIsAuthenticated(false);
         setLoading(false);
+      } else {
+        setIsAuthenticated(true);
+        fetchUserData(session.user.id);
       }
-    }, 4000);
+    }).catch(() => {
+      if (isMounted) setLoading(false);
+    });
 
-    // Listen for auth changes FIRST (catches INITIAL_SESSION)
+    // Secondary: listen for auth changes (sign in/out after initial load)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!isMounted) return;
       
-      if (!session) {
+      if (event === "SIGNED_OUT" || !session) {
         setIsAuthenticated(false);
         setProfile(null);
         setRoles([]);
         setLoading(false);
-      } else {
+      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
         setIsAuthenticated(true);
         fetchUserData(session.user.id);
       }
@@ -160,7 +166,6 @@ const Dashboard = () => {
 
     return () => {
       isMounted = false;
-      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, []);
@@ -368,7 +373,7 @@ const Dashboard = () => {
                 <img src={logo} alt="Crackly" className="w-16 h-10 object-contain" />
                 <span className="font-bold text-lg">Crackly</span>
               </div>
-              <p className="text-muted-foreground text-sm">&copy; 2025 Crackly. All rights reserved.</p>
+              <p className="text-muted-foreground text-sm">&copy; 2026 Crackly. All rights reserved.</p>
             </div>
           </div>
         </footer>
