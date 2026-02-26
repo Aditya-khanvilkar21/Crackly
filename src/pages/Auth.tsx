@@ -52,14 +52,17 @@ const Auth = () => {
         return;
       }
 
-      const { error } = await signIn(loginForm.email, loginForm.password);
+      const { data: signInData, error } = await signIn(loginForm.email, loginForm.password);
 
       if (error) {
         toast.error("Invalid email or password");
         setLoading(false);
-      } else {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
+        return;
+      }
+
+      // Use session from signIn response directly instead of re-fetching
+      const session = signInData?.session;
+      if (session) {
           const { data: roles } = await supabase
             .from("user_roles")
             .select("role")
@@ -99,7 +102,9 @@ const Auth = () => {
             toast.error("No role assigned to your account. Contact support.");
             navigate("/");
           }
-        }
+      } else {
+        toast.error("Login failed. Please try again.");
+        setLoading(false);
       }
     } catch (error) {
       toast.error("An error occurred during login");
@@ -192,7 +197,12 @@ const Auth = () => {
       } else {
         // Student signup - role auto-assigned by trigger
         toast.success("Account created successfully! Logging you in...");
-        await supabase.auth.refreshSession();
+        try {
+          await supabase.auth.refreshSession();
+        } catch (e) {
+          console.warn("Session refresh failed, proceeding anyway");
+        }
+        setLoading(false);
         navigate("/");
       }
     } catch (error: any) {
