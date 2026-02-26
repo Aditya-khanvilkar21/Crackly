@@ -116,51 +116,43 @@ const Dashboard = () => {
     let isMounted = true;
 
     const fetchUserData = async (userId: string) => {
-      // Run all queries in parallel for faster loading
-      const [profileResult, rolesResult, classResult] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", userId).single(),
-        supabase.from("user_roles").select("role").eq("user_id", userId),
-        supabase.from("class_students").select("class_id").eq("student_id", userId),
-      ]);
+      try {
+        const [profileResult, rolesResult, classResult] = await Promise.all([
+          supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+          supabase.from("user_roles").select("role").eq("user_id", userId),
+          supabase.from("class_students").select("class_id").eq("student_id", userId),
+        ]);
 
-      if (!isMounted) return;
+        if (!isMounted) return;
 
-      if (profileResult.error) {
-        console.error("Error fetching profile:", profileResult.error);
-      } else {
-        setProfile(profileResult.data);
+        if (profileResult.data) setProfile(profileResult.data);
+        if (rolesResult.data) setRoles(rolesResult.data);
+        setIsInClass(classResult.data && classResult.data.length > 0);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-
-      if (rolesResult.error) {
-        console.error("Error fetching roles:", rolesResult.error);
-      } else {
-        setRoles(rolesResult.data);
-      }
-
-      setIsInClass(classResult.data && classResult.data.length > 0);
-      setLoading(false);
     };
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!isMounted) return;
-      if (!session) {
-        setIsAuthenticated(false);
+    // Timeout fallback - if auth takes too long, show landing page
+    const timeout = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn("Auth timeout - showing landing page");
         setLoading(false);
-        return;
       }
-      setIsAuthenticated(true);
-      fetchUserData(session.user.id);
-    });
+    }, 4000);
 
+    // Listen for auth changes FIRST (catches INITIAL_SESSION)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!isMounted) return;
-      if (event === "SIGNED_OUT" || !session) {
+      
+      if (!session) {
         setIsAuthenticated(false);
         setProfile(null);
         setRoles([]);
         setLoading(false);
-      } else if (event === "SIGNED_IN" && session) {
+      } else {
         setIsAuthenticated(true);
         fetchUserData(session.user.id);
       }
@@ -168,6 +160,7 @@ const Dashboard = () => {
 
     return () => {
       isMounted = false;
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, []);
