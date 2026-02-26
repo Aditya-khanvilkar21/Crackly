@@ -113,65 +113,63 @@ const Dashboard = () => {
   ];
 
   useEffect(() => {
-    const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+    let isMounted = true;
+
+    const fetchUserData = async (userId: string) => {
+      // Run all queries in parallel for faster loading
+      const [profileResult, rolesResult, classResult] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", userId).single(),
+        supabase.from("user_roles").select("role").eq("user_id", userId),
+        supabase.from("class_students").select("class_id").eq("student_id", userId),
+      ]);
+
+      if (!isMounted) return;
+
+      if (profileResult.error) {
+        console.error("Error fetching profile:", profileResult.error);
+      } else {
+        setProfile(profileResult.data);
+      }
+
+      if (rolesResult.error) {
+        console.error("Error fetching roles:", rolesResult.error);
+      } else {
+        setRoles(rolesResult.data);
+      }
+
+      setIsInClass(classResult.data && classResult.data.length > 0);
+      setLoading(false);
+    };
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
       if (!session) {
         setIsAuthenticated(false);
         setLoading(false);
         return;
       }
-
       setIsAuthenticated(true);
-
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
-
-      if (profileError) {
-        console.error("Error fetching profile:", profileError);
-        toast.error("Error loading profile");
-      } else {
-        setProfile(profileData);
-      }
-
-      const { data: rolesData, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id);
-
-      if (rolesError) {
-        console.error("Error fetching roles:", rolesError);
-      } else {
-        setRoles(rolesData);
-      }
-
-      const { data: classData } = await supabase
-        .from("class_students")
-        .select("class_id")
-        .eq("student_id", session.user.id);
-
-      setIsInClass(classData && classData.length > 0);
-      setLoading(false);
-    };
-
-    initAuth();
+      fetchUserData(session.user.id);
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
       if (event === "SIGNED_OUT" || !session) {
         setIsAuthenticated(false);
         setProfile(null);
         setRoles([]);
-      } else if (session) {
+        setLoading(false);
+      } else if (event === "SIGNED_IN" && session) {
         setIsAuthenticated(true);
-        // Refetch user data
-        initAuth();
+        fetchUserData(session.user.id);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleSignOut = async () => {
