@@ -53,14 +53,21 @@ const Auth = () => {
       }
 
       let signInData, error;
-      try {
-        const result = await signIn(loginForm.email, loginForm.password);
-        signInData = result.data;
-        error = result.error;
-      } catch (networkErr) {
-        toast.error("Network error. Please check your internet connection and try again.");
-        setLoading(false);
-        return;
+      const maxRetries = 2;
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          const result = await signIn(loginForm.email, loginForm.password);
+          signInData = result.data;
+          error = result.error;
+          break;
+        } catch (networkErr) {
+          if (attempt === maxRetries) {
+            toast.error("Unable to connect to server. Please try opening the app directly at crackly.lovable.app or check your internet.");
+            setLoading(false);
+            return;
+          }
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
 
       if (error) {
@@ -161,14 +168,21 @@ const Auth = () => {
       }
 
       let data, error;
-      try {
-        const result = await signUp(signupForm.email, signupForm.password, signupForm.fullName);
-        data = result.data;
-        error = result.error;
-      } catch (networkErr) {
-        toast.error("Network error. Please check your internet connection and try again.");
-        setLoading(false);
-        return;
+      const maxRetries = 2;
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          const result = await signUp(signupForm.email, signupForm.password, signupForm.fullName);
+          data = result.data;
+          error = result.error;
+          break;
+        } catch (networkErr) {
+          if (attempt === maxRetries) {
+            toast.error("Unable to connect to server. Please try opening the app directly at crackly.lovable.app or check your internet.");
+            setLoading(false);
+            return;
+          }
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
 
       if (error) {
