@@ -52,10 +52,25 @@ const Auth = () => {
         return;
       }
 
-      const { data: signInData, error } = await signIn(loginForm.email, loginForm.password);
+      let signInData, error;
+      try {
+        const result = await signIn(loginForm.email, loginForm.password);
+        signInData = result.data;
+        error = result.error;
+      } catch (networkErr) {
+        toast.error("Network error. Please check your internet connection and try again.");
+        setLoading(false);
+        return;
+      }
 
       if (error) {
-        toast.error("Invalid email or password");
+        if (error.message?.includes("Invalid login")) {
+          toast.error("Invalid email or password");
+        } else if (error.message?.includes("Email not confirmed")) {
+          toast.error("Please verify your email before logging in.");
+        } else {
+          toast.error(error.message || "Login failed. Please try again.");
+        }
         setLoading(false);
         return;
       }
@@ -145,10 +160,18 @@ const Auth = () => {
         return;
       }
 
-      const { data, error } = await signUp(signupForm.email, signupForm.password, signupForm.fullName);
+      let data, error;
+      try {
+        const result = await signUp(signupForm.email, signupForm.password, signupForm.fullName);
+        data = result.data;
+        error = result.error;
+      } catch (networkErr) {
+        toast.error("Network error. Please check your internet connection and try again.");
+        setLoading(false);
+        return;
+      }
 
       if (error) {
-        // Handle specific error messages
         if (error.message?.includes("already registered") || error.message?.includes("already been registered")) {
           toast.error("This email is already registered. Please login instead.");
         } else if (error.message?.includes("valid email")) {
