@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, XCircle, Clock, Award, Lightbulb, Download, AlertCircle } from "lucide-react";
+import { LatexRenderer } from "@/components/LatexRenderer";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { downloadResultAsPDF } from "@/lib/downloadResult";
@@ -440,7 +441,7 @@ export default function TestResult() {
                     </Badge>
                   )}
                   
-                  <p className="font-medium mb-4">{question.question}</p>
+                  <p className="font-medium mb-4"><LatexRenderer content={question.question} /></p>
                   
                   {/* Question Image */}
                   {question.imageUrl && (
@@ -470,7 +471,7 @@ export default function TestResult() {
                             <span className="font-medium">
                               {String.fromCharCode(97 + optIndex)})
                             </span>
-                            <span>{option}</span>
+                            <span><LatexRenderer content={option} /></span>
                             {isCorrectOption && (
                               <Badge className="ml-auto bg-green-600">Correct Answer</Badge>
                             )}
@@ -490,7 +491,7 @@ export default function TestResult() {
                         <Lightbulb className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
                         <div>
                           <p className="font-semibold text-amber-800 dark:text-amber-200 mb-1">Explanation</p>
-                          <p className="text-sm text-amber-700 dark:text-amber-300">{question.explanation}</p>
+                          <p className="text-sm text-amber-700 dark:text-amber-300"><LatexRenderer content={question.explanation} /></p>
                         </div>
                       </div>
                     </div>

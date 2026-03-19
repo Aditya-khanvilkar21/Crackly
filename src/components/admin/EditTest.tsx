@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { LatexInput } from "@/components/admin/LatexInput";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -259,10 +259,10 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
                   <CardContent className="space-y-3">
                     <div>
                       <Label>Question Text</Label>
-                      <Textarea
+                      <LatexInput
                         value={q.question}
-                        onChange={(e) => handleUpdateQuestion(qIndex, "question", e.target.value)}
-                        rows={2}
+                        onChange={(val) => handleUpdateQuestion(qIndex, "question", val)}
+                        multiline
                       />
                     </div>
                     
@@ -279,9 +279,9 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
                       {q.options.map((opt, optIndex) => (
                         <div key={optIndex}>
                           <Label className="text-xs">Option {String.fromCharCode(65 + optIndex)}</Label>
-                          <Input
+                          <LatexInput
                             value={opt}
-                            onChange={(e) => handleUpdateOption(qIndex, optIndex, e.target.value)}
+                            onChange={(val) => handleUpdateOption(qIndex, optIndex, val)}
                           />
                         </div>
                       ))}
@@ -307,11 +307,11 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
 
                     <div>
                       <Label>Explanation (Optional)</Label>
-                      <Textarea
-                        placeholder="Enter explanation for the correct answer..."
+                      <LatexInput
                         value={q.explanation || ""}
-                        onChange={(e) => handleUpdateQuestion(qIndex, "explanation", e.target.value)}
-                        rows={2}
+                        onChange={(val) => handleUpdateQuestion(qIndex, "explanation", val)}
+                        placeholder="Enter explanation..."
+                        multiline
                       />
                     </div>
                   </CardContent>

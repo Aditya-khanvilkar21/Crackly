@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { LatexInput } from "@/components/admin/LatexInput";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -380,13 +380,15 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
                 {/* Current Question Editor */}
                 <div className="space-y-4 border rounded-lg p-6 bg-card">
                   <div>
-                    <Label>Question Text</Label>
-                    <Textarea
-                      placeholder="Enter the question..."
-                      value={currentQuestion.question}
-                      onChange={(e) => updateQuestion(absoluteIndex, "question", e.target.value)}
-                      className="mt-2 min-h-[100px]"
-                    />
+                    <Label>Question Text <span className="text-xs text-muted-foreground">(Use $...$ for math)</span></Label>
+                    <div className="mt-2">
+                      <LatexInput
+                        value={currentQuestion.question}
+                        onChange={(val) => updateQuestion(absoluteIndex, "question", val)}
+                        placeholder="Enter the question... Use $...$ for math notation"
+                        multiline
+                      />
+                    </div>
                   </div>
 
                   {/* Image Upload Section */}
@@ -444,14 +446,15 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
                       onValueChange={(value) => updateQuestion(absoluteIndex, "correctAnswer", parseInt(value))}
                     >
                       {currentQuestion.options.map((option, optIndex) => (
-                        <div key={optIndex} className="flex items-center gap-3">
-                          <RadioGroupItem value={optIndex.toString()} id={`neet-q${absoluteIndex}-opt${optIndex}`} />
-                          <Input
-                            placeholder={`Option ${String.fromCharCode(65 + optIndex)}`}
-                            value={option}
-                            onChange={(e) => updateOption(absoluteIndex, optIndex, e.target.value)}
-                            className="flex-1"
-                          />
+                        <div key={optIndex} className="flex items-start gap-3">
+                          <RadioGroupItem value={optIndex.toString()} id={`neet-q${absoluteIndex}-opt${optIndex}`} className="mt-2.5" />
+                          <div className="flex-1">
+                            <LatexInput
+                              value={option}
+                              onChange={(val) => updateOption(absoluteIndex, optIndex, val)}
+                              placeholder={`Option ${String.fromCharCode(65 + optIndex)} — use $...$ for math`}
+                            />
+                          </div>
                         </div>
                       ))}
                     </RadioGroup>
@@ -476,13 +479,15 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
 
                   {/* Explanation Section */}
                   <div>
-                    <Label>Explanation (Optional)</Label>
-                    <Textarea
-                      placeholder="Enter the explanation for the correct answer..."
-                      value={currentQuestion.explanation || ""}
-                      onChange={(e) => updateQuestion(absoluteIndex, "explanation", e.target.value)}
-                      className="mt-2 min-h-[80px]"
-                    />
+                    <Label>Explanation (Optional) <span className="text-xs text-muted-foreground">— supports LaTeX</span></Label>
+                    <div className="mt-2">
+                      <LatexInput
+                        value={currentQuestion.explanation || ""}
+                        onChange={(val) => updateQuestion(absoluteIndex, "explanation", val)}
+                        placeholder="Enter the explanation... Use $...$ for math notation"
+                        multiline
+                      />
+                    </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       This explanation will be shown to students after they submit the test.
                     </p>

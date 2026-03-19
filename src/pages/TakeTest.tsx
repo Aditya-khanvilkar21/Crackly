@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Timer, CheckCircle2, AlertCircle, Eye } from "lucide-react";
+import { LatexRenderer } from "@/components/LatexRenderer";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -573,7 +574,7 @@ export default function TakeTest() {
                   )}
                 </div>
                 <h2 className="text-xl font-semibold leading-relaxed">
-                  {currentQuestion.question}
+                  <LatexRenderer content={currentQuestion.question} />
                 </h2>
               </div>
 
@@ -606,7 +607,7 @@ export default function TakeTest() {
                     }`}>
                       {String.fromCharCode(65 + index)}
                     </span>
-                    <span className="flex-1 text-base">{option}</span>
+                    <span className="flex-1 text-base"><LatexRenderer content={option} /></span>
                     {answers[currentQuestionIndex] === index && (
                       <CheckCircle2 className="w-5 h-5 text-primary ml-2" />
                     )}
