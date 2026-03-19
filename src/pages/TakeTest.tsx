@@ -574,7 +574,7 @@ export default function TakeTest() {
                   )}
                 </div>
                 <h2 className="text-xl font-semibold leading-relaxed">
-                  {currentQuestion.question}
+                  <LatexRenderer content={currentQuestion.question} />
                 </h2>
               </div>
 
