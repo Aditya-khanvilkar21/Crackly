@@ -431,14 +431,15 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
                   onValueChange={(value) => updateQuestion(currentQuestionIndex, "correctAnswer", parseInt(value))}
                 >
                   {currentQuestion.options.map((option, optIndex) => (
-                    <div key={optIndex} className="flex items-center gap-3">
-                      <RadioGroupItem value={optIndex.toString()} id={`q${currentQuestionIndex}-opt${optIndex}`} />
-                      <Input
-                        placeholder={`Option ${String.fromCharCode(65 + optIndex)}`}
-                        value={option}
-                        onChange={(e) => updateOption(currentQuestionIndex, optIndex, e.target.value)}
-                        className="flex-1"
-                      />
+                    <div key={optIndex} className="flex items-start gap-3">
+                      <RadioGroupItem value={optIndex.toString()} id={`q${currentQuestionIndex}-opt${optIndex}`} className="mt-2.5" />
+                      <div className="flex-1">
+                        <LatexInput
+                          value={option}
+                          onChange={(val) => updateOption(currentQuestionIndex, optIndex, val)}
+                          placeholder={`Option ${String.fromCharCode(65 + optIndex)} — use $...$ for math`}
+                        />
+                      </div>
                     </div>
                   ))}
                 </RadioGroup>
