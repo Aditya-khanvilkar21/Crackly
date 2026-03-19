@@ -279,9 +279,9 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
                       {q.options.map((opt, optIndex) => (
                         <div key={optIndex}>
                           <Label className="text-xs">Option {String.fromCharCode(65 + optIndex)}</Label>
-                          <Input
+                          <LatexInput
                             value={opt}
-                            onChange={(e) => handleUpdateOption(qIndex, optIndex, e.target.value)}
+                            onChange={(val) => handleUpdateOption(qIndex, optIndex, val)}
                           />
                         </div>
                       ))}
