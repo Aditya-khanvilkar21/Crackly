@@ -400,13 +400,15 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
                 {/* Current Question Editor */}
                 <div className="space-y-4 border rounded-lg p-6 bg-card">
                   <div>
-                    <Label>Question Text</Label>
-                    <Textarea
-                      placeholder="Enter the question..."
-                      value={currentQuestion.question}
-                      onChange={(e) => updateQuestion(absoluteIndex, "question", e.target.value)}
-                      className="mt-2 min-h-[100px]"
-                    />
+                    <Label>Question Text <span className="text-xs text-muted-foreground">(Use $...$ for math)</span></Label>
+                    <div className="mt-2">
+                      <LatexInput
+                        value={currentQuestion.question}
+                        onChange={(val) => updateQuestion(absoluteIndex, "question", val)}
+                        placeholder="Enter the question... Use $...$ for math notation"
+                        multiline
+                      />
+                    </div>
                   </div>
 
                   {/* Image Upload Section */}
