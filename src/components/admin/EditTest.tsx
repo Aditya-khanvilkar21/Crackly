@@ -307,11 +307,11 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
 
                     <div>
                       <Label>Explanation (Optional)</Label>
-                      <Textarea
-                        placeholder="Enter explanation for the correct answer..."
+                      <LatexInput
                         value={q.explanation || ""}
-                        onChange={(e) => handleUpdateQuestion(qIndex, "explanation", e.target.value)}
-                        rows={2}
+                        onChange={(val) => handleUpdateQuestion(qIndex, "explanation", val)}
+                        placeholder="Enter explanation..."
+                        multiline
                       />
                     </div>
                   </CardContent>

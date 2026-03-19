@@ -479,13 +479,15 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
 
                   {/* Explanation Section */}
                   <div>
-                    <Label>Explanation (Optional)</Label>
-                    <Textarea
-                      placeholder="Enter the explanation for the correct answer..."
-                      value={currentQuestion.explanation || ""}
-                      onChange={(e) => updateQuestion(absoluteIndex, "explanation", e.target.value)}
-                      className="mt-2 min-h-[80px]"
-                    />
+                    <Label>Explanation (Optional) <span className="text-xs text-muted-foreground">— supports LaTeX</span></Label>
+                    <div className="mt-2">
+                      <LatexInput
+                        value={currentQuestion.explanation || ""}
+                        onChange={(val) => updateQuestion(absoluteIndex, "explanation", val)}
+                        placeholder="Enter the explanation... Use $...$ for math notation"
+                        multiline
+                      />
+                    </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       This explanation will be shown to students after they submit the test.
                     </p>
