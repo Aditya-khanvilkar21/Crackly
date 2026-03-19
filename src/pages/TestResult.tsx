@@ -491,7 +491,7 @@ export default function TestResult() {
                         <Lightbulb className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
                         <div>
                           <p className="font-semibold text-amber-800 dark:text-amber-200 mb-1">Explanation</p>
-                          <p className="text-sm text-amber-700 dark:text-amber-300">{question.explanation}</p>
+                          <p className="text-sm text-amber-700 dark:text-amber-300"><LatexRenderer content={question.explanation} /></p>
                         </div>
                       </div>
                     </div>

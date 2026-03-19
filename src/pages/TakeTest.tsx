@@ -607,7 +607,7 @@ export default function TakeTest() {
                     }`}>
                       {String.fromCharCode(65 + index)}
                     </span>
-                    <span className="flex-1 text-base">{option}</span>
+                    <span className="flex-1 text-base"><LatexRenderer content={option} /></span>
                     {answers[currentQuestionIndex] === index && (
                       <CheckCircle2 className="w-5 h-5 text-primary ml-2" />
                     )}
