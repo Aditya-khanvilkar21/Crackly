@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, XCircle, Clock, Award, Lightbulb, Download, AlertCircle } from "lucide-react";
+import { LatexRenderer } from "@/components/LatexRenderer";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { downloadResultAsPDF } from "@/lib/downloadResult";
