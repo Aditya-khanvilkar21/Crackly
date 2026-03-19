@@ -259,10 +259,10 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
                   <CardContent className="space-y-3">
                     <div>
                       <Label>Question Text</Label>
-                      <Textarea
+                      <LatexInput
                         value={q.question}
-                        onChange={(e) => handleUpdateQuestion(qIndex, "question", e.target.value)}
-                        rows={2}
+                        onChange={(val) => handleUpdateQuestion(qIndex, "question", val)}
+                        multiline
                       />
                     </div>
                     
