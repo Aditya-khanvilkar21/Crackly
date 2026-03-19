@@ -471,7 +471,7 @@ export default function TestResult() {
                             <span className="font-medium">
                               {String.fromCharCode(97 + optIndex)})
                             </span>
-                            <span>{option}</span>
+                            <span><LatexRenderer content={option} /></span>
                             {isCorrectOption && (
                               <Badge className="ml-auto bg-green-600">Correct Answer</Badge>
                             )}
