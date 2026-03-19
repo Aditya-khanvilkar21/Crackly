@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Timer, CheckCircle2, AlertCircle, Eye } from "lucide-react";
+import { LatexRenderer } from "@/components/LatexRenderer";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
