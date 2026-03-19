@@ -365,13 +365,15 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
             {/* Current Question Editor */}
             <div className="space-y-4 border rounded-lg p-6 bg-card">
               <div>
-                <Label>Question Text</Label>
-                <Textarea
-                  placeholder="Enter the question..."
-                  value={currentQuestion.question}
-                  onChange={(e) => updateQuestion(currentQuestionIndex, "question", e.target.value)}
-                  className="mt-2 min-h-[100px]"
-                />
+                <Label>Question Text <span className="text-xs text-muted-foreground">(Use $...$ for math: $\frac&#123;a&#125;&#123;b&#125;$, $\sqrt&#123;x&#125;$, $x^2$)</span></Label>
+                <div className="mt-2">
+                  <LatexInput
+                    value={currentQuestion.question}
+                    onChange={(val) => updateQuestion(currentQuestionIndex, "question", val)}
+                    placeholder="Enter the question... Use $...$ for math notation"
+                    multiline
+                  />
+                </div>
               </div>
 
               {/* Image Upload Section */}
