@@ -441,7 +441,7 @@ export default function TestResult() {
                     </Badge>
                   )}
                   
-                  <p className="font-medium mb-4">{question.question}</p>
+                  <p className="font-medium mb-4"><LatexRenderer content={question.question} /></p>
                   
                   {/* Question Image */}
                   {question.imageUrl && (
