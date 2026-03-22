@@ -107,7 +107,18 @@ export default function TestResult() {
       if (!testData) throw new Error("Test not found or access denied");
 
       setResult(resultData as unknown as TestResult);
-      setTest(testData as unknown as Test);
+      
+      const testObj = testData as unknown as Test;
+      // Fix options: ensure each question's options is a proper string array
+      testObj.questions = testObj.questions.map(q => ({
+        ...q,
+        options: Array.isArray(q.options) 
+          ? q.options.map(o => typeof o === 'string' ? o : String(o))
+          : typeof q.options === 'string'
+            ? JSON.parse(q.options as unknown as string)
+            : ['', '', '', '']
+      }));
+      setTest(testObj);
 
     } catch (error) {
       toast.error("Failed to load test result");
