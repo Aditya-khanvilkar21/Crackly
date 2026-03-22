@@ -33,6 +33,7 @@ interface Question {
   correctAnswer: number;
   explanation?: string;
   topic?: string;
+  imageUrl?: string;
 }
 
 interface Test {
