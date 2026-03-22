@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, BookOpen, ChevronRight, CheckCircle2, Lightbulb, FileText, FolderOpen } from "lucide-react";
+import { ArrowLeft, BookOpen, ChevronRight, CheckCircle2, Lightbulb, FileText, FolderOpen, ImageIcon } from "lucide-react";
+import { LatexRenderer } from "@/components/LatexRenderer";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Accordion,
@@ -32,6 +33,7 @@ interface Question {
   correctAnswer: number;
   explanation?: string;
   topic?: string;
+  imageUrl?: string;
 }
 
 interface Test {
@@ -102,12 +104,23 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
 
       if (error) throw error;
 
-      const formattedTests = (data || []).map(test => ({
-        ...test,
-        questions: Array.isArray(test.questions) 
+      const formattedTests = (data || []).map(test => {
+        let questions: Question[] = Array.isArray(test.questions) 
           ? (test.questions as unknown as Question[])
-          : JSON.parse(test.questions as string) as Question[]
-      }));
+          : JSON.parse(test.questions as string) as Question[];
+        
+        // Fix options: ensure each question's options is an array of strings
+        questions = questions.map(q => ({
+          ...q,
+          options: Array.isArray(q.options) 
+            ? q.options.map(o => typeof o === 'string' ? o : String(o))
+            : typeof q.options === 'string' 
+              ? JSON.parse(q.options as string) 
+              : ['', '', '', '']
+        }));
+        
+        return { ...test, questions };
+      });
 
       setTests(formattedTests);
     } catch (error) {
@@ -244,7 +257,9 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
                       Q{qIndex + 1}
                     </Badge>
                     <div className="flex-1">
-                      <p className="text-sm font-medium leading-relaxed">{question.question}</p>
+                      <div className="text-sm font-medium leading-relaxed">
+                        <LatexRenderer content={question.question} />
+                      </div>
                       {question.topic && (
                         <Badge variant="outline" className="mt-2 text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">
                           Topic: {question.topic}
@@ -252,6 +267,18 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
                       )}
                     </div>
                   </div>
+
+                  {/* Question Image */}
+                  {question.imageUrl && (
+                    <div className="ml-8 p-3 bg-muted/30 rounded-lg">
+                      <img 
+                        src={question.imageUrl} 
+                        alt={`Question ${qIndex + 1} diagram`}
+                        className="max-h-72 mx-auto rounded-lg"
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
 
                   <div className="ml-8 space-y-2">
                     {question.options.map((option, oIndex) => (
@@ -268,7 +295,7 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
                         }`}>
                           {getOptionLabel(oIndex)}.
                         </span>
-                        <span className="flex-1">{option}</span>
+                        <span className="flex-1"><LatexRenderer content={option} /></span>
                         {oIndex === question.correctAnswer && (
                           <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
                         )}
@@ -284,7 +311,9 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
                           <span className="text-xs font-bold text-amber-600 uppercase tracking-wide">
                             Explanation
                           </span>
-                          <p className="text-sm mt-1 leading-relaxed">{question.explanation}</p>
+                          <div className="text-sm mt-1 leading-relaxed">
+                            <LatexRenderer content={question.explanation} />
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -118,19 +118,27 @@ export default function TakeTest() {
       }
 
       const testData = data as unknown as Test;
+      
+      // Fix options: ensure each question's options is a proper string array
+      const fixedQuestions = testData.questions.map(q => ({
+        ...q,
+        options: Array.isArray(q.options) 
+          ? q.options.map(o => typeof o === 'string' ? o : String(o))
+          : typeof q.options === 'string'
+            ? JSON.parse(q.options as unknown as string)
+            : ['', '', '', '']
+      }));
+      testData.questions = fixedQuestions;
+      
       setTest(testData);
       
       const isMockTest = testData.test_type === 'mock_test';
       
       if (isMockTest) {
-        // For mock tests, use all 75 questions in order
-        const allQuestions = testData.questions as Question[];
-        setSelectedQuestions(allQuestions);
+        setSelectedQuestions(fixedQuestions);
         setTimeLeft(testData.duration_minutes * 60);
       } else {
-        // Select 25 random questions from the 40 available for chapter tests
-        const allQuestions = testData.questions as Question[];
-        const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+        const shuffled = [...fixedQuestions].sort(() => Math.random() - 0.5);
         setSelectedQuestions(shuffled.slice(0, 25));
         setTimeLeft(testData.duration_minutes * 60);
       }
