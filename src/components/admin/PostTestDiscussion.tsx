@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, BookOpen, ChevronRight, CheckCircle2, Lightbulb, FileText, FolderOpen } from "lucide-react";
+import { ArrowLeft, BookOpen, ChevronRight, CheckCircle2, Lightbulb, FileText, FolderOpen, ImageIcon } from "lucide-react";
+import { LatexRenderer } from "@/components/LatexRenderer";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Accordion,
