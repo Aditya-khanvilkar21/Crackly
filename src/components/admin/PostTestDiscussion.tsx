@@ -104,12 +104,23 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
 
       if (error) throw error;
 
-      const formattedTests = (data || []).map(test => ({
-        ...test,
-        questions: Array.isArray(test.questions) 
+      const formattedTests = (data || []).map(test => {
+        let questions: Question[] = Array.isArray(test.questions) 
           ? (test.questions as unknown as Question[])
-          : JSON.parse(test.questions as string) as Question[]
-      }));
+          : JSON.parse(test.questions as string) as Question[];
+        
+        // Fix options: ensure each question's options is an array of strings
+        questions = questions.map(q => ({
+          ...q,
+          options: Array.isArray(q.options) 
+            ? q.options.map(o => typeof o === 'string' ? o : String(o))
+            : typeof q.options === 'string' 
+              ? JSON.parse(q.options as string) 
+              : ['', '', '', '']
+        }));
+        
+        return { ...test, questions };
+      });
 
       setTests(formattedTests);
     } catch (error) {
