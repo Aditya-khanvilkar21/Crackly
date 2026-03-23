@@ -270,11 +270,15 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
         )}
 
         {userRole === "super_admin" && (
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap gap-2">
             <EditTest 
               test={test as any} 
               onTestUpdated={fetchTests} 
               onTestDeleted={fetchTests} 
+            />
+            <CloneTest 
+              test={test as any} 
+              onTestCloned={fetchTests} 
             />
           </div>
         )}
