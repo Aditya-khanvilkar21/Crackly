@@ -12,6 +12,7 @@ import { CreateMockTest } from "./CreateMockTest";
 import { CreateNEETMockTest } from "./CreateNEETMockTest";
 import { CreateCETMockTest } from "./CreateCETMockTest";
 import { EditTest } from "./EditTest";
+import { CloneTest } from "./CloneTest";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 
@@ -26,6 +27,8 @@ interface Test {
   questions: any;
   test_type: 'chapter_test' | 'mock_test';
   exam_type: ExamType;
+  negative_marking?: number | null;
+  cloned_from?: string | null;
 }
 
 interface TuitionClass {
@@ -209,9 +212,12 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <CardTitle className="text-lg">{test.title}</CardTitle>
               <Badge variant="outline">{test.exam_type}</Badge>
+              {userRole === "super_admin" && test.cloned_from && (
+                <Badge variant="secondary" className="text-xs">Cloned</Badge>
+              )}
             </div>
             <CardDescription>
               {test.test_type === 'mock_test' 
@@ -264,11 +270,15 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
         )}
 
         {userRole === "super_admin" && (
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap gap-2">
             <EditTest 
               test={test as any} 
               onTestUpdated={fetchTests} 
               onTestDeleted={fetchTests} 
+            />
+            <CloneTest 
+              test={test as any} 
+              onTestCloned={fetchTests} 
             />
           </div>
         )}

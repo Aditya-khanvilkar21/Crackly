@@ -1,0 +1,1 @@
+ALTER TABLE public.tests ADD COLUMN cloned_from uuid REFERENCES public.tests(id) ON DELETE SET NULL DEFAULT NULL;
