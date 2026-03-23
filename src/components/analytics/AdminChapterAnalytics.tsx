@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Users, TrendingUp, BookOpen, Award, Target, ChevronRight, ArrowLeft, Download } from "lucide-react";
+import { Users, TrendingUp, BookOpen, Award, Target, ChevronRight, ArrowLeft, Download, FileSpreadsheet } from "lucide-react";
 import { downloadChapterResultsAsPDF } from "@/lib/downloadChapterResults";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
