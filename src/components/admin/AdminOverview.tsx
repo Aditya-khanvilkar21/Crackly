@@ -288,7 +288,7 @@ export const AdminOverview = ({ userRole }: AdminOverviewProps) => {
           <CardContent>
             <div className="text-2xl font-bold">{stats.averageScore}%</div>
             <p className="text-xs text-muted-foreground">
-              From {stats.totalTestResults} test attempts
+              From {stats.totalTestResults} appeared students
             </p>
           </CardContent>
           </Card>
