@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { toast } from "sonner";
+import { downloadTestResultsAsXlsx } from "@/lib/downloadResultsXlsx";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
