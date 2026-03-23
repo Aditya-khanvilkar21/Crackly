@@ -212,9 +212,12 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <CardTitle className="text-lg">{test.title}</CardTitle>
               <Badge variant="outline">{test.exam_type}</Badge>
+              {userRole === "super_admin" && test.cloned_from && (
+                <Badge variant="secondary" className="text-xs">Cloned</Badge>
+              )}
             </div>
             <CardDescription>
               {test.test_type === 'mock_test' 
