@@ -499,10 +499,31 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
             </div>
           </div>
           {studentResults.length > 0 && (
-            <Button onClick={downloadRankListPDF} size="sm" className="gap-2">
-              <Download className="h-4 w-4" />
-              Download PDF
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={downloadRankListPDF} size="sm" variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                PDF
+              </Button>
+              <Button onClick={() => {
+                downloadTestResultsAsXlsx({
+                  testTitle: selectedTest.title,
+                  examType,
+                  subject: getSubjectLabel(selectedTest.subject),
+                  chapter: selectedTest.chapter,
+                  students: studentResults.map(s => ({
+                    rank: s.rank,
+                    studentName: s.studentName,
+                    score: s.score,
+                    totalQuestions: s.totalQuestions,
+                    percentage: s.percentage,
+                  })),
+                });
+                toast.success("Excel file downloaded!");
+              }} size="sm" className="gap-2">
+                <FileSpreadsheet className="h-4 w-4" />
+                Excel
+              </Button>
+            </div>
           )}
         </div>
 
