@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Users, TrendingUp, BookOpen, Award, Target, ChevronRight, ArrowLeft, Download, FileSpreadsheet } from "lucide-react";
 import { downloadChapterResultsAsPDF } from "@/lib/downloadChapterResults";
+import { downloadTestResultsAsXlsx } from "@/lib/downloadResultsXlsx";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
