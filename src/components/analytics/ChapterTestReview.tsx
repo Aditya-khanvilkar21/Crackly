@@ -549,7 +549,7 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
                 <CardContent className="p-4">
                   <Users className="h-5 w-5 mb-1" />
                   <div className="text-2xl font-bold">{studentResults.length}</div>
-                  <p className="text-xs opacity-80">Students</p>
+                  <p className="text-xs opacity-80">Appeared Students</p>
                 </CardContent>
               </Card>
               <Card className="bg-accent text-accent-foreground border-0">
