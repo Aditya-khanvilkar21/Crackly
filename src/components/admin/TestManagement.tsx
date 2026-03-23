@@ -27,6 +27,8 @@ interface Test {
   questions: any;
   test_type: 'chapter_test' | 'mock_test';
   exam_type: ExamType;
+  negative_marking?: number | null;
+  cloned_from?: string | null;
 }
 
 interface TuitionClass {
