@@ -12,6 +12,7 @@ import { CreateMockTest } from "./CreateMockTest";
 import { CreateNEETMockTest } from "./CreateNEETMockTest";
 import { CreateCETMockTest } from "./CreateCETMockTest";
 import { EditTest } from "./EditTest";
+import { CloneTest } from "./CloneTest";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 
