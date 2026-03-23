@@ -355,10 +355,31 @@ export const AdminChapterAnalytics = ({ examType, userRole, onBack }: AdminChapt
             </div>
           </div>
           {chapterStudents.length > 0 && (
-            <Button onClick={handleDownloadChapterResults} className="gap-2">
-              <Download className="h-4 w-4" />
-              Download Results
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleDownloadChapterResults} variant="outline" className="gap-2" size="sm">
+                <Download className="h-4 w-4" />
+                PDF
+              </Button>
+              <Button onClick={() => {
+                downloadTestResultsAsXlsx({
+                  testTitle: selectedChapter!,
+                  examType,
+                  subject: getSubjectLabel(selectedSubject!),
+                  chapter: selectedChapter!,
+                  students: chapterStudents.map((s, idx) => ({
+                    rank: idx + 1,
+                    studentName: s.studentName,
+                    score: s.score,
+                    totalQuestions: s.totalQuestions,
+                    percentage: s.percentage,
+                  })),
+                });
+                toast.success("Excel file downloaded!");
+              }} size="sm" className="gap-2">
+                <FileSpreadsheet className="h-4 w-4" />
+                Excel
+              </Button>
+            </div>
           )}
         </div>
         {chapterLoading ? (
