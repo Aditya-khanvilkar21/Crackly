@@ -248,6 +248,7 @@ export type Database = {
       tests: {
         Row: {
           chapter: string | null
+          cloned_from: string | null
           created_at: string
           difficulty: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes: number
@@ -263,6 +264,7 @@ export type Database = {
         }
         Insert: {
           chapter?: string | null
+          cloned_from?: string | null
           created_at?: string
           difficulty: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes?: number
@@ -278,6 +280,7 @@ export type Database = {
         }
         Update: {
           chapter?: string | null
+          cloned_from?: string | null
           created_at?: string
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
           duration_minutes?: number
@@ -291,7 +294,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tests_cloned_from_fkey"
+            columns: ["cloned_from"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tuition_classes: {
         Row: {
