@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Users, TrendingUp, BookOpen, Award, Target, ChevronRight, ArrowLeft, Download } from "lucide-react";
+import { Users, TrendingUp, BookOpen, Award, Target, ChevronRight, ArrowLeft, Download, FileSpreadsheet } from "lucide-react";
 import { downloadChapterResultsAsPDF } from "@/lib/downloadChapterResults";
+import { downloadTestResultsAsXlsx } from "@/lib/downloadResultsXlsx";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -354,10 +355,31 @@ export const AdminChapterAnalytics = ({ examType, userRole, onBack }: AdminChapt
             </div>
           </div>
           {chapterStudents.length > 0 && (
-            <Button onClick={handleDownloadChapterResults} className="gap-2">
-              <Download className="h-4 w-4" />
-              Download Results
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleDownloadChapterResults} variant="outline" className="gap-2" size="sm">
+                <Download className="h-4 w-4" />
+                PDF
+              </Button>
+              <Button onClick={() => {
+                downloadTestResultsAsXlsx({
+                  testTitle: selectedChapter!,
+                  examType,
+                  subject: getSubjectLabel(selectedSubject!),
+                  chapter: selectedChapter!,
+                  students: chapterStudents.map((s, idx) => ({
+                    rank: idx + 1,
+                    studentName: s.studentName,
+                    score: s.score,
+                    totalQuestions: s.totalQuestions,
+                    percentage: s.percentage,
+                  })),
+                });
+                toast.success("Excel file downloaded!");
+              }} size="sm" className="gap-2">
+                <FileSpreadsheet className="h-4 w-4" />
+                Excel
+              </Button>
+            </div>
           )}
         </div>
         {chapterLoading ? (
@@ -382,7 +404,7 @@ export const AdminChapterAnalytics = ({ examType, userRole, onBack }: AdminChapt
                 <CardContent className="p-4">
                   <Users className="h-5 w-5 mb-2" />
                   <div className="text-2xl font-bold">{chapterStudents.length}</div>
-                  <p className="text-xs opacity-80">Students</p>
+                  <p className="text-xs opacity-80">Appeared Students</p>
                 </CardContent>
               </Card>
               <Card className="bg-accent text-accent-foreground border-0">

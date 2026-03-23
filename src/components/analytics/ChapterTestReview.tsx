@@ -4,12 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Users, Award, Target, ChevronRight, CheckCircle2, XCircle, BookOpen, Download } from "lucide-react";
+import { ArrowLeft, Users, Award, Target, ChevronRight, CheckCircle2, XCircle, BookOpen, Download, FileSpreadsheet } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { toast } from "sonner";
+import { downloadTestResultsAsXlsx } from "@/lib/downloadResultsXlsx";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
@@ -498,10 +499,31 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
             </div>
           </div>
           {studentResults.length > 0 && (
-            <Button onClick={downloadRankListPDF} size="sm" className="gap-2">
-              <Download className="h-4 w-4" />
-              Download PDF
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={downloadRankListPDF} size="sm" variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                PDF
+              </Button>
+              <Button onClick={() => {
+                downloadTestResultsAsXlsx({
+                  testTitle: selectedTest.title,
+                  examType,
+                  subject: getSubjectLabel(selectedTest.subject),
+                  chapter: selectedTest.chapter,
+                  students: studentResults.map(s => ({
+                    rank: s.rank,
+                    studentName: s.studentName,
+                    score: s.score,
+                    totalQuestions: s.totalQuestions,
+                    percentage: s.percentage,
+                  })),
+                });
+                toast.success("Excel file downloaded!");
+              }} size="sm" className="gap-2">
+                <FileSpreadsheet className="h-4 w-4" />
+                Excel
+              </Button>
+            </div>
           )}
         </div>
 
@@ -527,7 +549,7 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
                 <CardContent className="p-4">
                   <Users className="h-5 w-5 mb-1" />
                   <div className="text-2xl font-bold">{studentResults.length}</div>
-                  <p className="text-xs opacity-80">Students</p>
+                  <p className="text-xs opacity-80">Appeared Students</p>
                 </CardContent>
               </Card>
               <Card className="bg-accent text-accent-foreground border-0">
