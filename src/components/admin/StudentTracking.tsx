@@ -155,25 +155,8 @@ export const StudentTracking = () => {
     if (!selectedClass) return;
 
     try {
-      const { data: classStudents } = await supabase
-        .from("class_students")
-        .select("student_id")
-        .eq("class_id", selectedClass);
-
-      const enrolledIds = classStudents?.map(cs => cs.student_id) || [];
-
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "student");
-
-      const studentIds = roles?.map(r => r.user_id) || [];
-
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, student_id")
-        .in("id", studentIds)
-        .not("id", "in", `(${enrolledIds.join(",")})`);
+        .rpc("get_available_students_for_class", { _class_id: selectedClass });
 
       if (error) throw error;
       setAvailableStudents(data || []);
