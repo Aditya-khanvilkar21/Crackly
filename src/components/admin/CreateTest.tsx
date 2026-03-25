@@ -49,7 +49,7 @@ const emptyQuestion: QuestionFormData = {
 export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState<QuestionFormData[]>(
-    Array(40).fill(null).map(() => ({ ...emptyQuestion }))
+    Array(45).fill(null).map(() => ({ ...emptyQuestion }))
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
