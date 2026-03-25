@@ -31,7 +31,7 @@ const testSchema = z.object({
   difficulty: z.enum(["easy", "medium", "hard"]),
   duration_minutes: z.number().min(10).max(180),
   exam_type: z.enum(["JEE", "NEET", "CET"]),
-  questions: z.array(questionSchema).length(40, "Must have exactly 40 questions"),
+  questions: z.array(questionSchema).length(45, "Must have exactly 45 questions"),
 });
 
 type TestFormData = z.infer<typeof testSchema>;
@@ -49,7 +49,7 @@ const emptyQuestion: QuestionFormData = {
 export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState<QuestionFormData[]>(
-    Array(40).fill(null).map(() => ({ ...emptyQuestion }))
+    Array(45).fill(null).map(() => ({ ...emptyQuestion }))
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -168,7 +168,7 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
 
       // Reset form
       form.reset();
-      setQuestions(Array(40).fill(null).map(() => ({ ...emptyQuestion })));
+      setQuestions(Array(45).fill(null).map(() => ({ ...emptyQuestion })));
       setCurrentQuestionIndex(0);
       
       onTestCreated?.();
@@ -328,13 +328,13 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle>Questions ({totalCompleteQuestions}/40 Complete)</CardTitle>
+                <CardTitle>Questions ({totalCompleteQuestions}/45 Complete)</CardTitle>
                 <CardDescription>
-                  Add 40 questions. Students will randomly get 25 questions during the test.
+                  Add 45 questions. All questions will be shown to students in shuffled order.
                 </CardDescription>
               </div>
               <div className="text-sm font-medium">
-                Question {currentQuestionIndex + 1} of 40
+                Question {currentQuestionIndex + 1} of 45
               </div>
             </div>
           </CardHeader>
@@ -492,8 +492,8 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setCurrentQuestionIndex(Math.min(39, currentQuestionIndex + 1))}
-                  disabled={currentQuestionIndex === 39}
+                  onClick={() => setCurrentQuestionIndex(Math.min(44, currentQuestionIndex + 1))}
+                  disabled={currentQuestionIndex === 44}
                 >
                   Next
                   <ChevronRight className="w-4 h-4 ml-2" />
@@ -507,7 +507,7 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
         <div className="flex justify-end">
           <Button 
             type="submit" 
-            disabled={isSubmitting || totalCompleteQuestions < 40}
+            disabled={isSubmitting || totalCompleteQuestions < 45}
             className="min-w-[200px]"
           >
             <Save className="w-4 h-4 mr-2" />

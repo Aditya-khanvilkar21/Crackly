@@ -136,12 +136,12 @@ export default function TakeTest() {
       
       if (isMockTest) {
         setSelectedQuestions(fixedQuestions);
-        setTimeLeft(testData.duration_minutes * 60);
       } else {
+        // Shuffle all questions for chapter tests (no random selection, show all)
         const shuffled = [...fixedQuestions].sort(() => Math.random() - 0.5);
-        setSelectedQuestions(shuffled.slice(0, 25));
-        setTimeLeft(testData.duration_minutes * 60);
+        setSelectedQuestions(shuffled);
       }
+      setTimeLeft(testData.duration_minutes * 60);
     } catch (error) {
       console.error("Error fetching test:", error);
       toast.error("Failed to load test");
@@ -214,13 +214,14 @@ export default function TakeTest() {
     const isPCB = test.title?.includes('[CET-PCB]');
     
     if (test.test_type === 'chapter_test') {
+      const totalQ = selectedQuestions.length || test.questions?.length || 45;
       return {
         title: 'Chapter Test Marking Scheme',
-        totalQuestions: 25,
-        totalMarks: 25,
+        totalQuestions: totalQ,
+        totalMarks: totalQ,
         marksPerQuestion: 1,
         negativeMarking: 0,
-        subjects: [{ name: test.subject || 'Subject', questions: 25, marksPerQ: 1 }]
+        subjects: [{ name: test.subject || 'Subject', questions: totalQ, marksPerQ: 1 }]
       };
     }
     

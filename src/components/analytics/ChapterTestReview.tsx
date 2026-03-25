@@ -233,8 +233,7 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
         .from("test_results")
         .select("*")
         .eq("test_id", test.id)
-        .in("student_id", studentIds)
-        .order("score", { ascending: false });
+        .in("student_id", studentIds);
 
       // Get profiles
       const { data: profiles } = await supabase
@@ -243,7 +242,13 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
         .in("id", studentIds);
 
       if (results && profiles) {
-        const rankedResults: StudentResult[] = results.map((r: any, idx: number) => {
+        // Sort by score descending, then by time taken ascending (tie-breaker)
+        const sortedResults = [...results].sort((a: any, b: any) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return (a.time_taken_seconds || Infinity) - (b.time_taken_seconds || Infinity);
+        });
+
+        const rankedResults: StudentResult[] = sortedResults.map((r: any, idx: number) => {
           const profile = profiles.find(p => p.id === r.student_id);
           return {
             studentId: r.student_id,
