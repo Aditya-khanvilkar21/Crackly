@@ -328,9 +328,9 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle>Questions ({totalCompleteQuestions}/40 Complete)</CardTitle>
+                <CardTitle>Questions ({totalCompleteQuestions}/45 Complete)</CardTitle>
                 <CardDescription>
-                  Add 40 questions. Students will randomly get 25 questions during the test.
+                  Add 45 questions. All questions will be shown to students in shuffled order.
                 </CardDescription>
               </div>
               <div className="text-sm font-medium">
