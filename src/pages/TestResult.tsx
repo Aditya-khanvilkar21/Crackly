@@ -134,14 +134,12 @@ export default function TestResult() {
 
   const getPercentage = () => {
     if (!result || !test) return 0;
-    // For chapter tests, always calculate out of 25
-    const totalQuestions = test.test_type === 'chapter_test' ? 25 : result.total_questions;
-    return ((result.score / totalQuestions) * 100).toFixed(1);
+    return ((result.score / result.total_questions) * 100).toFixed(1);
   };
 
   const getDisplayTotal = () => {
-    if (!test) return 0;
-    return test.test_type === 'chapter_test' ? 25 : result?.total_questions || 0;
+    if (!result) return 0;
+    return result.total_questions;
   };
 
   const isNEETMockTest = () => {

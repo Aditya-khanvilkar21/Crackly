@@ -507,7 +507,7 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
         <div className="flex justify-end">
           <Button 
             type="submit" 
-            disabled={isSubmitting || totalCompleteQuestions < 40}
+            disabled={isSubmitting || totalCompleteQuestions < 45}
             className="min-w-[200px]"
           >
             <Save className="w-4 h-4 mr-2" />

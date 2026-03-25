@@ -90,9 +90,8 @@ Deno.serve(async (req) => {
     const isChapterTest = test.test_type === 'chapter_test';
     const negativeMarking = test.negative_marking || 0;
     
-    // For chapter tests, we only have 25 questions (randomly selected by frontend)
-    // For mock tests, use all questions
-    const totalQuestions = isChapterTest ? 25 : questions.length;
+    // Use all questions for both chapter tests and mock tests
+    const totalQuestions = questions.length;
     let correctCount = 0;
     let wrongCount = 0;
     let totalMarks = 0;
