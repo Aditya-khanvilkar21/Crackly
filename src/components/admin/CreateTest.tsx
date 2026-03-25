@@ -31,7 +31,7 @@ const testSchema = z.object({
   difficulty: z.enum(["easy", "medium", "hard"]),
   duration_minutes: z.number().min(10).max(180),
   exam_type: z.enum(["JEE", "NEET", "CET"]),
-  questions: z.array(questionSchema).length(40, "Must have exactly 40 questions"),
+  questions: z.array(questionSchema).length(45, "Must have exactly 45 questions"),
 });
 
 type TestFormData = z.infer<typeof testSchema>;
