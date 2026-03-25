@@ -334,7 +334,7 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
                 </CardDescription>
               </div>
               <div className="text-sm font-medium">
-                Question {currentQuestionIndex + 1} of 40
+                Question {currentQuestionIndex + 1} of 45
               </div>
             </div>
           </CardHeader>
