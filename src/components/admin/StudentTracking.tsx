@@ -155,25 +155,8 @@ export const StudentTracking = () => {
     if (!selectedClass) return;
 
     try {
-      const { data: classStudents } = await supabase
-        .from("class_students")
-        .select("student_id")
-        .eq("class_id", selectedClass);
-
-      const enrolledIds = classStudents?.map(cs => cs.student_id) || [];
-
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "student");
-
-      const studentIds = roles?.map(r => r.user_id) || [];
-
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, student_id")
-        .in("id", studentIds)
-        .not("id", "in", `(${enrolledIds.join(",")})`);
+        .rpc("get_available_students_for_class", { _class_id: selectedClass });
 
       if (error) throw error;
       setAvailableStudents(data || []);
@@ -218,25 +201,15 @@ export const StudentTracking = () => {
     if (!studentIdSearch.trim() || !selectedClass) return;
 
     try {
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("id, full_name, student_id")
-        .or(`student_id.eq.${studentIdSearch},id.eq.${studentIdSearch}`)
-        .maybeSingle();
+      // Search within available students fetched via the security definer function
+      const matchedStudent = availableStudents.find(
+        s => s.student_id === studentIdSearch.trim() || s.id === studentIdSearch.trim()
+      );
 
-      if (profileError) {
-        toast({
-          title: "Error",
-          description: profileError.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (!profileData) {
+      if (!matchedStudent) {
         toast({
           title: "Student not found",
-          description: `No student found with ID: ${studentIdSearch}. You can select from the list of all registered students below.`,
+          description: `No student found with ID: ${studentIdSearch}. Please check the ID or select from the list below.`,
           variant: "destructive",
         });
         return;
@@ -244,13 +217,13 @@ export const StudentTracking = () => {
 
       const { error } = await supabase
         .from("class_students")
-        .insert([{ class_id: selectedClass, student_id: profileData.id }]);
+        .insert([{ class_id: selectedClass, student_id: matchedStudent.id }]);
 
       if (error) {
         if (error.code === "23505") {
           toast({
             title: "Already enrolled",
-            description: `${profileData.full_name} is already in this class`,
+            description: `${matchedStudent.full_name} is already in this class`,
             variant: "destructive",
           });
         } else {
@@ -259,7 +232,7 @@ export const StudentTracking = () => {
       } else {
         toast({
           title: "Success",
-          description: `${profileData.full_name} (${profileData.student_id}) added to class`,
+          description: `${matchedStudent.full_name} (${matchedStudent.student_id}) added to class`,
         });
         setStudentIdSearch("");
         setIsAddOpen(false);
