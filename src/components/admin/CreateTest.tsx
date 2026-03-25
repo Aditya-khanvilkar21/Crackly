@@ -168,7 +168,7 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
 
       // Reset form
       form.reset();
-      setQuestions(Array(40).fill(null).map(() => ({ ...emptyQuestion })));
+      setQuestions(Array(45).fill(null).map(() => ({ ...emptyQuestion })));
       setCurrentQuestionIndex(0);
       
       onTestCreated?.();
