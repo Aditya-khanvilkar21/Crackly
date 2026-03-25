@@ -374,6 +374,14 @@ export type Database = {
     }
     Functions: {
       generate_student_id: { Args: never; Returns: string }
+      get_available_students_for_class: {
+        Args: { _class_id: string }
+        Returns: {
+          full_name: string
+          id: string
+          student_id: string
+        }[]
+      }
       get_test_for_taking: { Args: { test_id_param: string }; Returns: Json }
       get_test_result_with_questions: {
         Args: { test_id_param: string }
