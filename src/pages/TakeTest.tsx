@@ -136,12 +136,12 @@ export default function TakeTest() {
       
       if (isMockTest) {
         setSelectedQuestions(fixedQuestions);
-        setTimeLeft(testData.duration_minutes * 60);
       } else {
+        // Shuffle all questions for chapter tests (no random selection, show all)
         const shuffled = [...fixedQuestions].sort(() => Math.random() - 0.5);
-        setSelectedQuestions(shuffled.slice(0, 25));
-        setTimeLeft(testData.duration_minutes * 60);
+        setSelectedQuestions(shuffled);
       }
+      setTimeLeft(testData.duration_minutes * 60);
     } catch (error) {
       console.error("Error fetching test:", error);
       toast.error("Failed to load test");
