@@ -214,7 +214,7 @@ export default function TakeTest() {
     const isPCB = test.title?.includes('[CET-PCB]');
     
     if (test.test_type === 'chapter_test') {
-      const totalQ = fixedQuestions?.length || selectedQuestions.length || 45;
+      const totalQ = selectedQuestions.length || test.questions?.length || 45;
       return {
         title: 'Chapter Test Marking Scheme',
         totalQuestions: totalQ,
