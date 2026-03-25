@@ -492,8 +492,8 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setCurrentQuestionIndex(Math.min(39, currentQuestionIndex + 1))}
-                  disabled={currentQuestionIndex === 39}
+                  onClick={() => setCurrentQuestionIndex(Math.min(44, currentQuestionIndex + 1))}
+                  disabled={currentQuestionIndex === 44}
                 >
                   Next
                   <ChevronRight className="w-4 h-4 ml-2" />
