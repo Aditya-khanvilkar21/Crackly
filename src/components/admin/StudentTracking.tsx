@@ -201,25 +201,15 @@ export const StudentTracking = () => {
     if (!studentIdSearch.trim() || !selectedClass) return;
 
     try {
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("id, full_name, student_id")
-        .or(`student_id.eq.${studentIdSearch},id.eq.${studentIdSearch}`)
-        .maybeSingle();
+      // Search within available students fetched via the security definer function
+      const matchedStudent = availableStudents.find(
+        s => s.student_id === studentIdSearch.trim() || s.id === studentIdSearch.trim()
+      );
 
-      if (profileError) {
-        toast({
-          title: "Error",
-          description: profileError.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (!profileData) {
+      if (!matchedStudent) {
         toast({
           title: "Student not found",
-          description: `No student found with ID: ${studentIdSearch}. You can select from the list of all registered students below.`,
+          description: `No student found with ID: ${studentIdSearch}. Please check the ID or select from the list below.`,
           variant: "destructive",
         });
         return;
