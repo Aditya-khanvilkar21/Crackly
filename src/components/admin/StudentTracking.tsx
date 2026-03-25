@@ -217,13 +217,13 @@ export const StudentTracking = () => {
 
       const { error } = await supabase
         .from("class_students")
-        .insert([{ class_id: selectedClass, student_id: profileData.id }]);
+        .insert([{ class_id: selectedClass, student_id: matchedStudent.id }]);
 
       if (error) {
         if (error.code === "23505") {
           toast({
             title: "Already enrolled",
-            description: `${profileData.full_name} is already in this class`,
+            description: `${matchedStudent.full_name} is already in this class`,
             variant: "destructive",
           });
         } else {
@@ -232,7 +232,7 @@ export const StudentTracking = () => {
       } else {
         toast({
           title: "Success",
-          description: `${profileData.full_name} (${profileData.student_id}) added to class`,
+          description: `${matchedStudent.full_name} (${matchedStudent.student_id}) added to class`,
         });
         setStudentIdSearch("");
         setIsAddOpen(false);
