@@ -15,6 +15,7 @@ interface Question {
   correctAnswer: number;
   imageUrl?: string;
   explanation?: string;
+  explanationImage?: string;
   subject?: string;
   marksPerQuestion?: number;
   topic?: string;
