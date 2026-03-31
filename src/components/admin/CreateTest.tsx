@@ -21,6 +21,7 @@ const questionSchema = z.object({
   correctAnswer: z.number().min(0).max(3, "Must select a correct answer"),
   imageUrl: z.string().optional(),
   explanation: z.string().optional(),
+  explanationImage: z.string().optional(),
   topic: z.string().optional(),
 });
 
