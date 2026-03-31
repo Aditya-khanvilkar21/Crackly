@@ -495,13 +495,23 @@ export default function TestResult() {
                   </div>
 
                   {/* Explanation Section */}
-                  {question.explanation && (
+                  {(question.explanation || question.explanationImage) && (
                     <div className="mt-4 p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
                       <div className="flex items-start gap-2">
                         <Lightbulb className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                        <div>
+                        <div className="flex-1">
                           <p className="font-semibold text-amber-800 dark:text-amber-200 mb-1">Explanation</p>
-                          <p className="text-sm text-amber-700 dark:text-amber-300"><LatexRenderer content={question.explanation} /></p>
+                          {question.explanation && (
+                            <p className="text-sm text-amber-700 dark:text-amber-300"><LatexRenderer content={question.explanation} /></p>
+                          )}
+                          {question.explanationImage && (
+                            <img 
+                              src={question.explanationImage} 
+                              alt="Explanation diagram"
+                              className="mt-3 max-w-full max-h-80 rounded-lg border border-amber-300 dark:border-amber-700"
+                              loading="lazy"
+                            />
+                          )}
                         </div>
                       </div>
                     </div>

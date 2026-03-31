@@ -304,17 +304,27 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
                     ))}
                   </div>
 
-                  {question.explanation && (
+                  {(question.explanation || question.explanationImage) && (
                     <div className="ml-8 mt-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
                       <div className="flex items-start gap-2">
                         <Lightbulb className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-                        <div>
+                        <div className="flex-1">
                           <span className="text-xs font-bold text-amber-600 uppercase tracking-wide">
                             Explanation
                           </span>
-                          <div className="text-sm mt-1 leading-relaxed">
-                            <LatexRenderer content={question.explanation} />
-                          </div>
+                          {question.explanation && (
+                            <div className="text-sm mt-1 leading-relaxed">
+                              <LatexRenderer content={question.explanation} />
+                            </div>
+                          )}
+                          {question.explanationImage && (
+                            <img 
+                              src={question.explanationImage} 
+                              alt={`Question ${qIndex + 1} explanation diagram`}
+                              className="mt-3 max-w-full max-h-80 rounded-lg border border-amber-500/30"
+                              loading="lazy"
+                            />
+                          )}
                         </div>
                       </div>
                     </div>
