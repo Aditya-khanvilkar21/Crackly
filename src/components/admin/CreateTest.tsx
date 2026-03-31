@@ -44,6 +44,7 @@ const emptyQuestion: QuestionFormData = {
   correctAnswer: 0,
   imageUrl: undefined,
   explanation: "",
+  explanationImage: undefined,
   topic: "",
 };
 
