@@ -127,16 +127,18 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
     }
   };
 
-  const handleRemoveImage = async (questionIndex: number) => {
-    const imageUrl = questions[questionIndex].imageUrl;
+  const handleRemoveImage = async (questionIndex: number, field: 'imageUrl' | 'explanationImage' = 'imageUrl') => {
+    const imageUrl = questions[questionIndex][field];
     if (!imageUrl) return;
 
     try {
-      const fileName = imageUrl.split('/').pop();
-      if (fileName) {
-        await supabase.storage.from('test-questions').remove([fileName]);
+      // Extract path from URL
+      const urlParts = imageUrl.split('/test-questions/');
+      const filePath = urlParts[urlParts.length - 1];
+      if (filePath) {
+        await supabase.storage.from('test-questions').remove([filePath]);
       }
-      updateQuestion(questionIndex, 'imageUrl', undefined);
+      updateQuestion(questionIndex, field, undefined);
       toast({
         title: "Success",
         description: "Image removed successfully",
