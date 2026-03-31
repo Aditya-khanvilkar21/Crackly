@@ -90,24 +90,27 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
     form.setValue("questions", newQuestions);
   };
 
-  const handleImageUpload = async (questionIndex: number, file: File) => {
-    setUploadingImage(true);
+  const [uploadingExplanationImage, setUploadingExplanationImage] = useState(false);
+
+  const handleImageUpload = async (questionIndex: number, file: File, field: 'imageUrl' | 'explanationImage' = 'imageUrl') => {
+    const setUploading = field === 'imageUrl' ? setUploadingImage : setUploadingExplanationImage;
+    setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const folder = field === 'explanationImage' ? 'explanations' : '';
+      const fileName = `${folder ? folder + '/' : ''}${crypto.randomUUID()}.${fileExt}`;
 
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('test-questions')
-        .upload(filePath, file);
+        .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
         .from('test-questions')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
-      updateQuestion(questionIndex, 'imageUrl', publicUrl);
+      updateQuestion(questionIndex, field, publicUrl);
 
       toast({
         title: "Success",
@@ -120,7 +123,7 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
         variant: "destructive",
       });
     } finally {
-      setUploadingImage(false);
+      setUploading(false);
     }
   };
 
