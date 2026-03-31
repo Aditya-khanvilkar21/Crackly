@@ -17,6 +17,7 @@ interface Question {
   correctAnswer: number;
   imageUrl?: string;
   explanation?: string;
+  explanationImage?: string;
   subject?: string;
 }
 
@@ -313,6 +314,20 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
                         placeholder="Enter explanation..."
                         multiline
                       />
+                    </div>
+
+                    <div>
+                      <Label>Explanation Image URL (optional)</Label>
+                      <Input
+                        value={q.explanationImage || ""}
+                        onChange={(e) => handleUpdateQuestion(qIndex, "explanationImage", e.target.value)}
+                        placeholder="https://..."
+                      />
+                      {q.explanationImage && (
+                        <div className="mt-2 p-2 bg-muted/50 rounded-lg">
+                          <img src={q.explanationImage} alt="Explanation" className="max-h-40 mx-auto rounded" />
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
