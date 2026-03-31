@@ -32,6 +32,7 @@ interface Question {
   options: string[];
   correctAnswer: number;
   explanation?: string;
+  explanationImage?: string;
   topic?: string;
   imageUrl?: string;
 }
