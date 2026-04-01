@@ -87,6 +87,16 @@ export default function TakeTest() {
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [selectedQuestions]);
 
+  // Anti-cheating: disable copy, paste, cut, right-click
+  useEffect(() => {
+    const prevent = (e: Event) => e.preventDefault();
+    const events: string[] = ["copy", "paste", "cut", "contextmenu"];
+    events.forEach((evt) => document.addEventListener(evt, prevent));
+    return () => {
+      events.forEach((evt) => document.removeEventListener(evt, prevent));
+    };
+  }, []);
+
   useEffect(() => {
     if (selectedQuestions.length > 0 && timeLeft > 0) {
       const timer = setInterval(() => {
