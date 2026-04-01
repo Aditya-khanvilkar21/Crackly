@@ -58,6 +58,9 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [preGenTestId, setPreGenTestId] = useState<string | null>(null);
+  const [preGenQuestions, setPreGenQuestions] = useState<any[]>([]);
+  const [showPreGen, setShowPreGen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<NEETMockTestFormData>({
