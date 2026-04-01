@@ -578,6 +578,18 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
           </Button>
         </div>
       </form>
+
+      <ImagePreGenModal
+        open={showPreGen}
+        testId={preGenTestId}
+        questions={preGenQuestions}
+        onComplete={() => {
+          setShowPreGen(false);
+          setPreGenTestId(null);
+          setPreGenQuestions([]);
+          onTestCreated?.();
+        }}
+      />
     </Form>
   );
 };
