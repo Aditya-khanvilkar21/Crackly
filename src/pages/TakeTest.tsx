@@ -23,6 +23,8 @@ interface Question {
   question: string;
   options: string[];
   imageUrl?: string;
+  questionImageUrl?: string;
+  optionImageUrls?: string[];
   subject?: 'physics' | 'chemistry' | 'mathematics' | 'biology';
   marksPerQuestion?: number;
 }
