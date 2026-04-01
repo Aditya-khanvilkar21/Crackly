@@ -168,7 +168,7 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
   const onSubmit = async (data: MockTestFormData) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("tests").insert({
+      const { data: insertedTest, error } = await supabase.from("tests").insert({
         title: data.title,
         test_type: 'mock_test',
         difficulty: data.difficulty,
@@ -179,14 +179,18 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
         is_active: true,
         chapter: null,
         subject: null,
-      });
+      }).select("id").single();
 
       if (error) throw error;
 
       toast({
         title: "Success!",
-        description: "Mock test created successfully",
+        description: "Mock test created. Generating images...",
       });
+
+      setPreGenTestId(insertedTest.id);
+      setPreGenQuestions(data.questions);
+      setShowPreGen(true);
 
       form.reset();
       setQuestions([
@@ -196,8 +200,6 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
       ]);
       setCurrentQuestionIndex(0);
       setCurrentSubject("physics");
-      
-      onTestCreated?.();
     } catch (error: any) {
       toast({
         title: "Error",
