@@ -594,7 +594,10 @@ export default function TakeTest() {
                   )}
                 </div>
                 <h2 className="text-xl font-semibold leading-relaxed">
-                  <LatexRenderer content={currentQuestion.question} />
+                  <QuestionImageRenderer
+                    questionId={`${testId}-q${currentQuestionIndex}`}
+                    content={currentQuestion.question}
+                  />
                 </h2>
               </div>
 
