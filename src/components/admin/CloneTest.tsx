@@ -54,6 +54,9 @@ export const CloneTest = ({ test, onTestCloned }: CloneTestProps) => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const { toast } = useToast();
+  const [preGenTestId, setPreGenTestId] = useState<string | null>(null);
+  const [preGenQuestions, setPreGenQuestions] = useState<any[]>([]);
+  const [showPreGen, setShowPreGen] = useState(false);
 
   // Clone state
   const [title, setTitle] = useState("");
