@@ -606,8 +606,11 @@ export default function TakeTest() {
                 <div className="mb-6 p-4 bg-muted/50 rounded-lg">
                   <img 
                     src={currentQuestion.imageUrl} 
-                    alt="Question diagram"
+                    alt=""
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
                     className="max-h-96 mx-auto rounded-lg"
+                    style={{ userSelect: "none", pointerEvents: "none" }}
                   />
                 </div>
               )}
