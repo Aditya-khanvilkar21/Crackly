@@ -216,7 +216,7 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
       // Store CET type in the title for identification
       const testTitle = `[CET-${cetType}] ${title}`;
       
-      const { error } = await supabase.from("tests").insert({
+      const { data: insertedTest, error } = await supabase.from("tests").insert({
         title: testTitle,
         test_type: 'mock_test',
         difficulty,
@@ -235,14 +235,18 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
         is_active: true,
         chapter: null,
         subject: null,
-      });
+      }).select("id").single();
 
       if (error) throw error;
 
       toast({
         title: "Success!",
-        description: `CET ${cetType} Mock test created successfully`,
+        description: `CET ${cetType} Mock test created. Generating images...`,
       });
+
+      setPreGenTestId(insertedTest.id);
+      setPreGenQuestions(questions);
+      setShowPreGen(true);
 
       // Reset form
       setTitle("");
