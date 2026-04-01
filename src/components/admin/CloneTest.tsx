@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +54,9 @@ export const CloneTest = ({ test, onTestCloned }: CloneTestProps) => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const { toast } = useToast();
+  const [preGenTestId, setPreGenTestId] = useState<string | null>(null);
+  const [preGenQuestions, setPreGenQuestions] = useState<any[]>([]);
+  const [showPreGen, setShowPreGen] = useState(false);
 
   // Clone state
   const [title, setTitle] = useState("");
@@ -185,12 +189,14 @@ export const CloneTest = ({ test, onTestCloned }: CloneTestProps) => {
         insertData.chapter = chapter;
       }
 
-      const { error } = await supabase.from("tests").insert(insertData);
+      const { data: insertedTest, error } = await supabase.from("tests").insert(insertData).select("id").single();
       if (error) throw error;
 
-      toast({ title: "Test cloned successfully! 🎉", description: `New ${examType} test created.` });
+      toast({ title: "Test cloned! Generating images...", description: `New ${examType} test created.` });
       setIsOpen(false);
-      onTestCloned();
+      setPreGenTestId(insertedTest.id);
+      setPreGenQuestions(questions);
+      setShowPreGen(true);
     } catch (error: any) {
       toast({ title: "Error cloning test", description: error.message, variant: "destructive" });
     } finally {
@@ -480,6 +486,18 @@ export const CloneTest = ({ test, onTestCloned }: CloneTestProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ImagePreGenModal
+        open={showPreGen}
+        testId={preGenTestId}
+        questions={preGenQuestions}
+        onComplete={() => {
+          setShowPreGen(false);
+          setPreGenTestId(null);
+          setPreGenQuestions([]);
+          onTestCloned();
+        }}
+      />
     </>
   );
 };

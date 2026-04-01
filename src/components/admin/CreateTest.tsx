@@ -14,6 +14,7 @@ import { Plus, Trash2, Save, ChevronLeft, ChevronRight, Upload, X, Image as Imag
 import { LatexInput } from "@/components/admin/LatexInput";
 import { LatexRenderer } from "@/components/LatexRenderer";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
 
 const questionSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),
@@ -55,6 +56,9 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [preGenTestId, setPreGenTestId] = useState<string | null>(null);
+  const [preGenQuestions, setPreGenQuestions] = useState<any[]>([]);
+  const [showPreGen, setShowPreGen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<TestFormData>({
@@ -155,7 +159,7 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
   const onSubmit = async (data: TestFormData) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("tests").insert({
+      const { data: insertedTest, error } = await supabase.from("tests").insert({
         title: data.title,
         chapter: data.chapter,
         subject: data.subject,
@@ -164,21 +168,24 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
         exam_type: data.exam_type,
         questions: data.questions,
         is_active: true,
-      });
+      }).select("id").single();
 
       if (error) throw error;
 
       toast({
         title: "Success!",
-        description: "Test created successfully",
+        description: "Test created. Generating anti-copy images...",
       });
+
+      // Trigger pre-generation
+      setPreGenTestId(insertedTest.id);
+      setPreGenQuestions(data.questions);
+      setShowPreGen(true);
 
       // Reset form
       form.reset();
       setQuestions(Array(45).fill(null).map(() => ({ ...emptyQuestion })));
       setCurrentQuestionIndex(0);
-      
-      onTestCreated?.();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -571,6 +578,18 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
           </Button>
         </div>
       </form>
+
+      <ImagePreGenModal
+        open={showPreGen}
+        testId={preGenTestId}
+        questions={preGenQuestions}
+        onComplete={() => {
+          setShowPreGen(false);
+          setPreGenTestId(null);
+          setPreGenQuestions([]);
+          onTestCreated?.();
+        }}
+      />
     </Form>
   );
 };

@@ -15,6 +15,7 @@ import { Save, ChevronLeft, ChevronRight, Upload, X, Image as ImageIcon } from "
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
 
 type CETType = 'PCM' | 'PCB';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
@@ -91,6 +92,9 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [durationMinutes, setDurationMinutes] = useState(180);
   const [negativeMarking, setNegativeMarking] = useState(0.25);
+  const [preGenTestId, setPreGenTestId] = useState<string | null>(null);
+  const [preGenQuestions, setPreGenQuestions] = useState<any[]>([]);
+  const [showPreGen, setShowPreGen] = useState(false);
   const { toast } = useToast();
 
   const handleCETTypeChange = (newType: CETType) => {
@@ -212,7 +216,7 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
       // Store CET type in the title for identification
       const testTitle = `[CET-${cetType}] ${title}`;
       
-      const { error } = await supabase.from("tests").insert({
+      const { data: insertedTest, error } = await supabase.from("tests").insert({
         title: testTitle,
         test_type: 'mock_test',
         difficulty,
@@ -231,22 +235,24 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
         is_active: true,
         chapter: null,
         subject: null,
-      });
+      }).select("id").single();
 
       if (error) throw error;
 
       toast({
         title: "Success!",
-        description: `CET ${cetType} Mock test created successfully`,
+        description: `CET ${cetType} Mock test created. Generating images...`,
       });
+
+      setPreGenTestId(insertedTest.id);
+      setPreGenQuestions(questions);
+      setShowPreGen(true);
 
       // Reset form
       setTitle("");
       setQuestions(getQuestionsForCETType(cetType));
       setCurrentQuestionIndex(0);
       setCurrentSubject("physics");
-      
-      onTestCreated?.();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -613,6 +619,18 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
           {isSubmitting ? "Creating..." : `Create CET ${cetType} Mock Test`}
         </Button>
       </div>
+
+      <ImagePreGenModal
+        open={showPreGen}
+        testId={preGenTestId}
+        questions={preGenQuestions}
+        onComplete={() => {
+          setShowPreGen(false);
+          setPreGenTestId(null);
+          setPreGenQuestions([]);
+          onTestCreated?.();
+        }}
+      />
     </div>
   );
 };

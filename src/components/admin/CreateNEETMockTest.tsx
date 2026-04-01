@@ -15,6 +15,7 @@ import { Save, ChevronLeft, ChevronRight, Upload, X, Image as ImageIcon } from "
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
 
 const questionSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),
@@ -57,6 +58,9 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [preGenTestId, setPreGenTestId] = useState<string | null>(null);
+  const [preGenQuestions, setPreGenQuestions] = useState<any[]>([]);
+  const [showPreGen, setShowPreGen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<NEETMockTestFormData>({
@@ -163,7 +167,7 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
   const onSubmit = async (data: NEETMockTestFormData) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("tests").insert({
+      const { data: insertedTest, error } = await supabase.from("tests").insert({
         title: data.title,
         test_type: 'mock_test',
         difficulty: data.difficulty,
@@ -174,14 +178,18 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
         is_active: true,
         chapter: 'NEET',
         subject: null,
-      });
+      }).select("id").single();
 
       if (error) throw error;
 
       toast({
         title: "Success!",
-        description: "NEET Mock test created successfully",
+        description: "NEET Mock test created. Generating images...",
       });
+
+      setPreGenTestId(insertedTest.id);
+      setPreGenQuestions(data.questions);
+      setShowPreGen(true);
 
       form.reset();
       setQuestions([
@@ -191,8 +199,6 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
       ]);
       setCurrentQuestionIndex(0);
       setCurrentSubject("physics");
-      
-      onTestCreated?.();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -531,6 +537,18 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
           {isSubmitting ? "Creating NEET Mock Test..." : `Create NEET Mock Test (${totalCompleteQuestions}/180 questions)`}
         </Button>
       </form>
+
+      <ImagePreGenModal
+        open={showPreGen}
+        testId={preGenTestId}
+        questions={preGenQuestions}
+        onComplete={() => {
+          setShowPreGen(false);
+          setPreGenTestId(null);
+          setPreGenQuestions([]);
+          onTestCreated?.();
+        }}
+      />
     </Form>
   );
 };

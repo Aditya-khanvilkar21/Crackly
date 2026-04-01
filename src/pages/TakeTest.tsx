@@ -23,6 +23,8 @@ interface Question {
   question: string;
   options: string[];
   imageUrl?: string;
+  questionImageUrl?: string;
+  optionImageUrls?: string[];
   subject?: 'physics' | 'chemistry' | 'mathematics' | 'biology';
   marksPerQuestion?: number;
 }
@@ -610,10 +612,22 @@ export default function TakeTest() {
                   )}
                 </div>
                 <h2 className="text-xl font-semibold leading-relaxed">
-                  <QuestionImageRenderer
-                    questionId={`${testId}-q${currentQuestionIndex}`}
-                    content={currentQuestion.question}
-                  />
+                  {currentQuestion.questionImageUrl ? (
+                    <img
+                      src={currentQuestion.questionImageUrl}
+                      alt=""
+                      draggable={false}
+                      onContextMenu={(e) => e.preventDefault()}
+                      onDragStart={(e) => e.preventDefault()}
+                      className="max-w-full h-auto rounded"
+                      style={{ userSelect: "none", WebkitUserSelect: "none", pointerEvents: "none" }}
+                    />
+                  ) : (
+                    <QuestionImageRenderer
+                      questionId={`${testId}-q${currentQuestionIndex}`}
+                      content={currentQuestion.question}
+                    />
+                  )}
                 </h2>
               </div>
 
@@ -650,10 +664,22 @@ export default function TakeTest() {
                       {String.fromCharCode(65 + index)}
                     </span>
                     <span className="flex-1 text-base">
-                      <OptionImageRenderer
-                        questionId={`${testId}-q${currentQuestionIndex}-opt${index}`}
-                        content={option}
-                      />
+                      {currentQuestion.optionImageUrls?.[index] ? (
+                        <img
+                          src={currentQuestion.optionImageUrls[index]}
+                          alt=""
+                          draggable={false}
+                          onContextMenu={(e) => e.preventDefault()}
+                          onDragStart={(e) => e.preventDefault()}
+                          className="inline-block h-auto max-h-10"
+                          style={{ userSelect: "none", WebkitUserSelect: "none", pointerEvents: "none" }}
+                        />
+                      ) : (
+                        <OptionImageRenderer
+                          questionId={`${testId}-q${currentQuestionIndex}-opt${index}`}
+                          content={option}
+                        />
+                      )}
                     </span>
                     {answers[currentQuestionIndex] === index && (
                       <CheckCircle2 className="w-5 h-5 text-primary ml-2" />

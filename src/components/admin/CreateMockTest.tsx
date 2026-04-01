@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Save, ChevronLeft, ChevronRight, Upload, X, Image as ImageIcon } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
 
 const questionSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),
@@ -57,6 +58,9 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [preGenTestId, setPreGenTestId] = useState<string | null>(null);
+  const [preGenQuestions, setPreGenQuestions] = useState<any[]>([]);
+  const [showPreGen, setShowPreGen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<MockTestFormData>({
@@ -164,7 +168,7 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
   const onSubmit = async (data: MockTestFormData) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("tests").insert({
+      const { data: insertedTest, error } = await supabase.from("tests").insert({
         title: data.title,
         test_type: 'mock_test',
         difficulty: data.difficulty,
@@ -175,14 +179,18 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
         is_active: true,
         chapter: null,
         subject: null,
-      });
+      }).select("id").single();
 
       if (error) throw error;
 
       toast({
         title: "Success!",
-        description: "Mock test created successfully",
+        description: "Mock test created. Generating images...",
       });
+
+      setPreGenTestId(insertedTest.id);
+      setPreGenQuestions(data.questions);
+      setShowPreGen(true);
 
       form.reset();
       setQuestions([
@@ -192,8 +200,6 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
       ]);
       setCurrentQuestionIndex(0);
       setCurrentSubject("physics");
-      
-      onTestCreated?.();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -552,6 +558,18 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
           </Button>
         </div>
       </form>
+
+      <ImagePreGenModal
+        open={showPreGen}
+        testId={preGenTestId}
+        questions={preGenQuestions}
+        onComplete={() => {
+          setShowPreGen(false);
+          setPreGenTestId(null);
+          setPreGenQuestions([]);
+          onTestCreated?.();
+        }}
+      />
     </Form>
   );
 };
