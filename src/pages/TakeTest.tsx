@@ -612,10 +612,22 @@ export default function TakeTest() {
                   )}
                 </div>
                 <h2 className="text-xl font-semibold leading-relaxed">
-                  <QuestionImageRenderer
-                    questionId={`${testId}-q${currentQuestionIndex}`}
-                    content={currentQuestion.question}
-                  />
+                  {currentQuestion.questionImageUrl ? (
+                    <img
+                      src={currentQuestion.questionImageUrl}
+                      alt=""
+                      draggable={false}
+                      onContextMenu={(e) => e.preventDefault()}
+                      onDragStart={(e) => e.preventDefault()}
+                      className="max-w-full h-auto rounded"
+                      style={{ userSelect: "none", WebkitUserSelect: "none", pointerEvents: "none" }}
+                    />
+                  ) : (
+                    <QuestionImageRenderer
+                      questionId={`${testId}-q${currentQuestionIndex}`}
+                      content={currentQuestion.question}
+                    />
+                  )}
                 </h2>
               </div>
 
