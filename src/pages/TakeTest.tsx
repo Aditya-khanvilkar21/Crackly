@@ -88,13 +88,29 @@ export default function TakeTest() {
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [selectedQuestions]);
 
-  // Anti-cheating: disable copy, paste, cut, right-click
+  // Anti-cheating: disable copy, paste, cut, right-click, and keyboard shortcuts
   useEffect(() => {
     const prevent = (e: Event) => e.preventDefault();
     const events: string[] = ["copy", "paste", "cut", "contextmenu"];
     events.forEach((evt) => document.addEventListener(evt, prevent));
+
+    // Block keyboard shortcuts: Ctrl+C, Ctrl+V, Ctrl+U, Ctrl+Shift+I, F12, PrintScreen
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        (e.ctrlKey && (e.key === "c" || e.key === "v" || e.key === "u" || e.key === "a" || e.key === "s" || e.key === "p")) ||
+        (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c")) ||
+        e.key === "F12" ||
+        e.key === "PrintScreen"
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown, true);
+
     return () => {
       events.forEach((evt) => document.removeEventListener(evt, prevent));
+      document.removeEventListener("keydown", handleKeyDown, true);
     };
   }, []);
 
