@@ -486,6 +486,18 @@ export const CloneTest = ({ test, onTestCloned }: CloneTestProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ImagePreGenModal
+        open={showPreGen}
+        testId={preGenTestId}
+        questions={preGenQuestions}
+        onComplete={() => {
+          setShowPreGen(false);
+          setPreGenTestId(null);
+          setPreGenQuestions([]);
+          onTestCloned();
+        }}
+      />
     </>
   );
 };

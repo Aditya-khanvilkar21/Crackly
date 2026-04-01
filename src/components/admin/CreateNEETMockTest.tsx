@@ -537,6 +537,18 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
           {isSubmitting ? "Creating NEET Mock Test..." : `Create NEET Mock Test (${totalCompleteQuestions}/180 questions)`}
         </Button>
       </form>
+
+      <ImagePreGenModal
+        open={showPreGen}
+        testId={preGenTestId}
+        questions={preGenQuestions}
+        onComplete={() => {
+          setShowPreGen(false);
+          setPreGenTestId(null);
+          setPreGenQuestions([]);
+          onTestCreated?.();
+        }}
+      />
     </Form>
   );
 };
