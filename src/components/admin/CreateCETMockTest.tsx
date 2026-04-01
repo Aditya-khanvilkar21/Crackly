@@ -253,8 +253,6 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
       setQuestions(getQuestionsForCETType(cetType));
       setCurrentQuestionIndex(0);
       setCurrentSubject("physics");
-      
-      onTestCreated?.();
     } catch (error: any) {
       toast({
         title: "Error",
