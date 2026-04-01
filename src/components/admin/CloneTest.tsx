@@ -186,12 +186,14 @@ export const CloneTest = ({ test, onTestCloned }: CloneTestProps) => {
         insertData.chapter = chapter;
       }
 
-      const { error } = await supabase.from("tests").insert(insertData);
+      const { data: insertedTest, error } = await supabase.from("tests").insert(insertData).select("id").single();
       if (error) throw error;
 
-      toast({ title: "Test cloned successfully! 🎉", description: `New ${examType} test created.` });
+      toast({ title: "Test cloned! Generating images...", description: `New ${examType} test created.` });
       setIsOpen(false);
-      onTestCloned();
+      setPreGenTestId(insertedTest.id);
+      setPreGenQuestions(questions);
+      setShowPreGen(true);
     } catch (error: any) {
       toast({ title: "Error cloning test", description: error.message, variant: "destructive" });
     } finally {

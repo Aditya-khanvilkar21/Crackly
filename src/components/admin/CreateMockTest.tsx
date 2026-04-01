@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Save, ChevronLeft, ChevronRight, Upload, X, Image as ImageIcon } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
 
 const questionSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),

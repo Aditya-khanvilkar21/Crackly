@@ -163,7 +163,7 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
   const onSubmit = async (data: NEETMockTestFormData) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("tests").insert({
+      const { data: insertedTest, error } = await supabase.from("tests").insert({
         title: data.title,
         test_type: 'mock_test',
         difficulty: data.difficulty,
@@ -174,14 +174,18 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
         is_active: true,
         chapter: 'NEET',
         subject: null,
-      });
+      }).select("id").single();
 
       if (error) throw error;
 
       toast({
         title: "Success!",
-        description: "NEET Mock test created successfully",
+        description: "NEET Mock test created. Generating images...",
       });
+
+      setPreGenTestId(insertedTest.id);
+      setPreGenQuestions(data.questions);
+      setShowPreGen(true);
 
       form.reset();
       setQuestions([
@@ -191,8 +195,6 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
       ]);
       setCurrentQuestionIndex(0);
       setCurrentSubject("physics");
-      
-      onTestCreated?.();
     } catch (error: any) {
       toast({
         title: "Error",
