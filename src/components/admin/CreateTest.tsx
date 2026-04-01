@@ -159,7 +159,7 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
   const onSubmit = async (data: TestFormData) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from("tests").insert({
+      const { data: insertedTest, error } = await supabase.from("tests").insert({
         title: data.title,
         chapter: data.chapter,
         subject: data.subject,
@@ -168,21 +168,24 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
         exam_type: data.exam_type,
         questions: data.questions,
         is_active: true,
-      });
+      }).select("id").single();
 
       if (error) throw error;
 
       toast({
         title: "Success!",
-        description: "Test created successfully",
+        description: "Test created. Generating anti-copy images...",
       });
+
+      // Trigger pre-generation
+      setPreGenTestId(insertedTest.id);
+      setPreGenQuestions(data.questions);
+      setShowPreGen(true);
 
       // Reset form
       form.reset();
       setQuestions(Array(45).fill(null).map(() => ({ ...emptyQuestion })));
       setCurrentQuestionIndex(0);
-      
-      onTestCreated?.();
     } catch (error: any) {
       toast({
         title: "Error",
