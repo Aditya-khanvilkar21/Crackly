@@ -621,6 +621,18 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
           {isSubmitting ? "Creating..." : `Create CET ${cetType} Mock Test`}
         </Button>
       </div>
+
+      <ImagePreGenModal
+        open={showPreGen}
+        testId={preGenTestId}
+        questions={preGenQuestions}
+        onComplete={() => {
+          setShowPreGen(false);
+          setPreGenTestId(null);
+          setPreGenQuestions([]);
+          onTestCreated?.();
+        }}
+      />
     </div>
   );
 };
