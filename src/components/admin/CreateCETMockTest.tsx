@@ -92,6 +92,9 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [durationMinutes, setDurationMinutes] = useState(180);
   const [negativeMarking, setNegativeMarking] = useState(0.25);
+  const [preGenTestId, setPreGenTestId] = useState<string | null>(null);
+  const [preGenQuestions, setPreGenQuestions] = useState<any[]>([]);
+  const [showPreGen, setShowPreGen] = useState(false);
   const { toast } = useToast();
 
   const handleCETTypeChange = (newType: CETType) => {
