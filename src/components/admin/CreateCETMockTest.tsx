@@ -15,6 +15,7 @@ import { Save, ChevronLeft, ChevronRight, Upload, X, Image as ImageIcon } from "
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
 
 type CETType = 'PCM' | 'PCB';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
