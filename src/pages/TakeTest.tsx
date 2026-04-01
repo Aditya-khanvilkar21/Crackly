@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Timer, CheckCircle2, AlertCircle, Eye } from "lucide-react";
 import { LatexRenderer } from "@/components/LatexRenderer";
+import { QuestionImageRenderer, OptionImageRenderer } from "@/components/QuestionImageRenderer";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -87,13 +88,29 @@ export default function TakeTest() {
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [selectedQuestions]);
 
-  // Anti-cheating: disable copy, paste, cut, right-click
+  // Anti-cheating: disable copy, paste, cut, right-click, and keyboard shortcuts
   useEffect(() => {
     const prevent = (e: Event) => e.preventDefault();
     const events: string[] = ["copy", "paste", "cut", "contextmenu"];
     events.forEach((evt) => document.addEventListener(evt, prevent));
+
+    // Block keyboard shortcuts: Ctrl+C, Ctrl+V, Ctrl+U, Ctrl+Shift+I, F12, PrintScreen
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        (e.ctrlKey && (e.key === "c" || e.key === "v" || e.key === "u" || e.key === "a" || e.key === "s" || e.key === "p")) ||
+        (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c")) ||
+        e.key === "F12" ||
+        e.key === "PrintScreen"
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown, true);
+
     return () => {
       events.forEach((evt) => document.removeEventListener(evt, prevent));
+      document.removeEventListener("keydown", handleKeyDown, true);
     };
   }, []);
 
@@ -593,7 +610,10 @@ export default function TakeTest() {
                   )}
                 </div>
                 <h2 className="text-xl font-semibold leading-relaxed">
-                  <LatexRenderer content={currentQuestion.question} />
+                  <QuestionImageRenderer
+                    questionId={`${testId}-q${currentQuestionIndex}`}
+                    content={currentQuestion.question}
+                  />
                 </h2>
               </div>
 
@@ -602,8 +622,11 @@ export default function TakeTest() {
                 <div className="mb-6 p-4 bg-muted/50 rounded-lg">
                   <img 
                     src={currentQuestion.imageUrl} 
-                    alt="Question diagram"
+                    alt=""
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
                     className="max-h-96 mx-auto rounded-lg"
+                    style={{ userSelect: "none", pointerEvents: "none" }}
                   />
                 </div>
               )}
@@ -626,7 +649,12 @@ export default function TakeTest() {
                     }`}>
                       {String.fromCharCode(65 + index)}
                     </span>
-                    <span className="flex-1 text-base"><LatexRenderer content={option} /></span>
+                    <span className="flex-1 text-base">
+                      <OptionImageRenderer
+                        questionId={`${testId}-q${currentQuestionIndex}-opt${index}`}
+                        content={option}
+                      />
+                    </span>
                     {answers[currentQuestionIndex] === index && (
                       <CheckCircle2 className="w-5 h-5 text-primary ml-2" />
                     )}
