@@ -664,10 +664,22 @@ export default function TakeTest() {
                       {String.fromCharCode(65 + index)}
                     </span>
                     <span className="flex-1 text-base">
-                      <OptionImageRenderer
-                        questionId={`${testId}-q${currentQuestionIndex}-opt${index}`}
-                        content={option}
-                      />
+                      {currentQuestion.optionImageUrls?.[index] ? (
+                        <img
+                          src={currentQuestion.optionImageUrls[index]}
+                          alt=""
+                          draggable={false}
+                          onContextMenu={(e) => e.preventDefault()}
+                          onDragStart={(e) => e.preventDefault()}
+                          className="inline-block h-auto max-h-10"
+                          style={{ userSelect: "none", WebkitUserSelect: "none", pointerEvents: "none" }}
+                        />
+                      ) : (
+                        <OptionImageRenderer
+                          questionId={`${testId}-q${currentQuestionIndex}-opt${index}`}
+                          content={option}
+                        />
+                      )}
                     </span>
                     {answers[currentQuestionIndex] === index && (
                       <CheckCircle2 className="w-5 h-5 text-primary ml-2" />
