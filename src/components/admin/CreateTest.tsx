@@ -14,6 +14,7 @@ import { Plus, Trash2, Save, ChevronLeft, ChevronRight, Upload, X, Image as Imag
 import { LatexInput } from "@/components/admin/LatexInput";
 import { LatexRenderer } from "@/components/LatexRenderer";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
 
 const questionSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),
