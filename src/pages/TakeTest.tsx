@@ -678,10 +678,14 @@ export default function TakeTest() {
                           style={{ userSelect: "none", WebkitUserSelect: "none", pointerEvents: "none" }}
                         />
                       ) : (
-                        <OptionImageRenderer
-                          questionId={`${testId}-q${currentQuestionIndex}-opt${index}`}
-                          content={option}
-                        />
+                        <span
+                          className="select-none"
+                          style={{ userSelect: "none", WebkitUserSelect: "none" }}
+                          onCopy={(e) => e.preventDefault()}
+                          onCut={(e) => e.preventDefault()}
+                        >
+                          <LatexRenderer content={option} />
+                        </span>
                       )}
                     </span>
                     {answers[currentQuestionIndex] === index && (
