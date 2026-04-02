@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Timer, CheckCircle2, AlertCircle, Eye } from "lucide-react";
 import { LatexRenderer } from "@/components/LatexRenderer";
-import { QuestionImageRenderer, OptionImageRenderer } from "@/components/QuestionImageRenderer";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -623,10 +622,14 @@ export default function TakeTest() {
                       style={{ userSelect: "none", WebkitUserSelect: "none", pointerEvents: "none" }}
                     />
                   ) : (
-                    <QuestionImageRenderer
-                      questionId={`${testId}-q${currentQuestionIndex}`}
-                      content={currentQuestion.question}
-                    />
+                    <div
+                      className="select-none"
+                      style={{ userSelect: "none", WebkitUserSelect: "none" }}
+                      onCopy={(e) => e.preventDefault()}
+                      onCut={(e) => e.preventDefault()}
+                    >
+                      <LatexRenderer content={currentQuestion.question} />
+                    </div>
                   )}
                 </h2>
               </div>
@@ -675,10 +678,14 @@ export default function TakeTest() {
                           style={{ userSelect: "none", WebkitUserSelect: "none", pointerEvents: "none" }}
                         />
                       ) : (
-                        <OptionImageRenderer
-                          questionId={`${testId}-q${currentQuestionIndex}-opt${index}`}
-                          content={option}
-                        />
+                        <span
+                          className="select-none"
+                          style={{ userSelect: "none", WebkitUserSelect: "none" }}
+                          onCopy={(e) => e.preventDefault()}
+                          onCut={(e) => e.preventDefault()}
+                        >
+                          <LatexRenderer content={option} />
+                        </span>
                       )}
                     </span>
                     {answers[currentQuestionIndex] === index && (
