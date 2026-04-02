@@ -622,10 +622,14 @@ export default function TakeTest() {
                       style={{ userSelect: "none", WebkitUserSelect: "none", pointerEvents: "none" }}
                     />
                   ) : (
-                    <QuestionImageRenderer
-                      questionId={`${testId}-q${currentQuestionIndex}`}
-                      content={currentQuestion.question}
-                    />
+                    <div
+                      className="select-none"
+                      style={{ userSelect: "none", WebkitUserSelect: "none" }}
+                      onCopy={(e) => e.preventDefault()}
+                      onCut={(e) => e.preventDefault()}
+                    >
+                      <LatexRenderer content={currentQuestion.question} />
+                    </div>
                   )}
                 </h2>
               </div>
