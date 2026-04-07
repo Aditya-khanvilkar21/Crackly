@@ -579,6 +579,55 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
                     </div>
                   </div>
 
+                  {/* Explanation Image Upload */}
+                  <div className="space-y-3">
+                    <Label>Explanation Image (Optional)</Label>
+                    {currentQuestion.explanationImage ? (
+                      <div className="relative border rounded-lg p-4 bg-muted/50">
+                        <img 
+                          src={currentQuestion.explanationImage} 
+                          alt="Explanation diagram"
+                          className="max-h-64 mx-auto rounded-lg"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => handleRemoveImage(absoluteIndex, 'explanationImage')}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                        <ImageIcon className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Upload an image for the explanation (diagram, solution steps, etc.)
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={uploadingExplanationImage}
+                          onClick={() => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/jpg,image/jpeg,image/png';
+                            input.onchange = (e) => {
+                              const file = (e.target as HTMLInputElement).files?.[0];
+                              if (file) handleImageUpload(absoluteIndex, file, 'explanationImage');
+                            };
+                            input.click();
+                          }}
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          {uploadingExplanationImage ? "Uploading..." : "Upload Explanation Image"}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Navigation buttons */}
                   <div className="flex justify-between pt-4">
                     <Button
