@@ -41,32 +41,18 @@ export const ChapterTestsList = ({ examType, subject, studentId, onBack }: Chapt
   const fetchTests = async () => {
     setLoading(true);
     
-    const { data: classData } = await supabase
-      .from("class_students")
-      .select("class_id")
-      .eq("student_id", studentId);
+    // Use secure RPC that excludes questions/answers
+    const { data: testsData } = await supabase
+      .rpc("get_student_available_tests", {
+        _exam_type: examType,
+        _test_type: "chapter_test" as const,
+        _subject: subject,
+      });
 
-    if (classData && classData.length > 0) {
-      const classIds = classData.map(c => c.class_id);
-
-      const { data: availabilityData } = await supabase
-        .from("test_availability")
-        .select("test_id")
-        .in("class_id", classIds)
-        .eq("is_locked", false);
-
-      // Use secure RPC that excludes questions/answers
-      const { data: testsData } = await supabase
-        .rpc("get_student_available_tests", {
-          _exam_type: examType,
-          _test_type: "chapter_test" as const,
-          _subject: subject,
-        });
-
-      if (testsData) {
-        setTests(testsData as unknown as Test[]);
-      }
+    if (testsData) {
+      setTests(testsData as unknown as Test[]);
     }
+
     setLoading(false);
   };
 
