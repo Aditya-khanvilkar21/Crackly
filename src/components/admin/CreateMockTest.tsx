@@ -22,6 +22,7 @@ const questionSchema = z.object({
   correctAnswer: z.number().min(0).max(3, "Must select a correct answer"),
   imageUrl: z.string().optional(),
   explanation: z.string().optional(),
+  explanationImage: z.string().optional(),
   subject: z.enum(["physics", "chemistry", "mathematics", "biology"]),
   topic: z.string().optional(),
 });
@@ -44,6 +45,7 @@ const emptyQuestion = (subject: "physics" | "chemistry" | "mathematics" | "biolo
   correctAnswer: 0,
   imageUrl: undefined,
   explanation: "",
+  explanationImage: undefined,
   subject,
   topic: "",
 });
@@ -108,24 +110,27 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
     form.setValue("questions", newQuestions);
   };
 
-  const handleImageUpload = async (questionIndex: number, file: File) => {
-    setUploadingImage(true);
+  const [uploadingExplanationImage, setUploadingExplanationImage] = useState(false);
+
+  const handleImageUpload = async (questionIndex: number, file: File, field: 'imageUrl' | 'explanationImage' = 'imageUrl') => {
+    const setUploading = field === 'imageUrl' ? setUploadingImage : setUploadingExplanationImage;
+    setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const folder = field === 'explanationImage' ? 'explanations' : '';
+      const fileName = `${folder ? folder + '/' : ''}${crypto.randomUUID()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('test-questions')
-        .upload(filePath, file);
+        .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
         .from('test-questions')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
-      updateQuestion(questionIndex, 'imageUrl', publicUrl);
+      updateQuestion(questionIndex, field, publicUrl);
 
       toast({
         title: "Success",
@@ -138,7 +143,23 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
         variant: "destructive",
       });
     } finally {
-      setUploadingImage(false);
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = async (questionIndex: number, field: 'imageUrl' | 'explanationImage' = 'imageUrl') => {
+    const imageUrl = questions[questionIndex][field];
+    if (!imageUrl) return;
+    try {
+      const urlParts = imageUrl.split('/test-questions/');
+      const filePath = urlParts[urlParts.length - 1];
+      if (filePath) {
+        await supabase.storage.from('test-questions').remove([filePath]);
+      }
+      updateQuestion(questionIndex, field, undefined);
+    } catch (error: any) {
+      console.warn("Failed to remove image:", error);
+      updateQuestion(questionIndex, field, undefined);
     }
   };
 
@@ -517,6 +538,55 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
                     <p className="text-xs text-muted-foreground mt-1">
                       This explanation will be shown to students after they submit the test.
                     </p>
+                  </div>
+
+                  {/* Explanation Image Upload */}
+                  <div className="space-y-3">
+                    <Label>Explanation Image (Optional)</Label>
+                    {currentQuestion.explanationImage ? (
+                      <div className="relative border rounded-lg p-4 bg-muted/50">
+                        <img 
+                          src={currentQuestion.explanationImage} 
+                          alt="Explanation diagram"
+                          className="max-h-64 mx-auto rounded-lg"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => handleRemoveImage(absoluteIndex, 'explanationImage')}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                        <ImageIcon className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Upload an image for the explanation (diagram, solution steps, etc.)
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={uploadingExplanationImage}
+                          onClick={() => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/jpg,image/jpeg,image/png';
+                            input.onchange = (e) => {
+                              const file = (e.target as HTMLInputElement).files?.[0];
+                              if (file) handleImageUpload(absoluteIndex, file, 'explanationImage');
+                            };
+                            input.click();
+                          }}
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          {uploadingExplanationImage ? "Uploading..." : "Upload Explanation Image"}
+                        </Button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Navigation buttons */}
