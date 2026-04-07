@@ -49,21 +49,15 @@ export const MockTestsList = ({ examType, studentId, onBack }: MockTestsListProp
         .in("class_id", classIds)
         .eq("is_locked", false);
 
-      if (availabilityData && availabilityData.length > 0) {
-        const testIds = availabilityData.map(a => a.test_id);
+      // Use secure RPC that excludes questions/answers
+      const { data: testsData } = await supabase
+        .rpc("get_student_available_tests", {
+          _exam_type: examType,
+          _test_type: "mock_test" as const,
+        });
 
-        const { data: testsData } = await supabase
-          .from("tests")
-          .select("*")
-          .in("id", testIds)
-          .eq("is_active", true)
-          .eq("exam_type", examType)
-          .eq("test_type", "mock_test")
-          .order("created_at", { ascending: false });
-
-        if (testsData) {
-          setTests(testsData as unknown as Test[]);
-        }
+      if (testsData) {
+        setTests(testsData as unknown as Test[]);
       }
     }
     setLoading(false);
