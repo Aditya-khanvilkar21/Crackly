@@ -183,31 +183,7 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
       updateQuestion(questionIndex, field, undefined);
     }
   };
-    }
-  };
 
-  const handleRemoveImage = async (questionIndex: number) => {
-    const imageUrl = questions[questionIndex].imageUrl;
-    if (!imageUrl) return;
-
-    try {
-      const fileName = imageUrl.split('/').pop();
-      if (fileName) {
-        await supabase.storage.from('test-questions').remove([fileName]);
-      }
-      updateQuestion(questionIndex, 'imageUrl', undefined);
-      toast({
-        title: "Success",
-        description: "Image removed successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
 
   const isQuestionComplete = (q: QuestionFormData) => 
     q.question.length >= 10 && q.options.every(opt => opt.length > 0);
