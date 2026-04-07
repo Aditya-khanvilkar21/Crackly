@@ -382,6 +382,26 @@ export type Database = {
           student_id: string
         }[]
       }
+      get_student_available_tests: {
+        Args: {
+          _exam_type?: Database["public"]["Enums"]["exam_type"]
+          _subject?: Database["public"]["Enums"]["test_subject"]
+          _test_type?: Database["public"]["Enums"]["test_type"]
+        }
+        Returns: {
+          chapter: string
+          created_at: string
+          difficulty: Database["public"]["Enums"]["difficulty_level"]
+          duration_minutes: number
+          exam_type: Database["public"]["Enums"]["exam_type"]
+          id: string
+          is_active: boolean
+          negative_marking: number
+          subject: Database["public"]["Enums"]["test_subject"]
+          test_type: Database["public"]["Enums"]["test_type"]
+          title: string
+        }[]
+      }
       get_test_for_taking: { Args: { test_id_param: string }; Returns: Json }
       get_test_result_with_questions: {
         Args: { test_id_param: string }
