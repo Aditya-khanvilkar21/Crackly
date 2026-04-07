@@ -161,8 +161,6 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
       updateQuestion(questionIndex, field, undefined);
     }
   };
-    }
-  };
 
 
 
