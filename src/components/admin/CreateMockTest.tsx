@@ -163,28 +163,8 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
     }
   };
 
-  const handleRemoveImage = async (questionIndex: number) => {
-    const imageUrl = questions[questionIndex].imageUrl;
-    if (!imageUrl) return;
 
-    try {
-      const fileName = imageUrl.split('/').pop();
-      if (fileName) {
-        await supabase.storage.from('test-questions').remove([fileName]);
-      }
-      updateQuestion(questionIndex, 'imageUrl', undefined);
-      toast({
-        title: "Success",
-        description: "Image removed successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
+
 
   const onSubmit = async (data: MockTestFormData) => {
     setIsSubmitting(true);
