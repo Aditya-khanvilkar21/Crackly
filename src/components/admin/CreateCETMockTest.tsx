@@ -26,6 +26,7 @@ interface QuestionFormData {
   correctAnswer: number;
   imageUrl?: string;
   explanation?: string;
+  explanationImage?: string;
   subject: Subject;
   marksPerQuestion: number;
   topic?: string;
@@ -37,6 +38,7 @@ const emptyQuestion = (subject: Subject, marks: number): QuestionFormData => ({
   correctAnswer: 0,
   imageUrl: undefined,
   explanation: "",
+  explanationImage: undefined,
   subject,
   marksPerQuestion: marks,
   topic: "",
@@ -129,24 +131,27 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
     setQuestions(newQuestions);
   };
 
-  const handleImageUpload = async (questionIndex: number, file: File) => {
-    setUploadingImage(true);
+  const [uploadingExplanationImage, setUploadingExplanationImage] = useState(false);
+
+  const handleImageUpload = async (questionIndex: number, file: File, field: 'imageUrl' | 'explanationImage' = 'imageUrl') => {
+    const setUploading = field === 'imageUrl' ? setUploadingImage : setUploadingExplanationImage;
+    setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const folder = field === 'explanationImage' ? 'explanations' : '';
+      const fileName = `${folder ? folder + '/' : ''}${crypto.randomUUID()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('test-questions')
-        .upload(filePath, file);
+        .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
         .from('test-questions')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
-      updateQuestion(questionIndex, 'imageUrl', publicUrl);
+      updateQuestion(questionIndex, field, publicUrl);
 
       toast({
         title: "Success",
@@ -159,7 +164,25 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
         variant: "destructive",
       });
     } finally {
-      setUploadingImage(false);
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = async (questionIndex: number, field: 'imageUrl' | 'explanationImage' = 'imageUrl') => {
+    const imageUrl = questions[questionIndex][field];
+    if (!imageUrl) return;
+    try {
+      const urlParts = imageUrl.split('/test-questions/');
+      const filePath = urlParts[urlParts.length - 1];
+      if (filePath) {
+        await supabase.storage.from('test-questions').remove([filePath]);
+      }
+      updateQuestion(questionIndex, field, undefined);
+    } catch (error: any) {
+      console.warn("Failed to remove image:", error);
+      updateQuestion(questionIndex, field, undefined);
+    }
+  };
     }
   };
 
