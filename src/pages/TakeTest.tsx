@@ -546,7 +546,239 @@ export default function TakeTest() {
 
   const currentQuestion = selectedQuestions[currentQuestionIndex];
 
-  // ======= MAIN CBT INTERFACE =======
+  // ======= CHAPTER TEST: Simple Mobile-Friendly UI =======
+  if (!isMockTest) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background select-none" style={{ userSelect: 'none' }}>
+        {/* Simple Header */}
+        <header className="bg-blue-900 text-white px-3 py-2 flex items-center justify-between shrink-0 sticky top-0 z-20">
+          <h1 className="text-sm font-bold truncate flex-1 mr-2">{test.title}</h1>
+          <div className="flex items-center gap-2 shrink-0">
+            {tabSwitchCount > 0 && (
+              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-600 text-[10px] font-medium">
+                <Eye className="w-3 h-3" />
+                <span>{tabSwitchCount}/{MAX_TAB_SWITCHES}</span>
+              </div>
+            )}
+            <div className={`flex items-center gap-1 px-2 py-1 rounded font-mono text-sm font-bold ${
+              timeLeft < 300 ? 'bg-red-600 animate-pulse' : 'bg-blue-700'
+            }`}>
+              <Timer className="w-3.5 h-3.5" />
+              {formatTime(timeLeft)}
+            </div>
+          </div>
+        </header>
+
+        {/* Tab Warning */}
+        {showTabWarning && (
+          <div className="px-3 py-1.5 shrink-0">
+            <Alert variant="destructive">
+              <AlertDescription className="text-xs">
+                <strong>Warning!</strong> Switching tabs is not allowed. {MAX_TAB_SWITCHES - tabSwitchCount} warning(s) remaining.
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
+
+        {/* Question Status Bar */}
+        <div className="px-3 py-2 bg-muted/50 border-b border-border flex items-center justify-between text-xs shrink-0">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-gray-400 inline-block" /> {statusCounts['not-visited']}</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-500 inline-block" /> {statusCounts['not-answered']}</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-500 inline-block" /> {statusCounts.answered}</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-purple-500 inline-block" /> {statusCounts.marked + statusCounts['answered-marked']}</span>
+          </div>
+        </div>
+
+        {/* Question Number Strip (scrollable) */}
+        <div className="px-3 py-2 border-b border-border shrink-0 overflow-x-auto">
+          <div className="flex gap-1.5 w-max">
+            {selectedQuestions.map((_, i) => {
+              const status = getQuestionStatus(i);
+              const isCurrent = i === currentQuestionIndex;
+              return (
+                <button
+                  key={i}
+                  onClick={() => navigateToQuestion(i)}
+                  className={`w-8 h-8 text-xs rounded font-bold transition-all shrink-0 relative ${
+                    isCurrent
+                      ? 'ring-2 ring-blue-500 ring-offset-1 bg-blue-500 text-white'
+                      : getStatusStyle(status, false)
+                  }`}
+                >
+                  {i + 1}
+                  {status === 'answered-marked' && (
+                    <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full border border-white" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Question Content */}
+        <div className="flex-1 overflow-auto px-4 py-4">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="px-2.5 py-1 bg-primary/10 text-primary rounded-full text-sm font-semibold">
+              Q.{currentQuestionIndex + 1} / {totalQuestions}
+            </span>
+            <span className="text-xs text-muted-foreground">(1 mark)</span>
+          </div>
+
+          {/* Question Text */}
+          <div className="mb-5">
+            <h2 className="text-base font-semibold leading-relaxed">
+              {currentQuestion.questionImageUrl ? (
+                <img src={currentQuestion.questionImageUrl} alt="" draggable={false}
+                  onContextMenu={(e) => e.preventDefault()} onDragStart={(e) => e.preventDefault()}
+                  className="max-w-full h-auto rounded"
+                  style={{ userSelect: "none", pointerEvents: "none" }} />
+              ) : (
+                <div onCopy={(e) => e.preventDefault()} onCut={(e) => e.preventDefault()}>
+                  <LatexRenderer content={currentQuestion.question} />
+                </div>
+              )}
+            </h2>
+          </div>
+
+          {/* Question Diagram */}
+          {currentQuestion.imageUrl && (
+            <div className="mb-5 p-3 bg-muted/50 rounded-lg">
+              <img src={currentQuestion.imageUrl} alt="" draggable={false}
+                onContextMenu={(e) => e.preventDefault()}
+                className="max-h-64 mx-auto rounded-lg"
+                style={{ userSelect: "none", pointerEvents: "none" }} />
+            </div>
+          )}
+
+          {/* Options */}
+          <div className="space-y-2.5 mb-6">
+            {currentQuestion.options.map((option, idx) => (
+              <div
+                key={idx}
+                onClick={() => handleAnswerSelect(idx)}
+                className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all active:scale-[0.98] ${
+                  answers[currentQuestionIndex] === idx
+                    ? "border-green-500 bg-green-50 dark:bg-green-950/30"
+                    : "border-border hover:border-primary/40"
+                }`}
+              >
+                <span className={`w-7 h-7 rounded-full flex items-center justify-center mr-3 font-bold text-sm shrink-0 ${
+                  answers[currentQuestionIndex] === idx
+                    ? "bg-green-500 text-white"
+                    : "bg-muted text-muted-foreground"
+                }`}>
+                  {String.fromCharCode(65 + idx)}
+                </span>
+                <span className="flex-1 text-sm">
+                  {currentQuestion.optionImageUrls?.[idx] ? (
+                    <img src={currentQuestion.optionImageUrls[idx]} alt="" draggable={false}
+                      onContextMenu={(e) => e.preventDefault()} onDragStart={(e) => e.preventDefault()}
+                      className="inline-block h-auto max-h-10"
+                      style={{ userSelect: "none", pointerEvents: "none" }} />
+                  ) : (
+                    <span onCopy={(e) => e.preventDefault()} onCut={(e) => e.preventDefault()}>
+                      <LatexRenderer content={option} />
+                    </span>
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom Action Bar */}
+        <div className="border-t border-border bg-card px-3 py-2.5 shrink-0 sticky bottom-0 z-20">
+          <div className="flex items-center gap-2 mb-2">
+            <Button variant="outline" size="sm" onClick={handleClearResponse} className="text-xs flex-1">
+              Clear
+            </Button>
+            <Button
+              variant="outline" size="sm"
+              onClick={() => {
+                setMarkedForReview(prev => {
+                  const next = new Set(prev);
+                  if (next.has(currentQuestionIndex)) next.delete(currentQuestionIndex);
+                  else next.add(currentQuestionIndex);
+                  return next;
+                });
+              }}
+              className={`text-xs flex-1 ${markedForReview.has(currentQuestionIndex) ? 'bg-purple-100 border-purple-400 text-purple-700 dark:bg-purple-950 dark:text-purple-300' : ''}`}
+            >
+              {markedForReview.has(currentQuestionIndex) ? '★ Marked' : '☆ Mark Review'}
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline" size="sm"
+              onClick={() => navigateToQuestion(Math.max(0, currentQuestionIndex - 1))}
+              disabled={currentQuestionIndex === 0}
+              className="flex-1"
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" /> Previous
+            </Button>
+            {currentQuestionIndex === totalQuestions - 1 ? (
+              <Button
+                size="sm"
+                onClick={() => setShowSubmitDialog(true)}
+                disabled={isSubmitting}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold"
+              >
+                Submit Test
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={handleSaveAndNext}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Save & Next <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Submit Dialog */}
+        <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Submit Test?</AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="p-2 bg-green-50 dark:bg-green-950/30 rounded">
+                      <span className="text-green-700 dark:text-green-400 font-medium">✅ Answered: {statusCounts.answered + statusCounts['answered-marked']}</span>
+                    </div>
+                    <div className="p-2 bg-red-50 dark:bg-red-950/30 rounded">
+                      <span className="text-red-700 dark:text-red-400 font-medium">❌ Not Answered: {statusCounts['not-answered'] + statusCounts['not-visited']}</span>
+                    </div>
+                    <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded">
+                      <span className="text-purple-700 dark:text-purple-400 font-medium">🔖 Marked: {statusCounts.marked + statusCounts['answered-marked']}</span>
+                    </div>
+                    <div className="p-2 bg-gray-50 dark:bg-gray-900 rounded">
+                      <span className="font-medium">📝 Total: {totalQuestions}</span>
+                    </div>
+                  </div>
+                  {!allQuestionsAttempted && (
+                    <p className="text-destructive font-medium text-sm">⚠️ {totalQuestions - Object.keys(answers).length} questions are unanswered!</p>
+                  )}
+                  <p className="text-sm">Are you sure you want to submit?</p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Go Back</AlertDialogCancel>
+              <AlertDialogAction onClick={submitTest} disabled={isSubmitting} className="bg-green-600 hover:bg-green-700">
+                {isSubmitting ? "Submitting..." : "Confirm Submit"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
+  }
+
+  // ======= MOCK TEST: Advanced CBT INTERFACE (UNCHANGED) =======
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden select-none" style={{ userSelect: 'none' }}>
       {/* ===== TOP HEADER ===== */}
@@ -591,41 +823,37 @@ export default function TakeTest() {
       )}
 
       {/* ===== SUBJECT TABS / FILTERS ===== */}
-      {isMockTest && (
-        <div className="bg-gray-100 dark:bg-gray-800 border-b border-border px-4 py-1 flex items-center gap-2 shrink-0 overflow-x-auto">
-          {isNEET ? (
-            // NEET: Filter buttons
-            neetFilters.map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setActiveSubjectTab(filter)}
-                className={`px-4 py-1.5 text-sm font-medium rounded transition-colors whitespace-nowrap ${
-                  activeSubjectTab === filter
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white dark:bg-gray-700 text-foreground hover:bg-blue-100 dark:hover:bg-gray-600 border'
-                }`}
-              >
-                {filter}
-              </button>
-            ))
-          ) : (
-            // CET / JEE: Tab buttons
-            (isCET ? cetTabs : jeeTabs).map((tab, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveSubjectTab(String(idx))}
-                className={`px-4 py-1.5 text-sm font-medium rounded transition-colors whitespace-nowrap ${
-                  activeSubjectTab === String(idx)
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white dark:bg-gray-700 text-foreground hover:bg-blue-100 dark:hover:bg-gray-600 border'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))
-          )}
-        </div>
-      )}
+      <div className="bg-gray-100 dark:bg-gray-800 border-b border-border px-4 py-1 flex items-center gap-2 shrink-0 overflow-x-auto">
+        {isNEET ? (
+          neetFilters.map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setActiveSubjectTab(filter)}
+              className={`px-4 py-1.5 text-sm font-medium rounded transition-colors whitespace-nowrap ${
+                activeSubjectTab === filter
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white dark:bg-gray-700 text-foreground hover:bg-blue-100 dark:hover:bg-gray-600 border'
+              }`}
+            >
+              {filter}
+            </button>
+          ))
+        ) : (
+          (isCET ? cetTabs : jeeTabs).map((tab, idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveSubjectTab(String(idx))}
+              className={`px-4 py-1.5 text-sm font-medium rounded transition-colors whitespace-nowrap ${
+                activeSubjectTab === String(idx)
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white dark:bg-gray-700 text-foreground hover:bg-blue-100 dark:hover:bg-gray-600 border'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))
+        )}
+      </div>
 
       {/* ===== MAIN CONTENT: Question Panel + Palette ===== */}
       <div className="flex-1 flex overflow-hidden">
@@ -634,11 +862,9 @@ export default function TakeTest() {
           <ScrollArea className="flex-1 p-4 md:p-6">
             {/* Question Header */}
             <div className="flex items-center gap-2 mb-4 flex-wrap">
-              {isMockTest && (
-                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-500/10 text-blue-700 dark:text-blue-400">
-                  {getCurrentSubject()}
-                </span>
-              )}
+              <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-500/10 text-blue-700 dark:text-blue-400">
+                {getCurrentSubject()}
+              </span>
               <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-semibold">
                 Q.{currentQuestionIndex + 1} of {totalQuestions}
               </span>
@@ -715,19 +941,12 @@ export default function TakeTest() {
           {/* Bottom Action Bar */}
           <div className="border-t border-border bg-card px-4 py-3 flex items-center justify-between gap-2 shrink-0 flex-wrap">
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClearResponse}
-                className="text-xs"
-              >
+              <Button variant="outline" size="sm" onClick={handleClearResponse} className="text-xs">
                 Clear Response
               </Button>
               <Button
-                variant="outline"
-                size="sm"
+                variant="outline" size="sm"
                 onClick={() => {
-                  // Unmark if already marked
                   setMarkedForReview(prev => {
                     const next = new Set(prev);
                     if (next.has(currentQuestionIndex)) next.delete(currentQuestionIndex);
@@ -742,8 +961,7 @@ export default function TakeTest() {
             </div>
             <div className="flex items-center gap-2">
               <Button
-                variant="outline"
-                size="sm"
+                variant="outline" size="sm"
                 onClick={() => navigateToQuestion(Math.max(0, currentQuestionIndex - 1))}
                 disabled={currentQuestionIndex === 0}
               >
@@ -758,8 +976,7 @@ export default function TakeTest() {
                 Save & Next <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
               <Button
-                size="sm"
-                variant="outline"
+                size="sm" variant="outline"
                 onClick={handleMarkForReview}
                 disabled={currentQuestionIndex === totalQuestions - 1}
                 className="border-purple-400 text-purple-700 hover:bg-purple-50 dark:text-purple-300 dark:hover:bg-purple-950"
@@ -781,80 +998,52 @@ export default function TakeTest() {
             </div>
             
             <ScrollArea className="flex-1 p-3">
-              {/* Render palette sections by subject for mock tests */}
-              {isMockTest ? (
-                <div className="space-y-3">
-                  {/* Group filtered indices by subject section */}
-                  {(() => {
-                    // Group indices by their subject
-                    const groups: { name: string; indices: number[] }[] = [];
-                    let currentGroup = '';
-                    filteredPaletteIndices.forEach(i => {
-                      const q = selectedQuestions[i];
-                      let subj = (q.subject || '').charAt(0).toUpperCase() + (q.subject || '').slice(1);
-                      if (isNEET && q.subject === 'biology') {
-                        const bioQs = selectedQuestions.filter(qq => qq.subject === 'biology');
-                        const bioIdx = bioQs.indexOf(q);
-                        subj = bioIdx < 45 ? 'Botany' : 'Zoology';
-                      }
-                      if (subj !== currentGroup) {
-                        currentGroup = subj;
-                        groups.push({ name: subj, indices: [] });
-                      }
-                      groups[groups.length - 1].indices.push(i);
-                    });
-                    return groups.map((group) => (
-                      <div key={group.name}>
-                        <h4 className="text-xs font-bold text-muted-foreground mb-1 uppercase tracking-wider">{group.name}</h4>
-                        <div className="grid grid-cols-5 gap-1.5">
-                          {group.indices.map(i => {
-                            const status = getQuestionStatus(i);
-                            const isCurrent = i === currentQuestionIndex;
-                            return (
-                              <button
-                                key={i}
-                                onClick={() => navigateToQuestion(i)}
-                                className={`relative w-9 h-9 text-xs rounded font-bold transition-all ${getStatusStyle(status, isCurrent)} ${
-                                  isCurrent ? (status === 'not-visited' ? 'bg-blue-500 text-white' : '') : ''
-                                }`}
-                                title={`Q${i+1}: ${status.replace('-', ' ')}`}
-                              >
-                                {i + 1}
-                                {/* Green dot for answered+marked */}
-                                {status === 'answered-marked' && (
-                                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border border-white" />
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
+              <div className="space-y-3">
+                {(() => {
+                  const groups: { name: string; indices: number[] }[] = [];
+                  let currentGroup = '';
+                  filteredPaletteIndices.forEach(i => {
+                    const q = selectedQuestions[i];
+                    let subj = (q.subject || '').charAt(0).toUpperCase() + (q.subject || '').slice(1);
+                    if (isNEET && q.subject === 'biology') {
+                      const bioQs = selectedQuestions.filter(qq => qq.subject === 'biology');
+                      const bioIdx = bioQs.indexOf(q);
+                      subj = bioIdx < 45 ? 'Botany' : 'Zoology';
+                    }
+                    if (subj !== currentGroup) {
+                      currentGroup = subj;
+                      groups.push({ name: subj, indices: [] });
+                    }
+                    groups[groups.length - 1].indices.push(i);
+                  });
+                  return groups.map((group) => (
+                    <div key={group.name}>
+                      <h4 className="text-xs font-bold text-muted-foreground mb-1 uppercase tracking-wider">{group.name}</h4>
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {group.indices.map(i => {
+                          const status = getQuestionStatus(i);
+                          const isCurrent = i === currentQuestionIndex;
+                          return (
+                            <button
+                              key={i}
+                              onClick={() => navigateToQuestion(i)}
+                              className={`relative w-9 h-9 text-xs rounded font-bold transition-all ${getStatusStyle(status, isCurrent)} ${
+                                isCurrent ? (status === 'not-visited' ? 'bg-blue-500 text-white' : '') : ''
+                              }`}
+                              title={`Q${i+1}: ${status.replace('-', ' ')}`}
+                            >
+                              {i + 1}
+                              {status === 'answered-marked' && (
+                                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border border-white" />
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
-                    ));
-                  })()}
-                </div>
-              ) : (
-                // Chapter test: single flat grid
-                <div className="grid grid-cols-5 gap-1.5">
-                  {selectedQuestions.map((_, i) => {
-                    const status = getQuestionStatus(i);
-                    const isCurrent = i === currentQuestionIndex;
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => navigateToQuestion(i)}
-                        className={`relative w-9 h-9 text-xs rounded font-bold transition-all ${getStatusStyle(status, isCurrent)} ${
-                          isCurrent ? (status === 'not-visited' ? 'bg-blue-500 text-white' : '') : ''
-                        }`}
-                      >
-                        {i + 1}
-                        {status === 'answered-marked' && (
-                          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border border-white" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                    </div>
+                  ));
+                })()}
+              </div>
             </ScrollArea>
 
             {/* Legend */}
@@ -884,7 +1073,6 @@ export default function TakeTest() {
                   <span>Answered & Marked</span>
                 </div>
               </div>
-              {/* Summary */}
               <div className="pt-1 border-t border-border mt-1 grid grid-cols-2 gap-1 text-[10px]">
                 <span>Answered: <strong className="text-green-600">{statusCounts.answered + statusCounts['answered-marked']}</strong></span>
                 <span>Not Answered: <strong className="text-red-600">{statusCounts['not-answered']}</strong></span>
@@ -915,30 +1103,20 @@ export default function TakeTest() {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="p-2 bg-green-50 dark:bg-green-950/30 rounded">
-                    <span className="text-green-700 dark:text-green-400 font-medium">
-                      ✅ Answered: {statusCounts.answered + statusCounts['answered-marked']}
-                    </span>
+                    <span className="text-green-700 dark:text-green-400 font-medium">✅ Answered: {statusCounts.answered + statusCounts['answered-marked']}</span>
                   </div>
                   <div className="p-2 bg-red-50 dark:bg-red-950/30 rounded">
-                    <span className="text-red-700 dark:text-red-400 font-medium">
-                      ❌ Not Answered: {statusCounts['not-answered'] + statusCounts['not-visited']}
-                    </span>
+                    <span className="text-red-700 dark:text-red-400 font-medium">❌ Not Answered: {statusCounts['not-answered'] + statusCounts['not-visited']}</span>
                   </div>
                   <div className="p-2 bg-purple-50 dark:bg-purple-950/30 rounded">
-                    <span className="text-purple-700 dark:text-purple-400 font-medium">
-                      🔖 Marked: {statusCounts.marked + statusCounts['answered-marked']}
-                    </span>
+                    <span className="text-purple-700 dark:text-purple-400 font-medium">🔖 Marked: {statusCounts.marked + statusCounts['answered-marked']}</span>
                   </div>
                   <div className="p-2 bg-gray-50 dark:bg-gray-900 rounded">
-                    <span className="font-medium">
-                      📝 Total: {totalQuestions}
-                    </span>
+                    <span className="font-medium">📝 Total: {totalQuestions}</span>
                   </div>
                 </div>
                 {!allQuestionsAttempted && (
-                  <p className="text-destructive font-medium text-sm">
-                    ⚠️ {totalQuestions - Object.keys(answers).length} questions are unanswered!
-                  </p>
+                  <p className="text-destructive font-medium text-sm">⚠️ {totalQuestions - Object.keys(answers).length} questions are unanswered!</p>
                 )}
                 <p className="text-sm">Are you sure you want to submit?</p>
               </div>
@@ -946,8 +1124,7 @@ export default function TakeTest() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Go Back</AlertDialogCancel>
-            <AlertDialogAction onClick={submitTest} disabled={isSubmitting}
-              className="bg-green-600 hover:bg-green-700">
+            <AlertDialogAction onClick={submitTest} disabled={isSubmitting} className="bg-green-600 hover:bg-green-700">
               {isSubmitting ? "Submitting..." : "Confirm Submit"}
             </AlertDialogAction>
           </AlertDialogFooter>
