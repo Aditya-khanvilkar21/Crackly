@@ -537,8 +537,14 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
             <CardContent>
               <ScrollArea className="h-[500px]">
                 <div className="space-y-3">
-                  {studentPerformances.map((student, idx) => (
-                    <Card key={student.user_id} className="p-4 bg-muted/30">
+                    {studentPerformances.map((student, idx) => (
+                    <Card key={student.user_id} className="p-4 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => {
+                      const testId = latestTestMap.get(student.user_id);
+                      if (testId) {
+                        setDrillDownStudent({ id: student.user_id, name: student.student_name, testId });
+                        setDrillDownOpen(true);
+                      }
+                    }}>
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <div className="flex items-center gap-2">
