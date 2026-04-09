@@ -560,6 +560,17 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
           </ScrollArea>
         </CardContent>
       </Card>
+
+      {/* Student Drill-Down Modal */}
+      {drillDownStudent && (
+        <StudentTestDrillDown
+          open={drillDownOpen}
+          onOpenChange={setDrillDownOpen}
+          studentId={drillDownStudent.id}
+          testId={drillDownStudent.testId}
+          studentName={drillDownStudent.name}
+        />
+      )}
     </motion.div>
   );
 };
