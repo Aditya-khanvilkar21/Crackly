@@ -166,16 +166,24 @@ export default function TestResult() {
       
       return subjectsConfig.map(({ subject, start, count }) => {
         let correct = 0;
+        let attempted = 0;
         for (let i = start; i < start + count; i++) {
-          if (result.answers[i] === test.questions[i]?.correctAnswer) {
-            correct++;
+          if (result.answers[i] !== undefined) {
+            attempted++;
+            if (result.answers[i] === test.questions[i]?.correctAnswer) {
+              correct++;
+            }
           }
         }
+        const wrong = attempted - correct;
         return {
           subject,
           correct,
+          wrong,
+          attempted,
           total: count,
-          percentage: (correct / count) * 100
+          percentage: (correct / count) * 100,
+          accuracy: attempted > 0 ? (correct / attempted) * 100 : 0
         };
       });
     } else {
@@ -184,18 +192,26 @@ export default function TestResult() {
       return subjects.map((subject, subjectIndex) => {
         const startIdx = subjectIndex * 25;
         let correct = 0;
+        let attempted = 0;
         
         for (let i = startIdx; i < startIdx + 25; i++) {
-          if (result.answers[i] === test.questions[i]?.correctAnswer) {
-            correct++;
+          if (result.answers[i] !== undefined) {
+            attempted++;
+            if (result.answers[i] === test.questions[i]?.correctAnswer) {
+              correct++;
+            }
           }
         }
+        const wrong = attempted - correct;
         
         return {
           subject,
           correct,
+          wrong,
+          attempted,
           total: 25,
-          percentage: (correct / 25) * 100
+          percentage: (correct / 25) * 100,
+          accuracy: attempted > 0 ? (correct / attempted) * 100 : 0
         };
       });
     }
