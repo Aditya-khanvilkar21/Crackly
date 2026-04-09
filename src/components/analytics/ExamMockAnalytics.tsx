@@ -498,7 +498,10 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
               </TableHeader>
               <TableBody>
                 {currentPerformances.map((student) => (
-                  <TableRow key={student.studentId}>
+                  <TableRow key={student.studentId} className="cursor-pointer hover:bg-muted/50" onClick={() => {
+                    setDrillDownStudent({ id: student.userId, name: student.studentName, testId: student.latestTestId });
+                    setDrillDownOpen(true);
+                  }}>
                     <TableCell>
                       {student.rank <= 3 ? (
                         <Badge className={
