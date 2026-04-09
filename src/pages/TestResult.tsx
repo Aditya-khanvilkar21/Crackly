@@ -455,12 +455,15 @@ export default function TestResult() {
               
               return (
                 <div key={qIndex} className={`p-4 rounded-lg border-2 ${
+                  !isAttempted ? 'border-gray-400 bg-gray-50 dark:bg-gray-950/20' :
                   isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-950/20' : 'border-red-500 bg-red-50 dark:bg-red-950/20'
                 }`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold">Q{qIndex + 1}.</span>
-                      {isCorrect ? (
+                      {!isAttempted ? (
+                        <AlertCircle className="w-5 h-5 text-gray-500" />
+                      ) : isCorrect ? (
                         <CheckCircle2 className="w-5 h-5 text-green-600" />
                       ) : (
                         <XCircle className="w-5 h-5 text-red-600" />
@@ -468,11 +471,13 @@ export default function TestResult() {
                       <span className="text-xs text-muted-foreground">({marksPerQ} mark{marksPerQ > 1 ? 's' : ''})</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                      <span className={`text-sm font-medium ${
+                        !isAttempted ? 'text-gray-500' : isCorrect ? 'text-green-600' : 'text-red-600'
+                      }`}>
                         {marksObtained > 0 ? '+' : ''}{marksObtained.toFixed(1)} marks
                       </span>
-                      <Badge className={isCorrect ? 'bg-green-600' : 'bg-red-600'}>
-                        {isCorrect ? 'Correct' : 'Incorrect'}
+                      <Badge className={!isAttempted ? 'bg-gray-500' : isCorrect ? 'bg-green-600' : 'bg-red-600'}>
+                        {!isAttempted ? 'Not Attempted' : isCorrect ? 'Correct' : 'Incorrect'}
                       </Badge>
                     </div>
                   </div>
