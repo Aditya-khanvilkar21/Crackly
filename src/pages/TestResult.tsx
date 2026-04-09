@@ -44,8 +44,11 @@ interface Test {
 interface SubjectBreakdown {
   subject: string;
   correct: number;
+  wrong: number;
+  attempted: number;
   total: number;
   percentage: number;
+  accuracy: number;
 }
 
 interface TopicAnalysis {
@@ -163,16 +166,24 @@ export default function TestResult() {
       
       return subjectsConfig.map(({ subject, start, count }) => {
         let correct = 0;
+        let attempted = 0;
         for (let i = start; i < start + count; i++) {
-          if (result.answers[i] === test.questions[i]?.correctAnswer) {
-            correct++;
+          if (result.answers[i] !== undefined) {
+            attempted++;
+            if (result.answers[i] === test.questions[i]?.correctAnswer) {
+              correct++;
+            }
           }
         }
+        const wrong = attempted - correct;
         return {
           subject,
           correct,
+          wrong,
+          attempted,
           total: count,
-          percentage: (correct / count) * 100
+          percentage: (correct / count) * 100,
+          accuracy: attempted > 0 ? (correct / attempted) * 100 : 0
         };
       });
     } else {
@@ -181,18 +192,26 @@ export default function TestResult() {
       return subjects.map((subject, subjectIndex) => {
         const startIdx = subjectIndex * 25;
         let correct = 0;
+        let attempted = 0;
         
         for (let i = startIdx; i < startIdx + 25; i++) {
-          if (result.answers[i] === test.questions[i]?.correctAnswer) {
-            correct++;
+          if (result.answers[i] !== undefined) {
+            attempted++;
+            if (result.answers[i] === test.questions[i]?.correctAnswer) {
+              correct++;
+            }
           }
         }
+        const wrong = attempted - correct;
         
         return {
           subject,
           correct,
+          wrong,
+          attempted,
           total: 25,
-          percentage: (correct / 25) * 100
+          percentage: (correct / 25) * 100,
+          accuracy: attempted > 0 ? (correct / attempted) * 100 : 0
         };
       });
     }
@@ -293,22 +312,30 @@ export default function TestResult() {
               {test.title} {isMockTest ? (isNEETMockTest() ? '- NEET Mock Test' : '- JEE Mock Test') : `- ${test.subject}`}
             </p>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-              <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-3xl font-bold">{detailedScore.correct}/{getDisplayTotal()}</div>
-                <div className="text-sm opacity-90">Correct Answers</div>
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-4xl mx-auto">
               <div className="bg-white/10 rounded-lg p-4">
                 <div className="text-3xl font-bold">{detailedScore.totalMarks.toFixed(1)}/{detailedScore.maxMarks}</div>
-                <div className="text-sm opacity-90">Total Marks</div>
+                <div className="text-sm opacity-90">Total Score</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-3xl font-bold">{getPercentage()}%</div>
-                <div className="text-sm opacity-90">Percentage</div>
+                <div className="text-3xl font-bold">{detailedScore.correct}</div>
+                <div className="text-sm opacity-90">Correct</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-3xl font-bold">{formatTime(result.time_taken_seconds)}</div>
-                <div className="text-sm opacity-90">Time Taken</div>
+                <div className="text-3xl font-bold">{detailedScore.wrong}</div>
+                <div className="text-sm opacity-90">Incorrect</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-4">
+                <div className="text-3xl font-bold">{detailedScore.unanswered}</div>
+                <div className="text-sm opacity-90">Not Attempted</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-4">
+                <div className="text-3xl font-bold">
+                  {(detailedScore.correct + detailedScore.wrong) > 0 
+                    ? ((detailedScore.correct / (detailedScore.correct + detailedScore.wrong)) * 100).toFixed(1) 
+                    : '0'}%
+                </div>
+                <div className="text-sm opacity-90">Accuracy</div>
               </div>
             </div>
             
@@ -359,27 +386,33 @@ export default function TestResult() {
             <h2 className="text-xl font-bold mb-4">Subject-wise Performance</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {subjectBreakdown.map((subject) => (
-                <div key={subject.subject} className="p-4 border rounded-lg bg-muted/20">
-                  <h3 className="font-semibold text-lg mb-2">{subject.subject}</h3>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>Score:</span>
-                      <span className="font-medium">{subject.correct}/{subject.total}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Percentage:</span>
+                <div key={subject.subject} className={`p-4 border rounded-lg ${
+                  subject.accuracy >= 70 ? 'bg-green-50/50 dark:bg-green-950/20 border-green-300' :
+                  subject.accuracy >= 50 ? 'bg-yellow-50/50 dark:bg-yellow-950/20 border-yellow-300' :
+                  'bg-red-50/50 dark:bg-red-950/20 border-red-300'
+                }`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-lg">{subject.subject}</h3>
+                    <Badge className={
+                      subject.accuracy >= 70 ? 'bg-green-600' : subject.accuracy >= 50 ? 'bg-yellow-600' : 'bg-red-600'
+                    }>
+                      {subject.accuracy >= 70 ? 'Strong' : subject.accuracy >= 50 ? 'Moderate' : 'Weak'}
+                    </Badge>
+                  </div>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between"><span>Total Questions:</span><span className="font-medium">{subject.total}</span></div>
+                    <div className="flex justify-between"><span>Attempted:</span><span className="font-medium">{subject.attempted}</span></div>
+                    <div className="flex justify-between"><span>Correct:</span><span className="font-medium text-green-600">{subject.correct}</span></div>
+                    <div className="flex justify-between"><span>Incorrect:</span><span className="font-medium text-red-600">{subject.wrong}</span></div>
+                    <div className="flex justify-between"><span>Accuracy:</span>
                       <span className={`font-bold ${
-                        subject.percentage >= 80 ? 'text-green-600' : 
-                        subject.percentage >= 60 ? 'text-yellow-600' : 'text-red-600'
-                      }`}>
-                        {subject.percentage.toFixed(1)}%
-                      </span>
+                        subject.accuracy >= 70 ? 'text-green-600' : subject.accuracy >= 50 ? 'text-yellow-600' : 'text-red-600'
+                      }`}>{subject.accuracy.toFixed(1)}%</span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2 mt-2">
                       <div 
                         className={`h-2 rounded-full transition-all ${
-                          subject.percentage >= 80 ? 'bg-green-600' : 
-                          subject.percentage >= 60 ? 'bg-yellow-600' : 'bg-red-600'
+                          subject.accuracy >= 70 ? 'bg-green-600' : subject.accuracy >= 50 ? 'bg-yellow-600' : 'bg-red-600'
                         }`}
                         style={{ width: `${subject.percentage}%` }}
                       />
@@ -413,21 +446,24 @@ export default function TestResult() {
         <Card className="p-6 mb-6">
           <h2 className="text-xl font-bold mb-6">Detailed Review</h2>
           <div className="space-y-6">
-            {Object.entries(result.answers).map(([questionIndex, selectedAnswer]) => {
-              const qIndex = parseInt(questionIndex);
-              const question = test.questions[qIndex];
-              const isCorrect = selectedAnswer === question.correctAnswer;
+            {test.questions.map((question, qIndex) => {
+              const selectedAnswer = result.answers[qIndex];
+              const isAttempted = selectedAnswer !== undefined;
+              const isCorrect = isAttempted && selectedAnswer === question.correctAnswer;
               const marksPerQ = question.marksPerQuestion || 1;
-              const marksObtained = isCorrect ? marksPerQ : (test.negative_marking ? -(test.negative_marking * marksPerQ) : 0);
+              const marksObtained = !isAttempted ? 0 : isCorrect ? marksPerQ : (test.negative_marking ? -(test.negative_marking * marksPerQ) : 0);
               
               return (
                 <div key={qIndex} className={`p-4 rounded-lg border-2 ${
+                  !isAttempted ? 'border-gray-400 bg-gray-50 dark:bg-gray-950/20' :
                   isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-950/20' : 'border-red-500 bg-red-50 dark:bg-red-950/20'
                 }`}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold">Q{qIndex + 1}.</span>
-                      {isCorrect ? (
+                      {!isAttempted ? (
+                        <AlertCircle className="w-5 h-5 text-gray-500" />
+                      ) : isCorrect ? (
                         <CheckCircle2 className="w-5 h-5 text-green-600" />
                       ) : (
                         <XCircle className="w-5 h-5 text-red-600" />
@@ -435,11 +471,13 @@ export default function TestResult() {
                       <span className="text-xs text-muted-foreground">({marksPerQ} mark{marksPerQ > 1 ? 's' : ''})</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                      <span className={`text-sm font-medium ${
+                        !isAttempted ? 'text-gray-500' : isCorrect ? 'text-green-600' : 'text-red-600'
+                      }`}>
                         {marksObtained > 0 ? '+' : ''}{marksObtained.toFixed(1)} marks
                       </span>
-                      <Badge className={isCorrect ? 'bg-green-600' : 'bg-red-600'}>
-                        {isCorrect ? 'Correct' : 'Incorrect'}
+                      <Badge className={!isAttempted ? 'bg-gray-500' : isCorrect ? 'bg-green-600' : 'bg-red-600'}>
+                        {!isAttempted ? 'Not Attempted' : isCorrect ? 'Correct' : 'Incorrect'}
                       </Badge>
                     </div>
                   </div>

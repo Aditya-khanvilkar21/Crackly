@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { TrendingUp, Target, Award, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { MockTestInsights } from "./MockTestInsights";
 
 interface MockTestResult {
   id: string;
@@ -19,8 +20,12 @@ interface MockTestResult {
 interface SubjectStats {
   subject: string;
   correct: number;
+  wrong: number;
+  attempted: number;
   total: number;
   percentage: number;
+  accuracy: number;
+  attemptRate: number;
 }
 
 interface Test {
@@ -72,18 +77,27 @@ export const MockTestAnalytics = () => {
       const startIdx = subjectIndex * 25;
       const endIdx = startIdx + 25;
       let correct = 0;
+      let attempted = 0;
 
       for (let i = startIdx; i < endIdx; i++) {
-        if (result.answers[i] === test.questions[i]?.correctAnswer) {
-          correct++;
+        if (result.answers[i] !== undefined) {
+          attempted++;
+          if (result.answers[i] === test.questions[i]?.correctAnswer) {
+            correct++;
+          }
         }
       }
+      const wrong = attempted - correct;
 
       stats.push({
         subject,
         correct,
+        wrong,
+        attempted,
         total: 25,
-        percentage: (correct / 25) * 100
+        percentage: (correct / 25) * 100,
+        accuracy: attempted > 0 ? (correct / attempted) * 100 : 0,
+        attemptRate: (attempted / 25) * 100
       });
     });
 
@@ -97,8 +111,12 @@ export const MockTestAnalytics = () => {
     const aggregated = subjects.map(subject => ({
       subject,
       correct: 0,
+      wrong: 0,
+      attempted: 0,
       total: 0,
-      percentage: 0
+      percentage: 0,
+      accuracy: 0,
+      attemptRate: 0
     }));
 
     results.forEach(result => {
@@ -108,14 +126,40 @@ export const MockTestAnalytics = () => {
       const subjectStats = calculateSubjectStats(result, test);
       subjectStats.forEach((stat, index) => {
         aggregated[index].correct += stat.correct;
+        aggregated[index].wrong += stat.wrong;
+        aggregated[index].attempted += stat.attempted;
         aggregated[index].total += stat.total;
       });
     });
 
     return aggregated.map(agg => ({
       ...agg,
-      percentage: agg.total > 0 ? (agg.correct / agg.total) * 100 : 0
+      percentage: agg.total > 0 ? (agg.correct / agg.total) * 100 : 0,
+      accuracy: agg.attempted > 0 ? (agg.correct / agg.attempted) * 100 : 0,
+      attemptRate: agg.total > 0 ? (agg.attempted / agg.total) * 100 : 0
     }));
+  };
+
+  // Build snapshots for insights
+  const getSnapshots = () => {
+    return results.map(result => {
+      const test = tests.find(t => t.id === result.test_id);
+      if (!test) return null;
+      const stats = calculateSubjectStats(result, test);
+      return {
+        testTitle: result.test_title || test.title,
+        completedAt: result.completed_at,
+        subjects: stats.map(s => ({
+          subject: s.subject,
+          accuracy: s.accuracy,
+          attemptRate: s.attemptRate,
+          correct: s.correct,
+          wrong: s.wrong,
+          attempted: s.attempted,
+          total: s.total
+        }))
+      };
+    }).filter(Boolean) as any[];
   };
 
   if (loading) {
@@ -147,6 +191,7 @@ export const MockTestAnalytics = () => {
   const bestScore = Math.max(...results.map(r => (r.score / r.total_questions) * 100));
   
   const subjectStats = getOverallSubjectStats();
+  const snapshots = getSnapshots();
   
   // Performance trend
   const performanceTrend = results.map((r, idx) => ({
@@ -300,6 +345,9 @@ export const MockTestAnalytics = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Smart Insights */}
+      <MockTestInsights snapshots={snapshots} />
 
       {/* Mock Test History */}
       <Card className="shadow-md hover:shadow-lg transition-shadow">
