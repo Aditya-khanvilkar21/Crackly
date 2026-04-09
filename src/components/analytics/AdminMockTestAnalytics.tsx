@@ -157,6 +157,13 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
           const existing = studentResultsMap.get(r.student_id) || [];
           existing.push(r);
           studentResultsMap.set(r.student_id, existing);
+          // Track latest test per student
+          const currentLatest = latestTests.get(r.student_id);
+          if (!currentLatest || new Date(r.completed_at) > new Date(currentLatest)) {
+            latestTests.set(r.student_id, r.test_id);
+          }
+        });
+        setLatestTestMap(latestTests);
         });
 
         const performances: StudentPerformance[] = Array.from(studentResultsMap.entries())
