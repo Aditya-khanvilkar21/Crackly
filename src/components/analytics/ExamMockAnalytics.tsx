@@ -184,16 +184,18 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
       });
     });
 
-    return Array.from(studentStats.values())
-      .map(s => ({
+    return Array.from(studentStats.entries())
+      .map(([uid, s]) => ({
         studentName: s.name,
         studentId: s.studentId,
+        userId: s.userId,
         avgScore: s.totalQuestions > 0 ? (s.totalScore / s.totalQuestions) * 100 : 0,
         mockTestsTaken: s.testCount,
         physicsAvg: s.physicsTotal > 0 ? (s.physicsCorrect / s.physicsTotal) * 100 : 0,
         chemistryAvg: s.chemistryTotal > 0 ? (s.chemistryCorrect / s.chemistryTotal) * 100 : 0,
         mathOrBioAvg: s.thirdSubjectTotal > 0 ? (s.thirdSubjectCorrect / s.thirdSubjectTotal) * 100 : 0,
         rank: 0,
+        latestTestId: s.latestTestId,
       }))
       .sort((a, b) => b.avgScore - a.avgScore)
       .map((s, idx) => ({ ...s, rank: idx + 1 }));
