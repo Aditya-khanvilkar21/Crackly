@@ -436,6 +436,11 @@ export const NextGenStudentAnalytics = ({ examType }: NextGenStudentAnalyticsPro
             />
           </TabsContent>
 
+          {/* Mock Test Insights Tab */}
+          <TabsContent value="mock-insights" className="space-y-4 mt-0">
+            <MockTestAnalytics examType={examType} />
+          </TabsContent>
+
           {/* Revision Tab - Spaced Repetition */}
           <TabsContent value="revision" className="space-y-4 mt-0">
             <SpacedRepetitionReminders
