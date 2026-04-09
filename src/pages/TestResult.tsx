@@ -446,12 +446,12 @@ export default function TestResult() {
         <Card className="p-6 mb-6">
           <h2 className="text-xl font-bold mb-6">Detailed Review</h2>
           <div className="space-y-6">
-            {Object.entries(result.answers).map(([questionIndex, selectedAnswer]) => {
-              const qIndex = parseInt(questionIndex);
-              const question = test.questions[qIndex];
-              const isCorrect = selectedAnswer === question.correctAnswer;
+            {test.questions.map((question, qIndex) => {
+              const selectedAnswer = result.answers[qIndex];
+              const isAttempted = selectedAnswer !== undefined;
+              const isCorrect = isAttempted && selectedAnswer === question.correctAnswer;
               const marksPerQ = question.marksPerQuestion || 1;
-              const marksObtained = isCorrect ? marksPerQ : (test.negative_marking ? -(test.negative_marking * marksPerQ) : 0);
+              const marksObtained = !isAttempted ? 0 : isCorrect ? marksPerQ : (test.negative_marking ? -(test.negative_marking * marksPerQ) : 0);
               
               return (
                 <div key={qIndex} className={`p-4 rounded-lg border-2 ${
