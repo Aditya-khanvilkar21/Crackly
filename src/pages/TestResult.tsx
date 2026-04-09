@@ -386,27 +386,33 @@ export default function TestResult() {
             <h2 className="text-xl font-bold mb-4">Subject-wise Performance</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {subjectBreakdown.map((subject) => (
-                <div key={subject.subject} className="p-4 border rounded-lg bg-muted/20">
-                  <h3 className="font-semibold text-lg mb-2">{subject.subject}</h3>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>Score:</span>
-                      <span className="font-medium">{subject.correct}/{subject.total}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Percentage:</span>
+                <div key={subject.subject} className={`p-4 border rounded-lg ${
+                  subject.accuracy >= 70 ? 'bg-green-50/50 dark:bg-green-950/20 border-green-300' :
+                  subject.accuracy >= 50 ? 'bg-yellow-50/50 dark:bg-yellow-950/20 border-yellow-300' :
+                  'bg-red-50/50 dark:bg-red-950/20 border-red-300'
+                }`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-lg">{subject.subject}</h3>
+                    <Badge className={
+                      subject.accuracy >= 70 ? 'bg-green-600' : subject.accuracy >= 50 ? 'bg-yellow-600' : 'bg-red-600'
+                    }>
+                      {subject.accuracy >= 70 ? 'Strong' : subject.accuracy >= 50 ? 'Moderate' : 'Weak'}
+                    </Badge>
+                  </div>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between"><span>Total Questions:</span><span className="font-medium">{subject.total}</span></div>
+                    <div className="flex justify-between"><span>Attempted:</span><span className="font-medium">{subject.attempted}</span></div>
+                    <div className="flex justify-between"><span>Correct:</span><span className="font-medium text-green-600">{subject.correct}</span></div>
+                    <div className="flex justify-between"><span>Incorrect:</span><span className="font-medium text-red-600">{subject.wrong}</span></div>
+                    <div className="flex justify-between"><span>Accuracy:</span>
                       <span className={`font-bold ${
-                        subject.percentage >= 80 ? 'text-green-600' : 
-                        subject.percentage >= 60 ? 'text-yellow-600' : 'text-red-600'
-                      }`}>
-                        {subject.percentage.toFixed(1)}%
-                      </span>
+                        subject.accuracy >= 70 ? 'text-green-600' : subject.accuracy >= 50 ? 'text-yellow-600' : 'text-red-600'
+                      }`}>{subject.accuracy.toFixed(1)}%</span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2 mt-2">
                       <div 
                         className={`h-2 rounded-full transition-all ${
-                          subject.percentage >= 80 ? 'bg-green-600' : 
-                          subject.percentage >= 60 ? 'bg-yellow-600' : 'bg-red-600'
+                          subject.accuracy >= 70 ? 'bg-green-600' : subject.accuracy >= 50 ? 'bg-yellow-600' : 'bg-red-600'
                         }`}
                         style={{ width: `${subject.percentage}%` }}
                       />
