@@ -549,6 +549,7 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="font-semibold">{student.student_name}</h4>
+                            <Eye className="h-3 w-3 text-muted-foreground" />
                             {student.trend === 'improving' && (
                               <Badge variant="outline" className="border-green-500 text-green-700 text-xs">
                                 <TrendingUp className="w-3 h-3 mr-1" /> Improving
@@ -599,6 +600,17 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Student Drill-Down Modal */}
+      {drillDownStudent && (
+        <StudentTestDrillDown
+          open={drillDownOpen}
+          onOpenChange={setDrillDownOpen}
+          studentId={drillDownStudent.id}
+          testId={drillDownStudent.testId}
+          studentName={drillDownStudent.name}
+        />
+      )}
     </div>
   );
 };
