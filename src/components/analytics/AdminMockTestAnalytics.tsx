@@ -52,6 +52,9 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
   const [studentPerformances, setStudentPerformances] = useState<StudentPerformance[]>([]);
   const [testOverviews, setTestOverviews] = useState<TestOverview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownStudent, setDrillDownStudent] = useState<{ id: string; name: string; testId: string } | null>(null);
+  const [latestTestMap, setLatestTestMap] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     fetchMockTestAnalytics();
