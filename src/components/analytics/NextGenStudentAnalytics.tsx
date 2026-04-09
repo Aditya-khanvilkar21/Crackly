@@ -266,7 +266,7 @@ export const NextGenStudentAnalytics = ({ examType }: NextGenStudentAnalyticsPro
 
         {/* Tabbed Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-4">
+          <TabsList className="grid w-full grid-cols-7 mb-4">
             <TabsTrigger value="overview" className="text-xs">
               <BarChart3 className="h-3 w-3 mr-1" />
               Overview
@@ -275,12 +275,16 @@ export const NextGenStudentAnalytics = ({ examType }: NextGenStudentAnalyticsPro
               <Brain className="h-3 w-3 mr-1" />
               Mock
             </TabsTrigger>
+            <TabsTrigger value="chapters" className="text-xs">
+              <BookOpen className="h-3 w-3 mr-1" />
+              Chapters
+            </TabsTrigger>
             <TabsTrigger value="revision" className="text-xs">
               <Bell className="h-3 w-3 mr-1" />
               Revision
             </TabsTrigger>
             <TabsTrigger value="topics" className="text-xs">
-              <BookOpen className="h-3 w-3 mr-1" />
+              <Target className="h-3 w-3 mr-1" />
               Topics
             </TabsTrigger>
             <TabsTrigger value="analysis" className="text-xs">
