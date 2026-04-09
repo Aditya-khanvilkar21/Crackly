@@ -18,12 +18,14 @@ type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
 interface StudentPerformance {
   studentName: string;
   studentId: string;
+  userId: string;
   avgScore: number;
   mockTestsTaken: number;
   physicsAvg: number;
   chemistryAvg: number;
   mathOrBioAvg: number;
   rank: number;
+  latestTestId: string;
 }
 
 interface ExamMockAnalyticsProps {
