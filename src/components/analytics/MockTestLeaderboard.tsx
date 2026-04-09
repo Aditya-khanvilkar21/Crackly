@@ -49,6 +49,8 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownStudent, setDrillDownStudent] = useState<{ id: string; name: string; rank: number } | null>(null);
 
   useEffect(() => {
     fetchMockTests();
