@@ -21,6 +21,7 @@ import { TopicDrillDown } from "./TopicDrillDown";
 import { TestDrillDown } from "./TestDrillDown";
 import { SpacedRepetitionReminders } from "./SpacedRepetitionReminders";
 import { MockTestAnalytics } from "./MockTestAnalytics";
+import { StudentChapterAnalytics } from "./StudentChapterAnalytics";
 import { jsPDF } from "jspdf";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
