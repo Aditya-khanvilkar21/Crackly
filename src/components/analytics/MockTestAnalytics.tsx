@@ -143,11 +143,14 @@ export const MockTestAnalytics = () => {
       if (!test) return;
 
       const subjectStats = calculateSubjectStats(result, test);
-      subjectStats.forEach((stat, index) => {
-        aggregated[index].correct += stat.correct;
-        aggregated[index].wrong += stat.wrong;
-        aggregated[index].attempted += stat.attempted;
-        aggregated[index].total += stat.total;
+      subjectStats.forEach(stat => {
+        const agg = aggregated.find(a => a.subject === stat.subject);
+        if (agg) {
+          agg.correct += stat.correct;
+          agg.wrong += stat.wrong;
+          agg.attempted += stat.attempted;
+          agg.total += stat.total;
+        }
       });
     });
 
