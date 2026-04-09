@@ -346,6 +346,9 @@ export const MockTestAnalytics = () => {
         </Card>
       </div>
 
+      {/* Smart Insights */}
+      <MockTestInsights snapshots={snapshots} />
+
       {/* Mock Test History */}
       <Card className="shadow-md hover:shadow-lg transition-shadow">
         <CardHeader>
