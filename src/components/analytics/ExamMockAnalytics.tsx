@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Users, TrendingUp, BookOpen, Award, Target, ArrowLeft } from "lucide-react";
+import { Users, TrendingUp, BookOpen, Award, Target, ArrowLeft, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StudentTestDrillDown } from "./StudentTestDrillDown";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 type CETType = 'PCM' | 'PCB';
@@ -17,12 +18,14 @@ type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
 interface StudentPerformance {
   studentName: string;
   studentId: string;
+  userId: string;
   avgScore: number;
   mockTestsTaken: number;
   physicsAvg: number;
   chemistryAvg: number;
   mathOrBioAvg: number;
   rank: number;
+  latestTestId: string;
 }
 
 interface ExamMockAnalyticsProps {
@@ -75,6 +78,8 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
   const [pcmTestCount, setPcmTestCount] = useState(0);
   const [pcbTestCount, setPcbTestCount] = useState(0);
   const [selectedCETType, setSelectedCETType] = useState<CETType>('PCM');
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownStudent, setDrillDownStudent] = useState<{ id: string; name: string; testId: string } | null>(null);
 
   const subjects = getSubjects(examType, examType === 'CET' ? selectedCETType : undefined);
 
@@ -88,6 +93,7 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
     filterFn?: (test: any) => boolean
   ): StudentPerformance[] => {
     const studentStats = new Map<string, {
+      userId: string;
       name: string;
       studentId: string;
       totalScore: number;
@@ -99,6 +105,8 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
       chemistryTotal: number;
       thirdSubjectCorrect: number;
       thirdSubjectTotal: number;
+      latestTestId: string;
+      latestTestDate: string;
     }>();
 
     const filteredResults = filterFn 
@@ -110,6 +118,7 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
       const profile = profiles.find(p => p.id === r.student_id);
       
       const existing = studentStats.get(r.student_id) || {
+        userId: r.student_id,
         name: profile?.full_name || "Unknown",
         studentId: profile?.student_id || "",
         totalScore: 0,
@@ -121,7 +130,15 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
         chemistryTotal: 0,
         thirdSubjectCorrect: 0,
         thirdSubjectTotal: 0,
+        latestTestId: r.test_id,
+        latestTestDate: r.completed_at || "",
       };
+
+      // Track latest test
+      if (r.completed_at && r.completed_at > existing.latestTestDate) {
+        existing.latestTestId = r.test_id;
+        existing.latestTestDate = r.completed_at;
+      }
 
       const questions = test.questions || [];
       const answers = r.answers || {};
@@ -167,16 +184,18 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
       });
     });
 
-    return Array.from(studentStats.values())
-      .map(s => ({
+    return Array.from(studentStats.entries())
+      .map(([uid, s]) => ({
         studentName: s.name,
         studentId: s.studentId,
+        userId: s.userId,
         avgScore: s.totalQuestions > 0 ? (s.totalScore / s.totalQuestions) * 100 : 0,
         mockTestsTaken: s.testCount,
         physicsAvg: s.physicsTotal > 0 ? (s.physicsCorrect / s.physicsTotal) * 100 : 0,
         chemistryAvg: s.chemistryTotal > 0 ? (s.chemistryCorrect / s.chemistryTotal) * 100 : 0,
         mathOrBioAvg: s.thirdSubjectTotal > 0 ? (s.thirdSubjectCorrect / s.thirdSubjectTotal) * 100 : 0,
         rank: 0,
+        latestTestId: s.latestTestId,
       }))
       .sort((a, b) => b.avgScore - a.avgScore)
       .map((s, idx) => ({ ...s, rank: idx + 1 }));
@@ -479,7 +498,10 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
               </TableHeader>
               <TableBody>
                 {currentPerformances.map((student) => (
-                  <TableRow key={student.studentId}>
+                  <TableRow key={student.studentId} className="cursor-pointer hover:bg-muted/50" onClick={() => {
+                    setDrillDownStudent({ id: student.userId, name: student.studentName, testId: student.latestTestId });
+                    setDrillDownOpen(true);
+                  }}>
                     <TableCell>
                       {student.rank <= 3 ? (
                         <Badge className={
@@ -493,9 +515,12 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
                       )}
                     </TableCell>
                     <TableCell>
-                      <div>
-                        <div className="font-medium">{student.studentName}</div>
-                        <div className="text-xs text-muted-foreground">{student.studentId}</div>
+                      <div className="flex items-center gap-2">
+                        <div>
+                          <div className="font-medium">{student.studentName}</div>
+                          <div className="text-xs text-muted-foreground">{student.studentId}</div>
+                        </div>
+                        <Eye className="h-3 w-3 text-muted-foreground ml-auto" />
                       </div>
                     </TableCell>
                     <TableCell className="text-center">{student.mockTestsTaken}</TableCell>
@@ -538,6 +563,17 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
           </ScrollArea>
         </CardContent>
       </Card>
+
+      {/* Student Drill-Down Modal */}
+      {drillDownStudent && (
+        <StudentTestDrillDown
+          open={drillDownOpen}
+          onOpenChange={setDrillDownOpen}
+          studentId={drillDownStudent.id}
+          testId={drillDownStudent.testId}
+          studentName={drillDownStudent.name}
+        />
+      )}
     </motion.div>
   );
 };

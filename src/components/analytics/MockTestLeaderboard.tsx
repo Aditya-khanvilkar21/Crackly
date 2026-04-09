@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Award, Trophy, Medal, ArrowLeft, Download, Users, Target, TrendingUp } from "lucide-react";
+import { Award, Trophy, Medal, ArrowLeft, Download, Users, Target, TrendingUp, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { StudentTestDrillDown } from "./StudentTestDrillDown";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 
@@ -48,6 +49,8 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownStudent, setDrillDownStudent] = useState<{ id: string; name: string; rank: number } | null>(null);
 
   useEffect(() => {
     fetchMockTests();
@@ -465,7 +468,14 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
                   </TableHeader>
                   <TableBody>
                     {leaderboard.map((entry) => (
-                      <TableRow key={entry.studentId} className={entry.rank <= 3 ? 'bg-muted/30' : ''}>
+                      <TableRow 
+                        key={entry.studentId} 
+                        className={`cursor-pointer hover:bg-muted/50 ${entry.rank <= 3 ? 'bg-muted/30' : ''}`}
+                        onClick={() => {
+                          setDrillDownStudent({ id: entry.studentId, name: entry.studentName, rank: entry.rank });
+                          setDrillDownOpen(true);
+                        }}
+                      >
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {getRankIcon(entry.rank)}
@@ -482,9 +492,12 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div>
-                            <div className="font-medium">{entry.studentName}</div>
-                            <div className="text-xs text-muted-foreground">{entry.visibleStudentId}</div>
+                          <div className="flex items-center gap-2">
+                            <div>
+                              <div className="font-medium">{entry.studentName}</div>
+                              <div className="text-xs text-muted-foreground">{entry.visibleStudentId}</div>
+                            </div>
+                            <Eye className="h-3 w-3 text-muted-foreground ml-auto" />
                           </div>
                         </TableCell>
                         <TableCell className="text-center">
@@ -515,6 +528,18 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
             </CardContent>
           </Card>
         </>
+      )}
+
+      {/* Student Drill-Down Modal */}
+      {drillDownStudent && selectedTestId && (
+        <StudentTestDrillDown
+          open={drillDownOpen}
+          onOpenChange={setDrillDownOpen}
+          studentId={drillDownStudent.id}
+          testId={selectedTestId}
+          studentName={drillDownStudent.name}
+          rank={drillDownStudent.rank}
+        />
       )}
     </motion.div>
   );

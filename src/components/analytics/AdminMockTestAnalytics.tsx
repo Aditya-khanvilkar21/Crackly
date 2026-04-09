@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Users, TrendingUp, TrendingDown, BookOpen, Award, Target, AlertTriangle, Lightbulb, Brain } from "lucide-react";
+import { Users, TrendingUp, TrendingDown, BookOpen, Award, Target, AlertTriangle, Lightbulb, Brain, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StudentTestDrillDown } from "./StudentTestDrillDown";
 
 interface MockTestResult {
   student_id: string;
@@ -51,6 +52,9 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
   const [studentPerformances, setStudentPerformances] = useState<StudentPerformance[]>([]);
   const [testOverviews, setTestOverviews] = useState<TestOverview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownStudent, setDrillDownStudent] = useState<{ id: string; name: string; testId: string } | null>(null);
+  const [latestTestMap, setLatestTestMap] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     fetchMockTestAnalytics();
@@ -148,11 +152,18 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
 
         // --- Student performances with trend + weak/strong ---
         const studentResultsMap = new Map<string, any[]>();
+        const latestTests = new Map<string, string>();
         resultsData.forEach((r: any) => {
           const existing = studentResultsMap.get(r.student_id) || [];
           existing.push(r);
           studentResultsMap.set(r.student_id, existing);
+          // Track latest test per student
+          const currentLatest = latestTests.get(r.student_id);
+          if (!currentLatest || new Date(r.completed_at) > new Date(currentLatest)) {
+            latestTests.set(r.student_id, r.test_id);
+          }
         });
+        setLatestTestMap(latestTests);
 
         const performances: StudentPerformance[] = Array.from(studentResultsMap.entries())
           .map(([userId, studentResults]) => {
@@ -526,12 +537,19 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
             <CardContent>
               <ScrollArea className="h-[500px]">
                 <div className="space-y-3">
-                  {studentPerformances.map((student, idx) => (
-                    <Card key={student.user_id} className="p-4 bg-muted/30">
+                    {studentPerformances.map((student, idx) => (
+                    <Card key={student.user_id} className="p-4 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => {
+                      const testId = latestTestMap.get(student.user_id);
+                      if (testId) {
+                        setDrillDownStudent({ id: student.user_id, name: student.student_name, testId });
+                        setDrillDownOpen(true);
+                      }
+                    }}>
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="font-semibold">{student.student_name}</h4>
+                            <Eye className="h-3 w-3 text-muted-foreground" />
                             {student.trend === 'improving' && (
                               <Badge variant="outline" className="border-green-500 text-green-700 text-xs">
                                 <TrendingUp className="w-3 h-3 mr-1" /> Improving
@@ -582,6 +600,17 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Student Drill-Down Modal */}
+      {drillDownStudent && (
+        <StudentTestDrillDown
+          open={drillDownOpen}
+          onOpenChange={setDrillDownOpen}
+          studentId={drillDownStudent.id}
+          testId={drillDownStudent.testId}
+          studentName={drillDownStudent.name}
+        />
+      )}
     </div>
   );
 };
