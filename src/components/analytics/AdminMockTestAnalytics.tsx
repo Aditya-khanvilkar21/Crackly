@@ -164,7 +164,6 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
           }
         });
         setLatestTestMap(latestTests);
-        });
 
         const performances: StudentPerformance[] = Array.from(studentResultsMap.entries())
           .map(([userId, studentResults]) => {
