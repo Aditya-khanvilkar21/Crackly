@@ -118,6 +118,7 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
       const profile = profiles.find(p => p.id === r.student_id);
       
       const existing = studentStats.get(r.student_id) || {
+        userId: r.student_id,
         name: profile?.full_name || "Unknown",
         studentId: profile?.student_id || "",
         totalScore: 0,
@@ -129,7 +130,15 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
         chemistryTotal: 0,
         thirdSubjectCorrect: 0,
         thirdSubjectTotal: 0,
+        latestTestId: r.test_id,
+        latestTestDate: r.completed_at || "",
       };
+
+      // Track latest test
+      if (r.completed_at && r.completed_at > existing.latestTestDate) {
+        existing.latestTestId = r.test_id;
+        existing.latestTestDate = r.completed_at;
+      }
 
       const questions = test.questions || [];
       const answers = r.answers || {};
