@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TopicDrillDown } from "./TopicDrillDown";
 import { TestDrillDown } from "./TestDrillDown";
 import { SpacedRepetitionReminders } from "./SpacedRepetitionReminders";
+import { MockTestAnalytics } from "./MockTestAnalytics";
 import { jsPDF } from "jspdf";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
@@ -264,10 +265,14 @@ export const NextGenStudentAnalytics = ({ examType }: NextGenStudentAnalyticsPro
 
         {/* Tabbed Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-4">
+          <TabsList className="grid w-full grid-cols-6 mb-4">
             <TabsTrigger value="overview" className="text-xs">
               <BarChart3 className="h-3 w-3 mr-1" />
               Overview
+            </TabsTrigger>
+            <TabsTrigger value="mock-insights" className="text-xs">
+              <Brain className="h-3 w-3 mr-1" />
+              Mock
             </TabsTrigger>
             <TabsTrigger value="revision" className="text-xs">
               <Bell className="h-3 w-3 mr-1" />
