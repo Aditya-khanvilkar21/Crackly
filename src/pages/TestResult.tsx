@@ -312,22 +312,30 @@ export default function TestResult() {
               {test.title} {isMockTest ? (isNEETMockTest() ? '- NEET Mock Test' : '- JEE Mock Test') : `- ${test.subject}`}
             </p>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-              <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-3xl font-bold">{detailedScore.correct}/{getDisplayTotal()}</div>
-                <div className="text-sm opacity-90">Correct Answers</div>
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-4xl mx-auto">
               <div className="bg-white/10 rounded-lg p-4">
                 <div className="text-3xl font-bold">{detailedScore.totalMarks.toFixed(1)}/{detailedScore.maxMarks}</div>
-                <div className="text-sm opacity-90">Total Marks</div>
+                <div className="text-sm opacity-90">Total Score</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-3xl font-bold">{getPercentage()}%</div>
-                <div className="text-sm opacity-90">Percentage</div>
+                <div className="text-3xl font-bold">{detailedScore.correct}</div>
+                <div className="text-sm opacity-90">Correct</div>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-3xl font-bold">{formatTime(result.time_taken_seconds)}</div>
-                <div className="text-sm opacity-90">Time Taken</div>
+                <div className="text-3xl font-bold">{detailedScore.wrong}</div>
+                <div className="text-sm opacity-90">Incorrect</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-4">
+                <div className="text-3xl font-bold">{detailedScore.unanswered}</div>
+                <div className="text-sm opacity-90">Not Attempted</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-4">
+                <div className="text-3xl font-bold">
+                  {(detailedScore.correct + detailedScore.wrong) > 0 
+                    ? ((detailedScore.correct / (detailedScore.correct + detailedScore.wrong)) * 100).toFixed(1) 
+                    : '0'}%
+                </div>
+                <div className="text-sm opacity-90">Accuracy</div>
               </div>
             </div>
             
