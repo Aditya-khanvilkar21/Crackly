@@ -70,34 +70,43 @@ export const MockTestAnalytics = () => {
   };
 
   const calculateSubjectStats = (result: MockTestResult, test: Test): SubjectStats[] => {
-    const subjects = ['Physics', 'Chemistry', 'Mathematics'];
+    // Group questions by subject dynamically
+    const subjectMap: Record<string, { indices: number[] }> = {};
+    
+    test.questions.forEach((q: any, idx: number) => {
+      const subject = q.subject || 'Unknown';
+      if (!subjectMap[subject]) {
+        subjectMap[subject] = { indices: [] };
+      }
+      subjectMap[subject].indices.push(idx);
+    });
+
     const stats: SubjectStats[] = [];
 
-    subjects.forEach((subject, subjectIndex) => {
-      const startIdx = subjectIndex * 25;
-      const endIdx = startIdx + 25;
+    Object.entries(subjectMap).forEach(([subject, { indices }]) => {
       let correct = 0;
       let attempted = 0;
 
-      for (let i = startIdx; i < endIdx; i++) {
+      indices.forEach(i => {
         if (result.answers[i] !== undefined) {
           attempted++;
           if (result.answers[i] === test.questions[i]?.correctAnswer) {
             correct++;
           }
         }
-      }
+      });
       const wrong = attempted - correct;
+      const total = indices.length;
 
       stats.push({
         subject,
         correct,
         wrong,
         attempted,
-        total: 25,
-        percentage: (correct / 25) * 100,
+        total,
+        percentage: total > 0 ? (correct / total) * 100 : 0,
         accuracy: attempted > 0 ? (correct / attempted) * 100 : 0,
-        attemptRate: (attempted / 25) * 100
+        attemptRate: total > 0 ? (attempted / total) * 100 : 0
       });
     });
 
@@ -107,7 +116,17 @@ export const MockTestAnalytics = () => {
   const getOverallSubjectStats = (): SubjectStats[] => {
     if (results.length === 0 || tests.length === 0) return [];
 
-    const subjects = ['Physics', 'Chemistry', 'Mathematics'];
+    // Collect all unique subjects from all tests dynamically
+    const allSubjects = new Set<string>();
+    results.forEach(result => {
+      const test = tests.find(t => t.id === result.test_id);
+      if (test) {
+        test.questions.forEach((q: any) => {
+          if (q.subject) allSubjects.add(q.subject);
+        });
+      }
+    });
+    const subjects = Array.from(allSubjects);
     const aggregated = subjects.map(subject => ({
       subject,
       correct: 0,
