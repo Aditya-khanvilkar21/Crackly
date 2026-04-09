@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LatexRenderer } from "@/components/LatexRenderer";
-import { QuestionImageRenderer } from "@/components/QuestionImageRenderer";
+
 import {
   CheckCircle, XCircle, MinusCircle, User, Target, Clock, AlertTriangle,
   Lightbulb, BookOpen, Filter, Brain, TrendingDown, TrendingUp
