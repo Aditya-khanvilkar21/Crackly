@@ -529,6 +529,18 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
           </Card>
         </>
       )}
+
+      {/* Student Drill-Down Modal */}
+      {drillDownStudent && selectedTestId && (
+        <StudentTestDrillDown
+          open={drillDownOpen}
+          onOpenChange={setDrillDownOpen}
+          studentId={drillDownStudent.id}
+          testId={selectedTestId}
+          studentName={drillDownStudent.name}
+          rank={drillDownStudent.rank}
+        />
+      )}
     </motion.div>
   );
 };
