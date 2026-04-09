@@ -34,7 +34,13 @@ interface Test {
   questions: any[];
 }
 
-export const MockTestAnalytics = () => {
+type ExamType = 'JEE' | 'NEET' | 'CET';
+
+interface MockTestAnalyticsProps {
+  examType?: ExamType;
+}
+
+export const MockTestAnalytics = ({ examType }: MockTestAnalyticsProps = {}) => {
   const [results, setResults] = useState<MockTestResult[]>([]);
   const [tests, setTests] = useState<Test[]>([]);
   const [loading, setLoading] = useState(true);
