@@ -93,6 +93,7 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
     filterFn?: (test: any) => boolean
   ): StudentPerformance[] => {
     const studentStats = new Map<string, {
+      userId: string;
       name: string;
       studentId: string;
       totalScore: number;
@@ -104,6 +105,8 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
       chemistryTotal: number;
       thirdSubjectCorrect: number;
       thirdSubjectTotal: number;
+      latestTestId: string;
+      latestTestDate: string;
     }>();
 
     const filteredResults = filterFn 
