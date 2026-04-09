@@ -515,9 +515,12 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
                       )}
                     </TableCell>
                     <TableCell>
-                      <div>
-                        <div className="font-medium">{student.studentName}</div>
-                        <div className="text-xs text-muted-foreground">{student.studentId}</div>
+                      <div className="flex items-center gap-2">
+                        <div>
+                          <div className="font-medium">{student.studentName}</div>
+                          <div className="text-xs text-muted-foreground">{student.studentId}</div>
+                        </div>
+                        <Eye className="h-3 w-3 text-muted-foreground ml-auto" />
                       </div>
                     </TableCell>
                     <TableCell className="text-center">{student.mockTestsTaken}</TableCell>
