@@ -77,18 +77,27 @@ export const MockTestAnalytics = () => {
       const startIdx = subjectIndex * 25;
       const endIdx = startIdx + 25;
       let correct = 0;
+      let attempted = 0;
 
       for (let i = startIdx; i < endIdx; i++) {
-        if (result.answers[i] === test.questions[i]?.correctAnswer) {
-          correct++;
+        if (result.answers[i] !== undefined) {
+          attempted++;
+          if (result.answers[i] === test.questions[i]?.correctAnswer) {
+            correct++;
+          }
         }
       }
+      const wrong = attempted - correct;
 
       stats.push({
         subject,
         correct,
+        wrong,
+        attempted,
         total: 25,
-        percentage: (correct / 25) * 100
+        percentage: (correct / 25) * 100,
+        accuracy: attempted > 0 ? (correct / attempted) * 100 : 0,
+        attemptRate: (attempted / 25) * 100
       });
     });
 
