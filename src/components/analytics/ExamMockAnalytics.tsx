@@ -78,6 +78,8 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
   const [pcmTestCount, setPcmTestCount] = useState(0);
   const [pcbTestCount, setPcbTestCount] = useState(0);
   const [selectedCETType, setSelectedCETType] = useState<CETType>('PCM');
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [drillDownStudent, setDrillDownStudent] = useState<{ id: string; name: string; testId: string } | null>(null);
 
   const subjects = getSubjects(examType, examType === 'CET' ? selectedCETType : undefined);
 
