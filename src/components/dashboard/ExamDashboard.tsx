@@ -48,8 +48,8 @@ export const ExamDashboard = ({ examType, studentId, onBack }: ExamDashboardProp
     },
     {
       id: 'analytics',
-      title: 'Analytics',
-      description: 'Your performance insights',
+      title: 'Advanced Analytics',
+      description: 'Deep performance insights & progress tracking',
       icon: TrendingUp,
     },
   ];
@@ -176,8 +176,8 @@ export const ExamDashboard = ({ examType, studentId, onBack }: ExamDashboardProp
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h2 className="text-xl font-bold">Analytics</h2>
-              <p className="text-sm text-muted-foreground">{examType} Performance</p>
+              <h2 className="text-xl font-bold">Advanced Analytics</h2>
+              <p className="text-sm text-muted-foreground">{examType} Deep Performance Insights</p>
             </div>
           </div>
           <NextGenStudentAnalytics examType={examType} />
