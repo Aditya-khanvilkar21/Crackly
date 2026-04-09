@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Award, Trophy, Medal, ArrowLeft, Download, Users, Target, TrendingUp } from "lucide-react";
+import { Award, Trophy, Medal, ArrowLeft, Download, Users, Target, TrendingUp, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { StudentTestDrillDown } from "./StudentTestDrillDown";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 
