@@ -468,7 +468,14 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
                   </TableHeader>
                   <TableBody>
                     {leaderboard.map((entry) => (
-                      <TableRow key={entry.studentId} className={entry.rank <= 3 ? 'bg-muted/30' : ''}>
+                      <TableRow 
+                        key={entry.studentId} 
+                        className={`cursor-pointer hover:bg-muted/50 ${entry.rank <= 3 ? 'bg-muted/30' : ''}`}
+                        onClick={() => {
+                          setDrillDownStudent({ id: entry.studentId, name: entry.studentName, rank: entry.rank });
+                          setDrillDownOpen(true);
+                        }}
+                      >
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {getRankIcon(entry.rank)}
@@ -485,9 +492,12 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div>
-                            <div className="font-medium">{entry.studentName}</div>
-                            <div className="text-xs text-muted-foreground">{entry.visibleStudentId}</div>
+                          <div className="flex items-center gap-2">
+                            <div>
+                              <div className="font-medium">{entry.studentName}</div>
+                              <div className="text-xs text-muted-foreground">{entry.visibleStudentId}</div>
+                            </div>
+                            <Eye className="h-3 w-3 text-muted-foreground ml-auto" />
                           </div>
                         </TableCell>
                         <TableCell className="text-center">
