@@ -152,6 +152,7 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
 
         // --- Student performances with trend + weak/strong ---
         const studentResultsMap = new Map<string, any[]>();
+        const latestTests = new Map<string, string>();
         resultsData.forEach((r: any) => {
           const existing = studentResultsMap.get(r.student_id) || [];
           existing.push(r);
