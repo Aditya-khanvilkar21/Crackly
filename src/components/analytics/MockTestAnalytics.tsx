@@ -20,8 +20,12 @@ interface MockTestResult {
 interface SubjectStats {
   subject: string;
   correct: number;
+  wrong: number;
+  attempted: number;
   total: number;
   percentage: number;
+  accuracy: number;
+  attemptRate: number;
 }
 
 interface Test {
