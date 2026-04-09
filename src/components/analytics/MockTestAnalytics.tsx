@@ -111,8 +111,12 @@ export const MockTestAnalytics = () => {
     const aggregated = subjects.map(subject => ({
       subject,
       correct: 0,
+      wrong: 0,
+      attempted: 0,
       total: 0,
-      percentage: 0
+      percentage: 0,
+      accuracy: 0,
+      attemptRate: 0
     }));
 
     results.forEach(result => {
@@ -122,14 +126,40 @@ export const MockTestAnalytics = () => {
       const subjectStats = calculateSubjectStats(result, test);
       subjectStats.forEach((stat, index) => {
         aggregated[index].correct += stat.correct;
+        aggregated[index].wrong += stat.wrong;
+        aggregated[index].attempted += stat.attempted;
         aggregated[index].total += stat.total;
       });
     });
 
     return aggregated.map(agg => ({
       ...agg,
-      percentage: agg.total > 0 ? (agg.correct / agg.total) * 100 : 0
+      percentage: agg.total > 0 ? (agg.correct / agg.total) * 100 : 0,
+      accuracy: agg.attempted > 0 ? (agg.correct / agg.attempted) * 100 : 0,
+      attemptRate: agg.total > 0 ? (agg.attempted / agg.total) * 100 : 0
     }));
+  };
+
+  // Build snapshots for insights
+  const getSnapshots = () => {
+    return results.map(result => {
+      const test = tests.find(t => t.id === result.test_id);
+      if (!test) return null;
+      const stats = calculateSubjectStats(result, test);
+      return {
+        testTitle: result.test_title || test.title,
+        completedAt: result.completed_at,
+        subjects: stats.map(s => ({
+          subject: s.subject,
+          accuracy: s.accuracy,
+          attemptRate: s.attemptRate,
+          correct: s.correct,
+          wrong: s.wrong,
+          attempted: s.attempted,
+          total: s.total
+        }))
+      };
+    }).filter(Boolean) as any[];
   };
 
   if (loading) {
