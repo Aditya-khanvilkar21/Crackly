@@ -357,7 +357,7 @@ export const StudentTestDrillDown = ({
                               <LatexRenderer content={q.question} />
                             </div>
                             {q.questionImage && (
-                              <QuestionImageRenderer imageUrl={q.questionImage} alt={`Q${q.index + 1}`} className="max-h-32 mt-1" />
+                              <img src={q.questionImage} alt={`Q${q.index + 1}`} className="max-h-32 mt-1 rounded" />
                             )}
                           </div>
                         </div>
@@ -384,7 +384,7 @@ export const StudentTestDrillDown = ({
                             <span className="font-medium">Explanation: </span>
                             <LatexRenderer content={q.explanation} />
                             {q.explanationImage && (
-                              <QuestionImageRenderer imageUrl={q.explanationImage} alt="Explanation" className="max-h-24 mt-1" />
+                              <img src={q.explanationImage} alt="Explanation" className="max-h-24 mt-1 rounded" />
                             )}
                           </div>
                         )}
