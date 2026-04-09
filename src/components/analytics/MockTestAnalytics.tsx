@@ -47,18 +47,23 @@ export const MockTestAnalytics = ({ examType }: MockTestAnalyticsProps = {}) => 
 
   useEffect(() => {
     fetchMockTestResults();
-  }, []);
+  }, [examType]);
 
   const fetchMockTestResults = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
-    // Fetch mock test results
-    const { data: resultsData, error: resultsError } = await supabase
+    let query = supabase
       .from("test_results")
-      .select("*, tests!inner(id, title, test_type, questions)")
+      .select("*, tests!inner(id, title, test_type, questions, exam_type)")
       .eq("student_id", session.user.id)
-      .eq("tests.test_type", "mock_test")
+      .eq("tests.test_type", "mock_test");
+    
+    if (examType) {
+      query = query.eq("tests.exam_type", examType);
+    }
+    
+    const { data: resultsData, error: resultsError } = await query
       .order("completed_at", { ascending: true });
 
     if (!resultsError && resultsData) {
