@@ -191,6 +191,7 @@ export const MockTestAnalytics = () => {
   const bestScore = Math.max(...results.map(r => (r.score / r.total_questions) * 100));
   
   const subjectStats = getOverallSubjectStats();
+  const snapshots = getSnapshots();
   
   // Performance trend
   const performanceTrend = results.map((r, idx) => ({
