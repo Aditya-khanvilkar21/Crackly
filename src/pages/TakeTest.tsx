@@ -48,6 +48,7 @@ export default function TakeTest() {
   
   const [test, setTest] = useState<Test | null>(null);
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
+  const [originalIndexMap, setOriginalIndexMap] = useState<number[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [markedForReview, setMarkedForReview] = useState<Set<number>>(new Set());
