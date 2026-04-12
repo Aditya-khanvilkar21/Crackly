@@ -280,7 +280,7 @@ const Auth = () => {
                 <CardTitle className="text-xl">Create Account</CardTitle>
                 <CardDescription>
                   {signupType === "student" 
-                    ? "Start your JEE & NEET preparation journey today" 
+                    ? "Start your JEE, NEET & CET preparation journey today" 
                     : "Request admin access (requires Super Admin approval)"}
                 </CardDescription>
               </CardHeader>
