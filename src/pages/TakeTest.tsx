@@ -48,6 +48,7 @@ export default function TakeTest() {
   
   const [test, setTest] = useState<Test | null>(null);
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
+  const [originalIndexMap, setOriginalIndexMap] = useState<number[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [markedForReview, setMarkedForReview] = useState<Set<number>>(new Set());
@@ -333,8 +334,13 @@ export default function TakeTest() {
       
       if (testData.test_type === 'mock_test') {
         setSelectedQuestions(fixedQuestions);
+        setOriginalIndexMap(fixedQuestions.map((_, i) => i));
       } else {
-        setSelectedQuestions([...fixedQuestions].sort(() => Math.random() - 0.5));
+        // Shuffle but track original indices
+        const indexed = fixedQuestions.map((q, i) => ({ q, origIdx: i }));
+        indexed.sort(() => Math.random() - 0.5);
+        setSelectedQuestions(indexed.map(item => item.q));
+        setOriginalIndexMap(indexed.map(item => item.origIdx));
       }
       setTimeLeft(testData.duration_minutes * 60);
       setVisitedQuestions(new Set([0]));
@@ -364,8 +370,16 @@ export default function TakeTest() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
       const timeInSeconds = test.duration_minutes * 60 - timeLeft;
+      
+      // Map shuffled indices back to original question indices
+      const mappedAnswers: Record<number, number> = {};
+      for (const [shuffledIdx, optionIdx] of Object.entries(answers)) {
+        const originalIdx = originalIndexMap[parseInt(shuffledIdx)];
+        mappedAnswers[originalIdx] = optionIdx as number;
+      }
+      
       const { data, error } = await supabase.functions.invoke('submit-test', {
-        body: { testId, answers, timeInSeconds },
+        body: { testId, answers: mappedAnswers, timeInSeconds },
       });
       if (error) throw error;
       if (!data.success) throw new Error(data.error || "Submission failed");
