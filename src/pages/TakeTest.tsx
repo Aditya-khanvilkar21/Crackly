@@ -334,8 +334,13 @@ export default function TakeTest() {
       
       if (testData.test_type === 'mock_test') {
         setSelectedQuestions(fixedQuestions);
+        setOriginalIndexMap(fixedQuestions.map((_, i) => i));
       } else {
-        setSelectedQuestions([...fixedQuestions].sort(() => Math.random() - 0.5));
+        // Shuffle but track original indices
+        const indexed = fixedQuestions.map((q, i) => ({ q, origIdx: i }));
+        indexed.sort(() => Math.random() - 0.5);
+        setSelectedQuestions(indexed.map(item => item.q));
+        setOriginalIndexMap(indexed.map(item => item.origIdx));
       }
       setTimeLeft(testData.duration_minutes * 60);
       setVisitedQuestions(new Set([0]));
