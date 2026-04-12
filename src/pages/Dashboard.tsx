@@ -76,7 +76,7 @@ const Dashboard = () => {
   const features = [
     {
       icon: Target,
-      title: "JEE & NEET Style Tests",
+      title: "JEE, NEET & CET Style Tests",
       description: "Practice with authentic exam pattern MCQ tests",
       content: "Comprehensive tests covering Physics, Chemistry, Mathematics, and Biology with proper difficulty levels.",
     },
@@ -255,7 +255,7 @@ const Dashboard = () => {
                 className="text-lg md:text-xl mb-8 text-white/80"
                 variants={itemVariants}
               >
-                Your Gateway to JEE & NEET Success
+                Your Gateway to JEE, NEET & CET Success
               </motion.p>
               <motion.div 
                 className="flex flex-col sm:flex-row gap-4 justify-center"
@@ -301,7 +301,7 @@ const Dashboard = () => {
               transition={{ duration: 0.5 }}
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Crackly?</h2>
-              <p className="text-xl text-muted-foreground">Everything you need for JEE & NEET success</p>
+              <p className="text-xl text-muted-foreground">Everything you need for JEE, NEET & CET success</p>
             </motion.div>
 
             <motion.div 
@@ -356,7 +356,7 @@ const Dashboard = () => {
                 Ready to Begin Your Journey?
               </h2>
               <p className="text-xl text-muted-foreground mb-8">
-                Join thousands of students preparing for JEE & NEET with Crackly
+                Join thousands of students preparing for JEE, NEET & CET with Crackly
               </p>
               <Button size="lg" className="text-lg px-8 font-semibold" onClick={() => navigate("/auth")}>
                 Start Practicing Now
