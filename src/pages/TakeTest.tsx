@@ -370,8 +370,16 @@ export default function TakeTest() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
       const timeInSeconds = test.duration_minutes * 60 - timeLeft;
+      
+      // Map shuffled indices back to original question indices
+      const mappedAnswers: Record<number, number> = {};
+      for (const [shuffledIdx, optionIdx] of Object.entries(answers)) {
+        const originalIdx = originalIndexMap[parseInt(shuffledIdx)];
+        mappedAnswers[originalIdx] = optionIdx as number;
+      }
+      
       const { data, error } = await supabase.functions.invoke('submit-test', {
-        body: { testId, answers, timeInSeconds },
+        body: { testId, answers: mappedAnswers, timeInSeconds },
       });
       if (error) throw error;
       if (!data.success) throw new Error(data.error || "Submission failed");
