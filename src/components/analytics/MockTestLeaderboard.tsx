@@ -454,6 +454,15 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
                 Class Rankings
               </CardTitle>
               <CardDescription>Ranked by total marks with percentile scores</CardDescription>
+              <div className="relative max-w-xs pt-2">
+                <Search className="absolute left-2.5 top-[18px] h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search student..."
+                  value={leaderboardSearch}
+                  onChange={(e) => setLeaderboardSearch(e.target.value)}
+                  className="pl-9 h-9"
+                />
+              </div>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[400px]">
@@ -469,7 +478,9 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {leaderboard.map((entry) => (
+                    {leaderboard
+                      .filter(e => !leaderboardSearch || e.studentName.toLowerCase().includes(leaderboardSearch.toLowerCase()))
+                      .map((entry) => (
                       <TableRow 
                         key={entry.studentId} 
                         className={`cursor-pointer hover:bg-muted/50 ${entry.rank <= 3 ? 'bg-muted/30' : ''}`}
