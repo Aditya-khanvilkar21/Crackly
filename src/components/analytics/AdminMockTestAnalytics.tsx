@@ -402,6 +402,22 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
         </Card>
       )}
 
+      {/* Smart Insights Panel */}
+      <AdminInsightsPanel
+        studentPerformances={studentPerformances.map(s => ({
+          student_name: s.student_name,
+          avg_score: s.avg_score,
+          physics_avg: s.physics_avg,
+          chemistry_avg: s.chemistry_avg,
+          mathematics_avg: s.mathematics_avg,
+          trend: s.trend,
+          mock_tests_taken: s.mock_tests_taken,
+          weakest_subject: s.weakest_subject,
+        }))}
+        testOverviews={testOverviews}
+        avgClassScore={avgClassScore}
+      />
+
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Test Overview</TabsTrigger>
