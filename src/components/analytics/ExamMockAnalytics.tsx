@@ -489,6 +489,24 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
             Student Rankings {examType === 'CET' && `- ${selectedCETType}`}
           </CardTitle>
           <CardDescription>Complete mock test performance breakdown</CardDescription>
+          <div className="flex flex-col sm:flex-row gap-2 pt-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search student..."
+                value={studentSearch}
+                onChange={(e) => setStudentSearch(e.target.value)}
+                className="pl-9 h-9"
+              />
+            </div>
+            <div className="flex gap-1.5">
+              {(['all', 'high', 'average', 'weak'] as const).map(f => (
+                <Button key={f} size="sm" variant={studentFilter === f ? "default" : "outline"} onClick={() => setStudentFilter(f)} className="text-xs h-9">
+                  {f === 'all' ? 'All' : f === 'high' ? '>70%' : f === 'average' ? '40-70%' : '<40%'}
+                </Button>
+              ))}
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-80">
@@ -505,7 +523,16 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentPerformances.map((student) => (
+                {currentPerformances
+                  .filter(s => {
+                    const matchesSearch = !studentSearch || s.studentName.toLowerCase().includes(studentSearch.toLowerCase());
+                    const matchesFilter = studentFilter === 'all' ||
+                      (studentFilter === 'high' && s.avgScore >= 70) ||
+                      (studentFilter === 'average' && s.avgScore >= 40 && s.avgScore < 70) ||
+                      (studentFilter === 'weak' && s.avgScore < 40);
+                    return matchesSearch && matchesFilter;
+                  })
+                  .map((student) => (
                   <TableRow key={student.studentId} className="cursor-pointer hover:bg-muted/50" onClick={() => {
                     setDrillDownStudent({ id: student.userId, name: student.studentName, testId: student.latestTestId });
                     setDrillDownOpen(true);
