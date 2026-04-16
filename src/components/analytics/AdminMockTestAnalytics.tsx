@@ -4,8 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
 import { Users, TrendingUp, TrendingDown, BookOpen, Award, Target, AlertTriangle, Lightbulb, Brain, Eye, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { Input } from "@/components/ui/input";
 import { StudentTestDrillDown } from "./StudentTestDrillDown";
 import { AdminInsightsPanel } from "./AdminInsightsPanel";
