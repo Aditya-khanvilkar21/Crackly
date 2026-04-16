@@ -82,6 +82,8 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
   const [selectedCETType, setSelectedCETType] = useState<CETType>('PCM');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownStudent, setDrillDownStudent] = useState<{ id: string; name: string; testId: string } | null>(null);
+  const [studentSearch, setStudentSearch] = useState("");
+  const [studentFilter, setStudentFilter] = useState<'all' | 'high' | 'average' | 'weak'>('all');
 
   const subjects = getSubjects(examType, examType === 'CET' ? selectedCETType : undefined);
 
