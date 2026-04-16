@@ -555,19 +555,46 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
 
         {/* Student Insights */}
         <TabsContent value="students">
-          <Card className="shadow-md">
+          <Card className="shadow-md rounded-2xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-primary" />
                 Student-wise Insights
               </CardTitle>
               <CardDescription>Detailed breakdown with weak/strong subjects and score trends</CardDescription>
+              <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search student name..."
+                    value={studentSearch}
+                    onChange={(e) => setStudentSearch(e.target.value)}
+                    className="pl-9 h-9"
+                  />
+                </div>
+                <div className="flex gap-1.5">
+                  {(['all', 'high', 'average', 'weak'] as const).map(f => (
+                    <Button key={f} size="sm" variant={studentFilter === f ? "default" : "outline"} onClick={() => setStudentFilter(f)} className="text-xs h-9 capitalize">
+                      {f === 'all' ? 'All' : f === 'high' ? '>70%' : f === 'average' ? '40-70%' : '<40%'}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[500px]">
                 <div className="space-y-3">
-                    {studentPerformances.map((student, idx) => (
-                    <Card key={student.user_id} className="p-4 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => {
+                    {studentPerformances
+                      .filter(s => {
+                        const matchesSearch = !studentSearch || s.student_name.toLowerCase().includes(studentSearch.toLowerCase());
+                        const matchesFilter = studentFilter === 'all' ||
+                          (studentFilter === 'high' && s.avg_score >= 70) ||
+                          (studentFilter === 'average' && s.avg_score >= 40 && s.avg_score < 70) ||
+                          (studentFilter === 'weak' && s.avg_score < 40);
+                        return matchesSearch && matchesFilter;
+                      })
+                      .map((student, idx) => (
+                    <Card key={student.user_id} className="p-4 bg-muted/30 cursor-pointer hover:bg-muted/50 hover:shadow-md hover:scale-[1.01] transition-all rounded-xl" onClick={() => {
                       const testId = latestTestMap.get(student.user_id);
                       if (testId) {
                         setDrillDownStudent({ id: student.user_id, name: student.student_name, testId });
@@ -605,7 +632,7 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
                           { name: 'Chemistry', avg: student.chemistry_avg },
                           { name: 'Mathematics', avg: student.mathematics_avg },
                         ].map(s => (
-                          <div key={s.name} className="p-2 bg-background rounded">
+                          <div key={s.name} className="p-2 bg-background rounded-lg">
                             <div className="font-medium text-xs mb-1">{s.name}</div>
                             <div className={`font-bold ${
                               s.avg >= 70 ? 'text-green-600' : s.avg >= 50 ? 'text-yellow-600' : 'text-red-600'
