@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Award, Trophy, Medal, ArrowLeft, Download, Users, Target, TrendingUp, Eye } from "lucide-react";
+import { Award, Trophy, Medal, ArrowLeft, Download, Users, Target, TrendingUp, Eye, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -51,6 +52,7 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownStudent, setDrillDownStudent] = useState<{ id: string; name: string; rank: number } | null>(null);
+  const [leaderboardSearch, setLeaderboardSearch] = useState("");
 
   useEffect(() => {
     fetchMockTests();
