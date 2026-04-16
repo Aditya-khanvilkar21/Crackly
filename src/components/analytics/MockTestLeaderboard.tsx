@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Award, Trophy, Medal, ArrowLeft, Download, Users, Target, TrendingUp, Eye } from "lucide-react";
+import { Award, Trophy, Medal, ArrowLeft, Download, Users, Target, TrendingUp, Eye, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -51,6 +52,7 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownStudent, setDrillDownStudent] = useState<{ id: string; name: string; rank: number } | null>(null);
+  const [leaderboardSearch, setLeaderboardSearch] = useState("");
 
   useEffect(() => {
     fetchMockTests();
@@ -452,6 +454,15 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
                 Class Rankings
               </CardTitle>
               <CardDescription>Ranked by total marks with percentile scores</CardDescription>
+              <div className="relative max-w-xs pt-2">
+                <Search className="absolute left-2.5 top-[18px] h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search student..."
+                  value={leaderboardSearch}
+                  onChange={(e) => setLeaderboardSearch(e.target.value)}
+                  className="pl-9 h-9"
+                />
+              </div>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[400px]">
@@ -467,7 +478,9 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {leaderboard.map((entry) => (
+                    {leaderboard
+                      .filter(e => !leaderboardSearch || e.studentName.toLowerCase().includes(leaderboardSearch.toLowerCase()))
+                      .map((entry) => (
                       <TableRow 
                         key={entry.studentId} 
                         className={`cursor-pointer hover:bg-muted/50 ${entry.rank <= 3 ? 'bg-muted/30' : ''}`}

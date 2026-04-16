@@ -241,54 +241,62 @@ export const AdminOverview = ({ userRole }: AdminOverviewProps) => {
 
       <TabsContent value="overview" className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="hover:shadow-lg hover:scale-[1.02] transition-all rounded-2xl border-0 bg-gradient-to-br from-primary/5 to-primary/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Classes</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Classes</CardTitle>
+            <div className="p-2 rounded-xl bg-primary/10">
+              <GraduationCap className="h-4 w-4 text-primary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalClasses}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-3xl font-bold tracking-tight">{stats.totalClasses}</div>
+            <p className="text-xs text-muted-foreground mt-1">
               {userRole === "super_admin" ? "Across all admins" : "Your classes"}
             </p>
           </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="hover:shadow-lg hover:scale-[1.02] transition-all rounded-2xl border-0 bg-gradient-to-br from-accent/5 to-accent/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Students</CardTitle>
+            <div className="p-2 rounded-xl bg-accent/10">
+              <Users className="h-4 w-4 text-accent" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalStudents}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-3xl font-bold tracking-tight">{stats.totalStudents}</div>
+            <p className="text-xs text-muted-foreground mt-1">
               Enrolled students
             </p>
           </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="hover:shadow-lg hover:scale-[1.02] transition-all rounded-2xl border-0 bg-gradient-to-br from-success/5 to-success/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available Tests</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Available Tests</CardTitle>
+            <div className="p-2 rounded-xl bg-success/10">
+              <BookOpen className="h-4 w-4 text-success" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalTests}</div>
-            <p className="text-xs text-muted-foreground">
-              Active physics tests
+            <div className="text-3xl font-bold tracking-tight">{stats.totalTests}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Active tests
             </p>
           </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="hover:shadow-lg hover:scale-[1.02] transition-all rounded-2xl border-0 bg-gradient-to-br from-warning/5 to-warning/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Score</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Average Score</CardTitle>
+            <div className="p-2 rounded-xl bg-warning/10">
+              <TrendingUp className="h-4 w-4 text-warning" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.averageScore}%</div>
-            <p className="text-xs text-muted-foreground">
-              From {stats.totalTestResults} appeared students
+            <div className="text-3xl font-bold tracking-tight">{stats.averageScore}%</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              From {stats.totalTestResults} attempts
             </p>
           </CardContent>
           </Card>

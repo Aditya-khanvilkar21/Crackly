@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Users, TrendingUp, BookOpen, Award, Target, ArrowLeft, Eye } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
+import { Users, TrendingUp, BookOpen, Award, Target, ArrowLeft, Eye, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion } from "framer-motion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StudentTestDrillDown } from "./StudentTestDrillDown";
+import { AdminInsightsPanel } from "./AdminInsightsPanel";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 type CETType = 'PCM' | 'PCB';
@@ -80,6 +82,8 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
   const [selectedCETType, setSelectedCETType] = useState<CETType>('PCM');
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownStudent, setDrillDownStudent] = useState<{ id: string; name: string; testId: string } | null>(null);
+  const [studentSearch, setStudentSearch] = useState("");
+  const [studentFilter, setStudentFilter] = useState<'all' | 'high' | 'average' | 'weak'>('all');
 
   const subjects = getSubjects(examType, examType === 'CET' ? selectedCETType : undefined);
 
@@ -410,42 +414,50 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
         </Card>
       </div>
 
+      {/* Smart Insights */}
+      <AdminInsightsPanel
+        studentPerformances={currentPerformances.map(s => ({
+          student_name: s.studentName,
+          avg_score: s.avgScore,
+          physics_avg: s.physicsAvg,
+          chemistry_avg: s.chemistryAvg,
+          mathematics_avg: s.mathOrBioAvg,
+        }))}
+        avgClassScore={avgClassScore}
+      />
+
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="shadow-md">
+        <Card className="shadow-md rounded-2xl hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
               Subject Performance
             </CardTitle>
+            <CardDescription>Color-coded by performance level</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <RadarChart data={subjectData}>
-                <PolarGrid stroke="hsl(var(--border))" />
-                <PolarAngleAxis dataKey="subject" stroke="hsl(var(--muted-foreground))" />
-                <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="hsl(var(--muted-foreground))" />
-                <Radar 
-                  name="Average %" 
-                  dataKey="percentage" 
-                  stroke="hsl(var(--primary))" 
-                  fill="hsl(var(--primary))" 
-                  fillOpacity={0.6} 
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={subjectData} layout="vertical" barCategoryGap="20%">
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                <XAxis type="number" domain={[0, 100]} stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `${v}%`} />
+                <YAxis type="category" dataKey="subject" width={100} stroke="hsl(var(--muted-foreground))" fontSize={13} fontWeight={600} />
+                <ReferenceLine x={avgClassScore} stroke="hsl(var(--muted-foreground))" strokeDasharray="5 5" />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px" }}
+                  formatter={(value: number) => [`${value.toFixed(1)}%`, "Average"]}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: "hsl(var(--card))", 
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px"
-                  }}
-                  formatter={(value: number) => `${value.toFixed(1)}%`}
-                />
-              </RadarChart>
+                <Bar dataKey="percentage" radius={[0, 8, 8, 0]} barSize={28}>
+                  {subjectData.map((entry, index) => (
+                    <Cell key={index} fill={entry.percentage >= 60 ? 'hsl(142 76% 36%)' : entry.percentage >= 40 ? 'hsl(38 92% 50%)' : 'hsl(0 84% 60%)'} />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="shadow-md">
+        <Card className="shadow-md rounded-2xl hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Award className="h-5 w-5 text-accent" />
@@ -453,17 +465,13 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={200}>
               <BarChart data={currentPerformances.slice(0, 6)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis type="number" domain={[0, 100]} stroke="hsl(var(--muted-foreground))" fontSize={12} />
                 <YAxis type="category" dataKey="studentName" width={100} stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: "hsl(var(--card))", 
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px"
-                  }}
+                <Tooltip
+                  contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px" }}
                   formatter={(value: number) => [`${value.toFixed(1)}%`, "Score"]}
                 />
                 <Bar dataKey="avgScore" fill="hsl(var(--accent))" radius={[0, 8, 8, 0]} />
@@ -481,6 +489,24 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
             Student Rankings {examType === 'CET' && `- ${selectedCETType}`}
           </CardTitle>
           <CardDescription>Complete mock test performance breakdown</CardDescription>
+          <div className="flex flex-col sm:flex-row gap-2 pt-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search student..."
+                value={studentSearch}
+                onChange={(e) => setStudentSearch(e.target.value)}
+                className="pl-9 h-9"
+              />
+            </div>
+            <div className="flex gap-1.5">
+              {(['all', 'high', 'average', 'weak'] as const).map(f => (
+                <Button key={f} size="sm" variant={studentFilter === f ? "default" : "outline"} onClick={() => setStudentFilter(f)} className="text-xs h-9">
+                  {f === 'all' ? 'All' : f === 'high' ? '>70%' : f === 'average' ? '40-70%' : '<40%'}
+                </Button>
+              ))}
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-80">
@@ -497,7 +523,16 @@ export const ExamMockAnalytics = ({ examType, userRole, onBack }: ExamMockAnalyt
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentPerformances.map((student) => (
+                {currentPerformances
+                  .filter(s => {
+                    const matchesSearch = !studentSearch || s.studentName.toLowerCase().includes(studentSearch.toLowerCase());
+                    const matchesFilter = studentFilter === 'all' ||
+                      (studentFilter === 'high' && s.avgScore >= 70) ||
+                      (studentFilter === 'average' && s.avgScore >= 40 && s.avgScore < 70) ||
+                      (studentFilter === 'weak' && s.avgScore < 40);
+                    return matchesSearch && matchesFilter;
+                  })
+                  .map((student) => (
                   <TableRow key={student.studentId} className="cursor-pointer hover:bg-muted/50" onClick={() => {
                     setDrillDownStudent({ id: student.userId, name: student.studentName, testId: student.latestTestId });
                     setDrillDownOpen(true);

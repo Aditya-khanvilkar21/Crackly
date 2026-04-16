@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Users, TrendingUp, TrendingDown, BookOpen, Award, Target, AlertTriangle, Lightbulb, Brain, Eye } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from "recharts";
+import { Users, TrendingUp, TrendingDown, BookOpen, Award, Target, AlertTriangle, Lightbulb, Brain, Eye, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { StudentTestDrillDown } from "./StudentTestDrillDown";
+import { AdminInsightsPanel } from "./AdminInsightsPanel";
 
 interface MockTestResult {
   student_id: string;
@@ -55,6 +58,8 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
   const [drillDownOpen, setDrillDownOpen] = useState(false);
   const [drillDownStudent, setDrillDownStudent] = useState<{ id: string; name: string; testId: string } | null>(null);
   const [latestTestMap, setLatestTestMap] = useState<Map<string, string>>(new Map());
+  const [studentSearch, setStudentSearch] = useState("");
+  const [studentFilter, setStudentFilter] = useState<'all' | 'high' | 'average' | 'weak'>('all');
 
   useEffect(() => {
     fetchMockTestAnalytics();
@@ -400,6 +405,22 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
         </Card>
       )}
 
+      {/* Smart Insights Panel */}
+      <AdminInsightsPanel
+        studentPerformances={studentPerformances.map(s => ({
+          student_name: s.student_name,
+          avg_score: s.avg_score,
+          physics_avg: s.physics_avg,
+          chemistry_avg: s.chemistry_avg,
+          mathematics_avg: s.mathematics_avg,
+          trend: s.trend,
+          mock_tests_taken: s.mock_tests_taken,
+          weakest_subject: s.weakest_subject,
+        }))}
+        testOverviews={testOverviews}
+        avgClassScore={avgClassScore}
+      />
+
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Test Overview</TabsTrigger>
@@ -468,22 +489,31 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
         {/* Subject Analysis */}
         <TabsContent value="subjects">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-md">
+            <Card className="shadow-md hover:shadow-lg transition-shadow rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5 text-primary" />
                   Subject-wise Class Performance
                 </CardTitle>
+                <CardDescription>Horizontal comparison with class average</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <RadarChart data={subjectData}>
-                    <PolarGrid stroke="hsl(var(--border))" />
-                    <PolarAngleAxis dataKey="subject" stroke="hsl(var(--muted-foreground))" />
-                    <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="hsl(var(--muted-foreground))" />
-                    <Radar name="Average %" dataKey="percentage" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} />
-                    <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} formatter={(value: number) => `${value.toFixed(1)}%`} />
-                  </RadarChart>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={subjectData} layout="vertical" barCategoryGap="20%">
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                    <XAxis type="number" domain={[0, 100]} stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `${v}%`} />
+                    <YAxis type="category" dataKey="subject" width={100} stroke="hsl(var(--muted-foreground))" fontSize={13} fontWeight={600} />
+                    <ReferenceLine x={avgClassScore} stroke="hsl(var(--muted-foreground))" strokeDasharray="5 5" label={{ value: `Avg ${avgClassScore.toFixed(0)}%`, position: 'top', fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px" }}
+                      formatter={(value: number) => [`${value.toFixed(1)}%`, "Average"]}
+                    />
+                    <Bar dataKey="percentage" radius={[0, 8, 8, 0]} barSize={28}>
+                      {subjectData.map((entry, index) => (
+                        <Cell key={index} fill={entry.percentage >= 60 ? 'hsl(142 76% 36%)' : entry.percentage >= 40 ? 'hsl(38 92% 50%)' : 'hsl(0 84% 60%)'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
                 <div className="mt-4 space-y-2">
                   {subjectData.map(s => {
@@ -526,19 +556,46 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
 
         {/* Student Insights */}
         <TabsContent value="students">
-          <Card className="shadow-md">
+          <Card className="shadow-md rounded-2xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-primary" />
                 Student-wise Insights
               </CardTitle>
               <CardDescription>Detailed breakdown with weak/strong subjects and score trends</CardDescription>
+              <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search student name..."
+                    value={studentSearch}
+                    onChange={(e) => setStudentSearch(e.target.value)}
+                    className="pl-9 h-9"
+                  />
+                </div>
+                <div className="flex gap-1.5">
+                  {(['all', 'high', 'average', 'weak'] as const).map(f => (
+                    <Button key={f} size="sm" variant={studentFilter === f ? "default" : "outline"} onClick={() => setStudentFilter(f)} className="text-xs h-9 capitalize">
+                      {f === 'all' ? 'All' : f === 'high' ? '>70%' : f === 'average' ? '40-70%' : '<40%'}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[500px]">
                 <div className="space-y-3">
-                    {studentPerformances.map((student, idx) => (
-                    <Card key={student.user_id} className="p-4 bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => {
+                    {studentPerformances
+                      .filter(s => {
+                        const matchesSearch = !studentSearch || s.student_name.toLowerCase().includes(studentSearch.toLowerCase());
+                        const matchesFilter = studentFilter === 'all' ||
+                          (studentFilter === 'high' && s.avg_score >= 70) ||
+                          (studentFilter === 'average' && s.avg_score >= 40 && s.avg_score < 70) ||
+                          (studentFilter === 'weak' && s.avg_score < 40);
+                        return matchesSearch && matchesFilter;
+                      })
+                      .map((student, idx) => (
+                    <Card key={student.user_id} className="p-4 bg-muted/30 cursor-pointer hover:bg-muted/50 hover:shadow-md hover:scale-[1.01] transition-all rounded-xl" onClick={() => {
                       const testId = latestTestMap.get(student.user_id);
                       if (testId) {
                         setDrillDownStudent({ id: student.user_id, name: student.student_name, testId });
@@ -576,7 +633,7 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
                           { name: 'Chemistry', avg: student.chemistry_avg },
                           { name: 'Mathematics', avg: student.mathematics_avg },
                         ].map(s => (
-                          <div key={s.name} className="p-2 bg-background rounded">
+                          <div key={s.name} className="p-2 bg-background rounded-lg">
                             <div className="font-medium text-xs mb-1">{s.name}</div>
                             <div className={`font-bold ${
                               s.avg >= 70 ? 'text-green-600' : s.avg >= 50 ? 'text-yellow-600' : 'text-red-600'

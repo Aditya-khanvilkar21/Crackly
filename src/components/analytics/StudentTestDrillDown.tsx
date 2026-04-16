@@ -38,7 +38,7 @@ interface QuestionAnalysis {
   marksPerQuestion?: number;
 }
 
-type QuestionFilter = "all" | "wrong" | "unattempted" | "correct";
+type QuestionFilter = "all" | "incorrect" | "unattempted" | "correct";
 
 export const StudentTestDrillDown = ({
   open, onOpenChange, studentId, testId, studentName, rank
@@ -52,6 +52,7 @@ export const StudentTestDrillDown = ({
 
   useEffect(() => {
     if (open && studentId && testId) {
+      setFilter("all");
       fetchData();
     }
   }, [open, studentId, testId]);
@@ -287,10 +288,10 @@ export const StudentTestDrillDown = ({
 
                     <TabsContent value="questions" className="mt-2">
                       <div className="flex gap-1.5 mb-2 flex-wrap">
-                        {(["all", "wrong", "unattempted", "correct"] as QuestionFilter[]).map(f => (
+                        {(["all", "incorrect", "unattempted", "correct"] as QuestionFilter[]).map(f => (
                           <Button key={f} size="sm" variant={filter === f ? "default" : "outline"} onClick={() => setFilter(f)} className="capitalize text-xs h-7 px-2">
                             {f === "all" ? `All (${questions.length})` :
-                             f === "wrong" ? `Wrong (${stats.incorrect})` :
+                             f === "incorrect" ? `Wrong (${stats.incorrect})` :
                              f === "unattempted" ? `Skipped (${stats.unattempted})` :
                              `Correct (${stats.correct})`}
                           </Button>
