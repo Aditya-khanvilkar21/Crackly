@@ -486,22 +486,31 @@ export const AdminMockTestAnalytics = ({ userRole }: AdminMockTestAnalyticsProps
         {/* Subject Analysis */}
         <TabsContent value="subjects">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="shadow-md">
+            <Card className="shadow-md hover:shadow-lg transition-shadow rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5 text-primary" />
                   Subject-wise Class Performance
                 </CardTitle>
+                <CardDescription>Horizontal comparison with class average</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <RadarChart data={subjectData}>
-                    <PolarGrid stroke="hsl(var(--border))" />
-                    <PolarAngleAxis dataKey="subject" stroke="hsl(var(--muted-foreground))" />
-                    <PolarRadiusAxis angle={90} domain={[0, 100]} stroke="hsl(var(--muted-foreground))" />
-                    <Radar name="Average %" dataKey="percentage" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.6} />
-                    <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} formatter={(value: number) => `${value.toFixed(1)}%`} />
-                  </RadarChart>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={subjectData} layout="vertical" barCategoryGap="20%">
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                    <XAxis type="number" domain={[0, 100]} stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `${v}%`} />
+                    <YAxis type="category" dataKey="subject" width={100} stroke="hsl(var(--muted-foreground))" fontSize={13} fontWeight={600} />
+                    <ReferenceLine x={avgClassScore} stroke="hsl(var(--muted-foreground))" strokeDasharray="5 5" label={{ value: `Avg ${avgClassScore.toFixed(0)}%`, position: 'top', fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px" }}
+                      formatter={(value: number) => [`${value.toFixed(1)}%`, "Average"]}
+                    />
+                    <Bar dataKey="percentage" radius={[0, 8, 8, 0]} barSize={28}>
+                      {subjectData.map((entry, index) => (
+                        <Cell key={index} fill={entry.percentage >= 60 ? 'hsl(142 76% 36%)' : entry.percentage >= 40 ? 'hsl(38 92% 50%)' : 'hsl(0 84% 60%)'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
                 <div className="mt-4 space-y-2">
                   {subjectData.map(s => {
