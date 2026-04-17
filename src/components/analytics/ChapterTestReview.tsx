@@ -11,6 +11,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { toast } from "sonner";
 import { downloadTestResultsAsXlsx } from "@/lib/downloadResultsXlsx";
+import { LatexRenderer } from "@/components/LatexRenderer";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
