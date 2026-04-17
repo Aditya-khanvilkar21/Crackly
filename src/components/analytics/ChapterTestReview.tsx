@@ -11,6 +11,7 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { toast } from "sonner";
 import { downloadTestResultsAsXlsx } from "@/lib/downloadResultsXlsx";
+import { LatexRenderer } from "@/components/LatexRenderer";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
@@ -446,20 +447,24 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3 mb-3">
                           <Badge variant="outline" className="shrink-0">Q{q.index + 1}</Badge>
-                          <p className="text-sm font-medium">{q.question}</p>
+                          <div className="text-sm font-medium"><LatexRenderer content={q.question} /></div>
                         </div>
                         <div className="space-y-2 ml-8">
-                          <div className="flex items-center gap-2 text-sm">
-                            <XCircle className="h-4 w-4 text-red-500 shrink-0" />
-                            <span className="text-red-600 dark:text-red-400">
-                              Student's Answer: {q.options[q.studentAnswer] || "Not answered"}
-                            </span>
+                          <div className="flex items-start gap-2 text-sm">
+                            <XCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                            <div className="text-red-600 dark:text-red-400">
+                              <span className="font-medium">Student's Answer: </span>
+                              {q.studentAnswer !== undefined && q.options[q.studentAnswer] !== undefined
+                                ? <LatexRenderer content={q.options[q.studentAnswer]} />
+                                : "Not answered"}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                            <span className="text-green-600 dark:text-green-400">
-                              Correct Answer: {q.options[q.correctAnswer]}
-                            </span>
+                          <div className="flex items-start gap-2 text-sm">
+                            <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                            <div className="text-green-600 dark:text-green-400">
+                              <span className="font-medium">Correct Answer: </span>
+                              <LatexRenderer content={q.options[q.correctAnswer]} />
+                            </div>
                           </div>
                         </div>
                       </CardContent>
