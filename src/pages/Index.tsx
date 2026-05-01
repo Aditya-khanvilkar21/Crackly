@@ -80,10 +80,13 @@ const Index = () => {
       {/* Navigation Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src={logo} alt="Crackly" className="w-12 h-8 object-contain" />
-            <span className="font-bold text-lg text-foreground">Crackly</span>
-          </div>
+          <Link to="/" className="flex items-center gap-3 group">
+            <img
+              src={logo}
+              alt="Crackly"
+              className="h-10 md:h-11 w-auto object-contain transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_12px_rgba(255,106,0,0.45)]"
+            />
+          </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <Link to="/auth">
@@ -110,11 +113,15 @@ const Index = () => {
             animate="visible"
           >
             {/* Logo */}
-            <motion.div className="mb-6" variants={itemVariants}>
-              <img 
-                src={logo} 
-                alt="Crackly - Crack Your Limits" 
-                className="w-48 h-32 md:w-64 md:h-40 mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.3)] object-contain"
+            <motion.div className="mb-6 relative" variants={itemVariants}>
+              {/* Soft light rays glow behind logo */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-64 h-64 md:w-80 md:h-80 rounded-full bg-gradient-radial from-orange-400/30 via-blue-300/10 to-transparent blur-2xl" />
+              </div>
+              <img
+                src={logo}
+                alt="Crackly - Crack Your Limits"
+                className="relative w-28 h-28 md:w-32 md:h-32 mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.35)] object-contain"
               />
             </motion.div>
             <motion.h1 
@@ -233,10 +240,10 @@ const Index = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <img 
-              src={logo} 
-              alt="Crackly" 
-              className="w-40 h-24 mx-auto mb-6 drop-shadow-lg object-contain"
+            <img
+              src={logo}
+              alt="Crackly"
+              className="w-24 h-24 md:w-28 md:h-28 mx-auto mb-6 drop-shadow-lg object-contain"
             />
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
               Ready to Begin Your Journey?
@@ -257,10 +264,9 @@ const Index = () => {
       <footer className="bg-card border-t py-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <img src={logo} alt="Crackly" className="w-16 h-10 object-contain" />
-              <span className="font-bold text-lg">Crackly</span>
-            </div>
+            <Link to="/" className="flex items-center gap-2 opacity-75 hover:opacity-100 transition-opacity">
+              <img src={logo} alt="Crackly" className="h-9 w-auto object-contain" />
+            </Link>
             <p className="text-muted-foreground text-sm">&copy; 2026 Crackly. All rights reserved.</p>
           </div>
         </div>
