@@ -80,12 +80,43 @@ const Index = () => {
       {/* Navigation Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 group">
-            <img
-              src={logo}
-              alt="Crackly"
-              className="h-10 md:h-11 w-auto object-contain transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_12px_rgba(255,106,0,0.45)]"
+          <Link to="/" className="flex items-center gap-3 group relative">
+            {/* Soft gradient glow */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -inset-3 rounded-full opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-100"
+              style={{
+                background:
+                  "radial-gradient(circle at center, rgba(255,106,0,0.55) 0%, rgba(255,106,0,0.25) 35%, rgba(20,40,90,0.3) 65%, transparent 75%)",
+              }}
             />
+            {/* Rotating light rays */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -inset-4 rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-80 group-hover:animate-light-rays-spin"
+              style={{
+                background:
+                  "conic-gradient(from 0deg, transparent 0deg, rgba(255,106,0,0.4) 30deg, transparent 60deg, transparent 180deg, rgba(40,70,160,0.35) 210deg, transparent 240deg)",
+                WebkitMaskImage: "radial-gradient(circle, black 30%, transparent 70%)",
+                maskImage: "radial-gradient(circle, black 30%, transparent 70%)",
+              }}
+            />
+            <span className="relative overflow-hidden rounded-md">
+              <img
+                src={logo}
+                alt="Crackly"
+                className="relative h-10 md:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              />
+              {/* Sweep shine */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 opacity-0 group-hover:opacity-100 group-hover:animate-light-rays-sweep"
+                style={{
+                  background:
+                    "linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%)",
+                }}
+              />
+            </span>
           </Link>
           <div className="flex items-center gap-3">
             <ThemeToggle />
