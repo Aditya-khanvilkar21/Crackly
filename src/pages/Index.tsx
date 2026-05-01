@@ -144,15 +144,38 @@ const Index = () => {
             animate="visible"
           >
             {/* Logo */}
-            <motion.div className="mb-6 relative" variants={itemVariants}>
-              {/* Soft light rays glow behind logo */}
+            <motion.div className="mb-6 relative group cursor-pointer" variants={itemVariants}>
+              {/* Ambient glow — intensifies on hover */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-64 h-64 md:w-80 md:h-80 rounded-full bg-gradient-radial from-orange-400/30 via-blue-300/10 to-transparent blur-2xl" />
+                <div className="w-64 h-64 md:w-80 md:h-80 rounded-full bg-gradient-radial from-orange-400/30 via-blue-300/10 to-transparent blur-2xl transition-all duration-700 group-hover:from-orange-400/60 group-hover:via-blue-400/20 group-hover:scale-110" />
+              </div>
+              {/* Rotating conic light rays on hover */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div
+                  className="w-72 h-72 md:w-96 md:h-96 rounded-full opacity-0 transition-opacity duration-700 group-hover:opacity-90 group-hover:animate-light-rays-spin"
+                  style={{
+                    background:
+                      "conic-gradient(from 0deg, transparent 0deg, rgba(255,106,0,0.45) 25deg, transparent 55deg, transparent 120deg, rgba(120,160,255,0.35) 150deg, transparent 180deg, transparent 270deg, rgba(255,140,40,0.4) 300deg, transparent 330deg)",
+                    WebkitMaskImage: "radial-gradient(circle, black 25%, transparent 70%)",
+                    maskImage: "radial-gradient(circle, black 25%, transparent 70%)",
+                    filter: "blur(6px)",
+                  }}
+                />
+              </div>
+              {/* Pulsing inner glow on hover */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div
+                  className="w-40 h-40 md:w-48 md:h-48 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-glow-pulse blur-2xl"
+                  style={{
+                    background:
+                      "radial-gradient(circle, rgba(255,106,0,0.7) 0%, rgba(20,40,90,0.4) 60%, transparent 80%)",
+                  }}
+                />
               </div>
               <img
                 src={logo}
                 alt="Crackly - Crack Your Limits"
-                className="relative w-28 h-28 md:w-32 md:h-32 mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.35)] object-contain"
+                className="relative w-28 h-28 md:w-32 md:h-32 mx-auto object-contain drop-shadow-[0_0_25px_rgba(255,255,255,0.35)] transition-transform duration-500 group-hover:scale-110 group-hover:drop-shadow-[0_0_35px_rgba(255,140,40,0.65)]"
               />
             </motion.div>
             <motion.h1 
