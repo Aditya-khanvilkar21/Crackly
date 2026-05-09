@@ -39,7 +39,7 @@ interface UserRole {
   role: string;
 }
 
-type AdminView = 'menu' | 'classes' | 'students' | 'requests' | 'tests' | 'admin-requests';
+type AdminView = 'menu' | 'classes' | 'students' | 'requests' | 'tests' | 'admin-requests' | 'schedule';
 
 const AdminPanel = () => {
   const navigate = useNavigate();
