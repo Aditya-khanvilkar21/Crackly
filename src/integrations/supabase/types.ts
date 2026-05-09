@@ -158,6 +158,45 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_tests: {
+        Row: {
+          class_id: string
+          created_at: string
+          created_by: string
+          duration_minutes: number
+          id: string
+          instructions: string | null
+          scheduled_at: string
+          status: string
+          test_id: string
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          created_by: string
+          duration_minutes: number
+          id?: string
+          instructions?: string | null
+          scheduled_at: string
+          status?: string
+          test_id: string
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          created_by?: string
+          duration_minutes?: number
+          id?: string
+          instructions?: string | null
+          scheduled_at?: string
+          status?: string
+          test_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       test_availability: {
         Row: {
           class_id: string
