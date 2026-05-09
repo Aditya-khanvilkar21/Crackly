@@ -70,6 +70,7 @@ export default function TestResult() {
   const [result, setResult] = useState<TestResult | null>(null);
   const [test, setTest] = useState<Test | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     fetchResultAndTest();
