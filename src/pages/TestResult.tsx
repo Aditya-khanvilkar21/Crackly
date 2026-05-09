@@ -70,6 +70,7 @@ export default function TestResult() {
   const [result, setResult] = useState<TestResult | null>(null);
   const [test, setTest] = useState<Test | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     fetchResultAndTest();
@@ -569,37 +570,87 @@ export default function TestResult() {
           <Button onClick={() => navigate(`/take-test/${testId}`)} size="lg">
             Retake Test
           </Button>
-          <Button 
-            onClick={() => {
-              if (!profile || !result || !test) return;
-              
-              downloadResultAsPDF({
-                studentName: profile.full_name,
-                studentId: profile.student_id,
-                testTitle: test.title,
-                testType: test.test_type,
-                subject: test.subject || undefined,
-                chapter: test.chapter || undefined,
-                score: result.score,
-                totalQuestions: getDisplayTotal(),
-                percentage: parseFloat(getPercentage() as string),
-                timeTaken: formatTime(result.time_taken_seconds),
-                completedAt: new Date(result.completed_at).toLocaleDateString('en-IN', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                }),
-                subjectBreakdown: isMockTest ? subjectBreakdown : undefined,
-                weakTopics: weakTopics.length > 0 ? weakTopics.map(t => `${t.topic} (${t.percentage.toFixed(0)}%)`) : undefined
-              });
-              toast.success("Result downloaded successfully!");
+          <Button
+            onClick={async () => {
+              if (!profile || !result || !test) {
+                toast.error("Result data is still loading. Please wait.");
+                return;
+              }
+              setDownloading(true);
+              try {
+                const { data: { user } } = await supabase.auth.getUser();
+                let rank: number | null = null;
+                let totalStudents: number | null = null;
+                try {
+                  const { data: allResults } = await supabase
+                    .from("test_results")
+                    .select("student_id, score, completed_at")
+                    .eq("test_id", testId)
+                    .order("score", { ascending: false })
+                    .order("completed_at", { ascending: true });
+                  if (allResults && allResults.length > 0 && user) {
+                    const bestByStudent = new Map<string, { score: number; completed_at: string }>();
+                    allResults.forEach((r: any) => {
+                      const existing = bestByStudent.get(r.student_id);
+                      if (!existing || r.score > existing.score) {
+                        bestByStudent.set(r.student_id, { score: r.score, completed_at: r.completed_at });
+                      }
+                    });
+                    const ranked = Array.from(bestByStudent.entries())
+                      .sort((a, b) => b[1].score - a[1].score);
+                    totalStudents = ranked.length;
+                    const idx = ranked.findIndex(([sid]) => sid === user.id);
+                    if (idx >= 0) rank = idx + 1;
+                  }
+                } catch {}
+
+                const questionSummary = test.questions.map((q, idx) => {
+                  const sel = result.answers[idx];
+                  const labels = ['A', 'B', 'C', 'D', 'E'];
+                  const yourAnswer = sel === undefined ? '-' : (labels[sel] || String(sel + 1));
+                  const correctAnswer = labels[q.correctAnswer] || String(q.correctAnswer + 1);
+                  const status: 'Correct' | 'Incorrect' | 'Not Attempted' =
+                    sel === undefined ? 'Not Attempted' : sel === q.correctAnswer ? 'Correct' : 'Incorrect';
+                  return { qNo: idx + 1, yourAnswer, correctAnswer, status };
+                });
+
+                downloadResultAsPDF({
+                  studentName: profile.full_name,
+                  studentId: profile.student_id,
+                  testTitle: test.title,
+                  testType: test.test_type,
+                  subject: test.subject || undefined,
+                  chapter: test.chapter || undefined,
+                  score: result.score,
+                  totalQuestions: getDisplayTotal(),
+                  percentage: parseFloat(getPercentage() as string),
+                  timeTaken: formatTime(result.time_taken_seconds),
+                  completedAt: new Date(result.completed_at).toLocaleDateString('en-IN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  }),
+                  rank,
+                  totalStudents,
+                  subjectBreakdown: isMockTest ? subjectBreakdown : undefined,
+                  weakTopics: weakTopics.length > 0 ? weakTopics.map(t => `${t.topic} (${t.percentage.toFixed(0)}%)`) : undefined,
+                  questions: questionSummary,
+                });
+                toast.success("Result downloaded successfully!");
+              } catch (err) {
+                console.error(err);
+                toast.error("Failed to generate PDF. Please try again.");
+              } finally {
+                setDownloading(false);
+              }
             }}
             variant="secondary"
             size="lg"
             className="gap-2"
+            disabled={downloading || !profile || !result || !test}
           >
             <Download className="w-4 h-4" />
-            Download Result
+            {downloading ? "Generating PDF..." : "Download Result"}
           </Button>
         </div>
       </div>
