@@ -142,22 +142,6 @@ const AdminPanel = () => {
     }
   };
 
-  const renderContent = () => {
-    switch (activeView) {
-      case 'classes':
-        return <ClassManagement userRole={userRole} />;
-      case 'students':
-        return <StudentTracking />;
-      case 'requests':
-        return <JoinRequestsManagement />;
-      case 'tests':
-        return <TestManagement userRole={userRole} />;
-      case 'admin-requests':
-        return <AdminRequestsManagement />;
-      default:
-        return null;
-    }
-  };
 
   const getViewTitle = () => {
     const item = managementItems.find(m => m.id === activeView);
