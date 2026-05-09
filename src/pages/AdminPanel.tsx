@@ -11,6 +11,7 @@ import { StudentTracking } from "@/components/admin/StudentTracking";
 import { TestManagement } from "@/components/admin/TestManagement";
 import { JoinRequestsManagement } from "@/components/admin/JoinRequestsManagement";
 import { AdminRequestsManagement } from "@/components/admin/AdminRequestsManagement";
+import { ScheduleMockTest } from "@/components/admin/ScheduleMockTest";
 
 import { 
   ArrowLeft, 
@@ -21,7 +22,8 @@ import {
   Menu,
   LogOut,
   ChevronRight,
-  UserPlus
+  UserPlus,
+  CalendarClock
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { motion, AnimatePresence } from "framer-motion";
