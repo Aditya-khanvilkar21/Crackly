@@ -119,8 +119,28 @@ const AdminPanel = () => {
     { id: 'students', title: 'Students', description: 'Track student progress', icon: Users },
     ...(!isSuperAdmin ? [{ id: 'requests', title: 'Join Requests', description: 'Pending approvals', icon: Inbox }] : []),
     { id: 'tests', title: 'Tests', description: 'Manage tests', icon: FileText },
+    { id: 'schedule', title: 'Schedule Tests', description: 'Assign mock tests to batches', icon: CalendarClock },
     ...(isSuperAdmin ? [{ id: 'admin-requests', title: 'Admin Requests', description: 'Approve admin signups', icon: UserPlus }] : []),
   ];
+
+  const renderContent = () => {
+    switch (activeView) {
+      case 'classes':
+        return <ClassManagement userRole={userRole} />;
+      case 'students':
+        return <StudentTracking />;
+      case 'requests':
+        return <JoinRequestsManagement />;
+      case 'tests':
+        return <TestManagement userRole={userRole} />;
+      case 'schedule':
+        return <ScheduleMockTest />;
+      case 'admin-requests':
+        return <AdminRequestsManagement />;
+      default:
+        return null;
+    }
+  };
 
   const renderContent = () => {
     switch (activeView) {
