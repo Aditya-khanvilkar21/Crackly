@@ -478,6 +478,7 @@ const Dashboard = () => {
                       <h2 className="text-xl font-bold mb-1">Select Exam</h2>
                       <p className="text-sm text-muted-foreground">Choose your exam type</p>
                     </div>
+                    <ScheduledTestsPanel />
                     <ExamSectionSelector 
                       selectedExam={selectedExam} 
                       onSelect={setSelectedExam} 
