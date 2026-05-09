@@ -578,7 +578,7 @@ export default function TestResult() {
               }
               setDownloading(true);
               try {
-                // Fetch rank (best-effort)
+                const { data: { user } } = await supabase.auth.getUser();
                 let rank: number | null = null;
                 let totalStudents: number | null = null;
                 try {
@@ -588,8 +588,7 @@ export default function TestResult() {
                     .eq("test_id", testId)
                     .order("score", { ascending: false })
                     .order("completed_at", { ascending: true });
-                  if (allResults && allResults.length > 0) {
-                    // Best score per student
+                  if (allResults && allResults.length > 0 && user) {
                     const bestByStudent = new Map<string, { score: number; completed_at: string }>();
                     allResults.forEach((r: any) => {
                       const existing = bestByStudent.get(r.student_id);
@@ -600,7 +599,7 @@ export default function TestResult() {
                     const ranked = Array.from(bestByStudent.entries())
                       .sort((a, b) => b[1].score - a[1].score);
                     totalStudents = ranked.length;
-                    const idx = ranked.findIndex(([sid]) => sid === profile && (profile as any).id ? (profile as any).id : sid === (await supabase.auth.getUser()).data.user?.id);
+                    const idx = ranked.findIndex(([sid]) => sid === user.id);
                     if (idx >= 0) rank = idx + 1;
                   }
                 } catch {}
