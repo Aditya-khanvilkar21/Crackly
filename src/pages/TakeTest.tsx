@@ -640,19 +640,25 @@ export default function TakeTest() {
           </div>
 
           {/* Question Text */}
-          <div className="mb-5">
+          <div className="mb-5 space-y-3">
             <h2 className="text-base font-semibold leading-relaxed">
-              {currentQuestion.questionImageUrl ? (
+              {currentQuestion.question?.trim() ? (
+                <div onCopy={(e) => e.preventDefault()} onCut={(e) => e.preventDefault()}>
+                  <LatexRenderer content={currentQuestion.question} />
+                </div>
+              ) : currentQuestion.questionImageUrl ? (
                 <img src={currentQuestion.questionImageUrl} alt="" draggable={false}
                   onContextMenu={(e) => e.preventDefault()} onDragStart={(e) => e.preventDefault()}
                   className="max-w-full h-auto rounded"
                   style={{ userSelect: "none", pointerEvents: "none" }} />
-              ) : (
-                <div onCopy={(e) => e.preventDefault()} onCut={(e) => e.preventDefault()}>
-                  <LatexRenderer content={currentQuestion.question} />
-                </div>
-              )}
+              ) : null}
             </h2>
+            {currentQuestion.question?.trim() && currentQuestion.questionImageUrl && (
+              <img src={currentQuestion.questionImageUrl} alt="" draggable={false}
+                onContextMenu={(e) => e.preventDefault()} onDragStart={(e) => e.preventDefault()}
+                className="max-w-full h-auto rounded"
+                style={{ userSelect: "none", pointerEvents: "none" }} />
+            )}
           </div>
 
           {/* Question Diagram */}
@@ -685,15 +691,16 @@ export default function TakeTest() {
                   {String.fromCharCode(65 + idx)}
                 </span>
                 <span className="flex-1 text-sm">
-                  {currentQuestion.optionImageUrls?.[idx] ? (
-                    <img src={currentQuestion.optionImageUrls[idx]} alt="" draggable={false}
-                      onContextMenu={(e) => e.preventDefault()} onDragStart={(e) => e.preventDefault()}
-                      className="inline-block h-auto max-h-10"
-                      style={{ userSelect: "none", pointerEvents: "none" }} />
-                  ) : (
+                  {option?.trim() && (
                     <span onCopy={(e) => e.preventDefault()} onCut={(e) => e.preventDefault()}>
                       <LatexRenderer content={option} />
                     </span>
+                  )}
+                  {currentQuestion.optionImageUrls?.[idx] && (
+                    <img src={currentQuestion.optionImageUrls[idx]} alt="" draggable={false}
+                      onContextMenu={(e) => e.preventDefault()} onDragStart={(e) => e.preventDefault()}
+                      className="mt-2 block h-auto max-h-10"
+                      style={{ userSelect: "none", pointerEvents: "none" }} />
                   )}
                 </span>
               </div>
