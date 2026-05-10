@@ -905,7 +905,36 @@ export default function TakeTest() {
                 </h2>
               ) : null}
             </div>
-...
+
+            {/* Question Image (diagram) */}
+            {currentQuestion.imageUrl && (
+              <div className="mb-6 p-4 bg-muted/50 rounded-lg">
+                <img src={currentQuestion.imageUrl} alt="" draggable={false}
+                  onContextMenu={(e) => e.preventDefault()}
+                  className="max-h-80 mx-auto rounded-lg"
+                  style={{ userSelect: "none", pointerEvents: "none" }} />
+              </div>
+            )}
+
+            {/* Options */}
+            <div className="space-y-3 mb-6">
+              {currentQuestion.options.map((option, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => handleAnswerSelect(idx)}
+                  className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                    answers[currentQuestionIndex] === idx
+                      ? "border-green-500 bg-green-50 dark:bg-green-950/30"
+                      : "border-border hover:border-primary/40 hover:bg-muted/50"
+                  }`}
+                >
+                  <span className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 font-bold text-sm shrink-0 ${
+                    answers[currentQuestionIndex] === idx
+                      ? "bg-green-500 text-white"
+                      : "bg-muted text-muted-foreground"
+                  }`}>
+                    {String.fromCharCode(65 + idx)}
+                  </span>
                   <span className="flex-1 text-base">
                     {currentQuestion.optionImageUrls?.[idx] ? (
                       <img src={currentQuestion.optionImageUrls[idx]} alt="" draggable={false}
