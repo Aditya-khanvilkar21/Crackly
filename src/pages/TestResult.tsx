@@ -372,7 +372,18 @@ export default function TestResult() {
         {/* Performance Analysis */}
         <Card className="p-6 mb-6">
           <h2 className="text-xl font-bold mb-4">Performance Analysis</h2>
-          <div className={`grid grid-cols-2 ${test.negative_marking && test.negative_marking > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
+          <div className={`grid grid-cols-2 ${cetScore ? 'md:grid-cols-3' : (test.negative_marking && test.negative_marking > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2')} gap-4`}>
+            {cetScore && (
+              <div className="flex items-center gap-3 p-4 bg-primary/10 rounded-lg col-span-2 md:col-span-1">
+                <Award className="w-8 h-8 text-primary" />
+                <div>
+                  <div className="text-2xl font-bold text-primary">{cetScore.obtained}/{cetScore.max}</div>
+                  <div className="text-sm text-muted-foreground">
+                    CET Score {cetScore.pcb ? '(PCB)' : '(PCM • Math ×2)'}
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
               <CheckCircle2 className="w-8 h-8 text-green-600" />
               <div>
