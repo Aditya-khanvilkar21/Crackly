@@ -61,6 +61,12 @@ export default function TakeTest() {
   const [showTabWarning, setShowTabWarning] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(true);
   const [activeSubjectTab, setActiveSubjectTab] = useState<string>('all');
+  const [attemptId, setAttemptId] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const initializedRef = useRef(false);
+  const attemptIdRef = useRef<string | null>(null);
+  const submittedRef = useRef(false);
   const MAX_TAB_SWITCHES = 3;
 
   // Detect exam type
