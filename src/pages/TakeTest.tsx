@@ -324,6 +324,9 @@ export default function TakeTest() {
 
   const fetchTest = async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast.error("Not authenticated"); navigate("/auth"); return; }
+
       const { data, error } = await supabase.rpc('get_test_for_taking', { test_id_param: testId });
       if (error) throw error;
       if (!data) { toast.error("Test not found"); navigate("/"); return; }
@@ -337,32 +340,137 @@ export default function TakeTest() {
       }));
       testData.questions = fixedQuestions;
       setTest(testData);
-      
-      if (testData.test_type === 'mock_test') {
-        setSelectedQuestions(fixedQuestions);
-        setOriginalIndexMap(fixedQuestions.map((_, i) => i));
+
+      // Try to resume an existing active attempt
+      const { data: existingAttempt } = await supabase
+        .from('test_attempts')
+        .select('*')
+        .eq('test_id', testId!)
+        .eq('student_id', session.user.id)
+        .eq('submitted', false)
+        .maybeSingle();
+
+      let orderedQuestions: Question[];
+      let indexMap: number[];
+
+      if (existingAttempt && Array.isArray(existingAttempt.original_index_map) && (existingAttempt.original_index_map as number[]).length === fixedQuestions.length) {
+        // RESUME: rebuild same question order from stored index map
+        indexMap = existingAttempt.original_index_map as number[];
+        orderedQuestions = indexMap.map(i => fixedQuestions[i]);
+        setSelectedQuestions(orderedQuestions);
+        setOriginalIndexMap(indexMap);
+        setAnswers((existingAttempt.answers as Record<number, number>) || {});
+        setMarkedForReview(new Set((existingAttempt.marked_for_review as number[]) || []));
+        setVisitedQuestions(new Set(((existingAttempt.visited_questions as number[]) || [0])));
+        setCurrentQuestionIndex(existingAttempt.current_question_index || 0);
+        setTimeLeft(existingAttempt.time_left_seconds && existingAttempt.time_left_seconds > 0
+          ? existingAttempt.time_left_seconds
+          : testData.duration_minutes * 60);
+        setAttemptId(existingAttempt.id);
+        attemptIdRef.current = existingAttempt.id;
+        // Skip marking-scheme intro on resume
+        setShowMarkingScheme(false);
+        toast.success("Resumed your previous attempt");
       } else {
-        // Shuffle but track original indices
-        const indexed = fixedQuestions.map((q, i) => ({ q, origIdx: i }));
-        indexed.sort(() => Math.random() - 0.5);
-        setSelectedQuestions(indexed.map(item => item.q));
-        setOriginalIndexMap(indexed.map(item => item.origIdx));
+        // NEW attempt
+        if (testData.test_type === 'mock_test') {
+          orderedQuestions = fixedQuestions;
+          indexMap = fixedQuestions.map((_, i) => i);
+        } else {
+          const indexed = fixedQuestions.map((q, i) => ({ q, origIdx: i }));
+          indexed.sort(() => Math.random() - 0.5);
+          orderedQuestions = indexed.map(item => item.q);
+          indexMap = indexed.map(item => item.origIdx);
+        }
+        setSelectedQuestions(orderedQuestions);
+        setOriginalIndexMap(indexMap);
+        setTimeLeft(testData.duration_minutes * 60);
+        setVisitedQuestions(new Set([0]));
+
+        const { data: created, error: createErr } = await supabase
+          .from('test_attempts')
+          .insert({
+            student_id: session.user.id,
+            test_id: testId!,
+            answers: {},
+            marked_for_review: [],
+            visited_questions: [0],
+            original_index_map: indexMap,
+            current_question_index: 0,
+            time_left_seconds: testData.duration_minutes * 60,
+          })
+          .select('id')
+          .single();
+        if (!createErr && created) {
+          setAttemptId(created.id);
+          attemptIdRef.current = created.id;
+        }
       }
-      setTimeLeft(testData.duration_minutes * 60);
-      setVisitedQuestions(new Set([0]));
-      
-      // Set default active tab
-      if (testData.exam_type === 'NEET') {
-        setActiveSubjectTab('All');
-      } else {
-        setActiveSubjectTab('0');
-      }
+
+      if (testData.exam_type === 'NEET') setActiveSubjectTab('All');
+      else setActiveSubjectTab('0');
+
+      // Allow auto-save to start
+      setTimeout(() => { initializedRef.current = true; }, 100);
     } catch (error) {
       console.error("Error fetching test:", error);
       toast.error("Failed to load test");
       navigate("/");
     }
   };
+
+  // ===== AUTO-SAVE =====
+  const latestStateRef = useRef({ answers, markedForReview, visitedQuestions, currentQuestionIndex, timeLeft });
+  useEffect(() => {
+    latestStateRef.current = { answers, markedForReview, visitedQuestions, currentQuestionIndex, timeLeft };
+  }, [answers, markedForReview, visitedQuestions, currentQuestionIndex, timeLeft]);
+
+  const saveAttempt = useCallback(async () => {
+    const id = attemptIdRef.current;
+    if (!id || submittedRef.current) return;
+    setSaveStatus('saving');
+    const s = latestStateRef.current;
+    const { error } = await supabase
+      .from('test_attempts')
+      .update({
+        answers: s.answers,
+        marked_for_review: Array.from(s.markedForReview),
+        visited_questions: Array.from(s.visitedQuestions),
+        current_question_index: s.currentQuestionIndex,
+        time_left_seconds: s.timeLeft,
+      })
+      .eq('id', id);
+    setSaveStatus(error ? 'error' : 'saved');
+  }, []);
+
+  // Debounced save on user actions
+  useEffect(() => {
+    if (!attemptId || !initializedRef.current) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => { saveAttempt(); }, 700);
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, [answers, markedForReview, visitedQuestions, currentQuestionIndex, attemptId, saveAttempt]);
+
+  // Periodic time-left save
+  useEffect(() => {
+    if (!attemptId) return;
+    const id = setInterval(() => { saveAttempt(); }, 20000);
+    return () => clearInterval(id);
+  }, [attemptId, saveAttempt]);
+
+  // Retry on error
+  useEffect(() => {
+    if (saveStatus !== 'error' || !attemptId) return;
+    const t = setTimeout(() => { saveAttempt(); }, 3000);
+    return () => clearTimeout(t);
+  }, [saveStatus, attemptId, saveAttempt]);
+
+  // Flush before leaving
+  useEffect(() => {
+    const handler = () => { saveAttempt(); };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [saveAttempt]);
 
   const handleAutoSubmit = async () => {
     toast.info("Time's up! Submitting...");
@@ -389,6 +497,16 @@ export default function TakeTest() {
       });
       if (error) throw error;
       if (!data.success) throw new Error(data.error || "Submission failed");
+
+      // Mark attempt submitted so it won't be resumed
+      submittedRef.current = true;
+      if (attemptIdRef.current) {
+        await supabase
+          .from('test_attempts')
+          .update({ submitted: true, time_left_seconds: timeLeft })
+          .eq('id', attemptIdRef.current);
+      }
+
       toast.success("Test submitted successfully!");
       navigate(`/test-result/${testId}`);
     } catch (error) {
