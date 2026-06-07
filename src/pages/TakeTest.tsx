@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Timer, Eye, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { Timer, Eye, ChevronLeft, ChevronRight, PanelRightClose, PanelRightOpen, CheckCircle2, Loader2, CloudOff } from "lucide-react";
 import { LatexRenderer } from "@/components/LatexRenderer";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -41,6 +41,21 @@ interface Test {
 }
 
 type QuestionStatus = 'not-visited' | 'not-answered' | 'answered' | 'marked' | 'answered-marked';
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+
+function SaveBadge({ status, compact = false }: { status: SaveStatus; compact?: boolean }) {
+  if (status === 'idle') return null;
+  const base = compact
+    ? "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium"
+    : "flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium";
+  if (status === 'saving') {
+    return <div className={`${base} bg-blue-700/60 text-white`}><Loader2 className="w-3 h-3 animate-spin" /> Saving…</div>;
+  }
+  if (status === 'saved') {
+    return <div className={`${base} bg-green-600/80 text-white`}><CheckCircle2 className="w-3 h-3" /> {compact ? 'Saved' : 'All Changes Saved'}</div>;
+  }
+  return <div className={`${base} bg-red-600 text-white`}><CloudOff className="w-3 h-3" /> {compact ? 'Retry' : 'Save failed — retrying'}</div>;
+}
 
 export default function TakeTest() {
   const { testId } = useParams();
@@ -61,6 +76,12 @@ export default function TakeTest() {
   const [showTabWarning, setShowTabWarning] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(true);
   const [activeSubjectTab, setActiveSubjectTab] = useState<string>('all');
+  const [attemptId, setAttemptId] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const initializedRef = useRef(false);
+  const attemptIdRef = useRef<string | null>(null);
+  const submittedRef = useRef(false);
   const MAX_TAB_SWITCHES = 3;
 
   // Detect exam type
@@ -318,6 +339,9 @@ export default function TakeTest() {
 
   const fetchTest = async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast.error("Not authenticated"); navigate("/auth"); return; }
+
       const { data, error } = await supabase.rpc('get_test_for_taking', { test_id_param: testId });
       if (error) throw error;
       if (!data) { toast.error("Test not found"); navigate("/"); return; }
@@ -331,32 +355,137 @@ export default function TakeTest() {
       }));
       testData.questions = fixedQuestions;
       setTest(testData);
-      
-      if (testData.test_type === 'mock_test') {
-        setSelectedQuestions(fixedQuestions);
-        setOriginalIndexMap(fixedQuestions.map((_, i) => i));
+
+      // Try to resume an existing active attempt
+      const { data: existingAttempt } = await supabase
+        .from('test_attempts')
+        .select('*')
+        .eq('test_id', testId!)
+        .eq('student_id', session.user.id)
+        .eq('submitted', false)
+        .maybeSingle();
+
+      let orderedQuestions: Question[];
+      let indexMap: number[];
+
+      if (existingAttempt && Array.isArray(existingAttempt.original_index_map) && (existingAttempt.original_index_map as number[]).length === fixedQuestions.length) {
+        // RESUME: rebuild same question order from stored index map
+        indexMap = existingAttempt.original_index_map as number[];
+        orderedQuestions = indexMap.map(i => fixedQuestions[i]);
+        setSelectedQuestions(orderedQuestions);
+        setOriginalIndexMap(indexMap);
+        setAnswers((existingAttempt.answers as Record<number, number>) || {});
+        setMarkedForReview(new Set((existingAttempt.marked_for_review as number[]) || []));
+        setVisitedQuestions(new Set(((existingAttempt.visited_questions as number[]) || [0])));
+        setCurrentQuestionIndex(existingAttempt.current_question_index || 0);
+        setTimeLeft(existingAttempt.time_left_seconds && existingAttempt.time_left_seconds > 0
+          ? existingAttempt.time_left_seconds
+          : testData.duration_minutes * 60);
+        setAttemptId(existingAttempt.id);
+        attemptIdRef.current = existingAttempt.id;
+        // Skip marking-scheme intro on resume
+        setShowMarkingScheme(false);
+        toast.success("Resumed your previous attempt");
       } else {
-        // Shuffle but track original indices
-        const indexed = fixedQuestions.map((q, i) => ({ q, origIdx: i }));
-        indexed.sort(() => Math.random() - 0.5);
-        setSelectedQuestions(indexed.map(item => item.q));
-        setOriginalIndexMap(indexed.map(item => item.origIdx));
+        // NEW attempt
+        if (testData.test_type === 'mock_test') {
+          orderedQuestions = fixedQuestions;
+          indexMap = fixedQuestions.map((_, i) => i);
+        } else {
+          const indexed = fixedQuestions.map((q, i) => ({ q, origIdx: i }));
+          indexed.sort(() => Math.random() - 0.5);
+          orderedQuestions = indexed.map(item => item.q);
+          indexMap = indexed.map(item => item.origIdx);
+        }
+        setSelectedQuestions(orderedQuestions);
+        setOriginalIndexMap(indexMap);
+        setTimeLeft(testData.duration_minutes * 60);
+        setVisitedQuestions(new Set([0]));
+
+        const { data: created, error: createErr } = await supabase
+          .from('test_attempts')
+          .insert({
+            student_id: session.user.id,
+            test_id: testId!,
+            answers: {},
+            marked_for_review: [],
+            visited_questions: [0],
+            original_index_map: indexMap,
+            current_question_index: 0,
+            time_left_seconds: testData.duration_minutes * 60,
+          })
+          .select('id')
+          .single();
+        if (!createErr && created) {
+          setAttemptId(created.id);
+          attemptIdRef.current = created.id;
+        }
       }
-      setTimeLeft(testData.duration_minutes * 60);
-      setVisitedQuestions(new Set([0]));
-      
-      // Set default active tab
-      if (testData.exam_type === 'NEET') {
-        setActiveSubjectTab('All');
-      } else {
-        setActiveSubjectTab('0');
-      }
+
+      if (testData.exam_type === 'NEET') setActiveSubjectTab('All');
+      else setActiveSubjectTab('0');
+
+      // Allow auto-save to start
+      setTimeout(() => { initializedRef.current = true; }, 100);
     } catch (error) {
       console.error("Error fetching test:", error);
       toast.error("Failed to load test");
       navigate("/");
     }
   };
+
+  // ===== AUTO-SAVE =====
+  const latestStateRef = useRef({ answers, markedForReview, visitedQuestions, currentQuestionIndex, timeLeft });
+  useEffect(() => {
+    latestStateRef.current = { answers, markedForReview, visitedQuestions, currentQuestionIndex, timeLeft };
+  }, [answers, markedForReview, visitedQuestions, currentQuestionIndex, timeLeft]);
+
+  const saveAttempt = useCallback(async () => {
+    const id = attemptIdRef.current;
+    if (!id || submittedRef.current) return;
+    setSaveStatus('saving');
+    const s = latestStateRef.current;
+    const { error } = await supabase
+      .from('test_attempts')
+      .update({
+        answers: s.answers,
+        marked_for_review: Array.from(s.markedForReview),
+        visited_questions: Array.from(s.visitedQuestions),
+        current_question_index: s.currentQuestionIndex,
+        time_left_seconds: s.timeLeft,
+      })
+      .eq('id', id);
+    setSaveStatus(error ? 'error' : 'saved');
+  }, []);
+
+  // Debounced save on user actions
+  useEffect(() => {
+    if (!attemptId || !initializedRef.current) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => { saveAttempt(); }, 700);
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, [answers, markedForReview, visitedQuestions, currentQuestionIndex, attemptId, saveAttempt]);
+
+  // Periodic time-left save
+  useEffect(() => {
+    if (!attemptId) return;
+    const id = setInterval(() => { saveAttempt(); }, 20000);
+    return () => clearInterval(id);
+  }, [attemptId, saveAttempt]);
+
+  // Retry on error
+  useEffect(() => {
+    if (saveStatus !== 'error' || !attemptId) return;
+    const t = setTimeout(() => { saveAttempt(); }, 3000);
+    return () => clearTimeout(t);
+  }, [saveStatus, attemptId, saveAttempt]);
+
+  // Flush before leaving
+  useEffect(() => {
+    const handler = () => { saveAttempt(); };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [saveAttempt]);
 
   const handleAutoSubmit = async () => {
     toast.info("Time's up! Submitting...");
@@ -383,6 +512,16 @@ export default function TakeTest() {
       });
       if (error) throw error;
       if (!data.success) throw new Error(data.error || "Submission failed");
+
+      // Mark attempt submitted so it won't be resumed
+      submittedRef.current = true;
+      if (attemptIdRef.current) {
+        await supabase
+          .from('test_attempts')
+          .update({ submitted: true, time_left_seconds: timeLeft })
+          .eq('id', attemptIdRef.current);
+      }
+
       toast.success("Test submitted successfully!");
       navigate(`/test-result/${testId}`);
     } catch (error) {
@@ -568,6 +707,7 @@ export default function TakeTest() {
         <header className="bg-blue-900 text-white px-3 py-2 flex items-center justify-between shrink-0 sticky top-0 z-20">
           <h1 className="text-sm font-bold truncate flex-1 mr-2">{test.title}</h1>
           <div className="flex items-center gap-2 shrink-0">
+            <SaveBadge status={saveStatus} compact />
             {tabSwitchCount > 0 && (
               <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-600 text-[10px] font-medium">
                 <Eye className="w-3 h-3" />
@@ -809,6 +949,7 @@ export default function TakeTest() {
           )}
         </div>
         <div className="flex items-center gap-4">
+          <SaveBadge status={saveStatus} />
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded font-mono text-lg font-bold ${
             timeLeft < 300 ? 'bg-red-600 animate-pulse' : 'bg-blue-700'
           }`}>
