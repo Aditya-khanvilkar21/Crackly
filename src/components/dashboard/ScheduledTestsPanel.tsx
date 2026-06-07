@@ -80,10 +80,10 @@ export const ScheduledTestsPanel = () => {
     const testIds = Array.from(new Set(sched.map((s) => s.test_id)));
     const classIds = Array.from(new Set(sched.map((s) => s.class_id)));
     const [{ data: testsData }, { data: classData }] = await Promise.all([
-      supabase.from("tests").select("id, title").in("id", testIds),
+      supabase.rpc("get_scheduled_test_meta" as any, { _test_ids: testIds }),
       supabase.from("tuition_classes").select("id, name").in("id", classIds),
     ]);
-    const tMap = new Map(((testsData as any[]) || []).map((t) => [t.id, t]));
+    const tMap = new Map(((testsData as any[]) || []).map((t: any) => [t.id, t]));
     const cMap = new Map(((classData as any[]) || []).map((c) => [c.id, c]));
     setRows(
       sched.map((r) => ({
