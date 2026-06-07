@@ -692,6 +692,7 @@ export default function TakeTest() {
         <header className="bg-blue-900 text-white px-3 py-2 flex items-center justify-between shrink-0 sticky top-0 z-20">
           <h1 className="text-sm font-bold truncate flex-1 mr-2">{test.title}</h1>
           <div className="flex items-center gap-2 shrink-0">
+            <SaveBadge status={saveStatus} compact />
             {tabSwitchCount > 0 && (
               <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-600 text-[10px] font-medium">
                 <Eye className="w-3 h-3" />
