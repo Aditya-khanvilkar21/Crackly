@@ -949,6 +949,7 @@ export default function TakeTest() {
           )}
         </div>
         <div className="flex items-center gap-4">
+          <SaveBadge status={saveStatus} />
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded font-mono text-lg font-bold ${
             timeLeft < 300 ? 'bg-red-600 animate-pulse' : 'bg-blue-700'
           }`}>
