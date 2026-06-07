@@ -149,31 +149,34 @@ export default function TestResult() {
 
   const isNEETMockTest = () => {
     if (!test || test.test_type !== 'mock_test') return false;
+    if (test.exam_type === 'NEET') return true;
     return test.chapter === 'NEET' || (test.questions && test.questions.length === 180);
+  };
+
+  const isCETMockTest = () => {
+    if (!test || test.test_type !== 'mock_test') return false;
+    if (test.exam_type === 'CET') return true;
+    return test.chapter === 'CET' || (test.questions && (test.questions.length === 150 || test.questions.length === 200));
+  };
+
+  // CET PCB has Biology (200 questions total: 50+50+100). CET PCM has Math (150 questions: 50+50+50).
+  const isCETPCB = () => {
+    if (!test) return false;
+    if (test.questions?.length === 200) return true;
+    return test.questions?.some(q => (q.subject || '').toLowerCase().includes('bio')) ?? false;
   };
 
   const getSubjectBreakdown = (): SubjectBreakdown[] => {
     if (!test || test.test_type !== 'mock_test' || !result) return [];
-    
-    const isNEET = isNEETMockTest();
-    
-    if (isNEET) {
-      // NEET: 45 Physics, 45 Chemistry, 90 Biology
-      const subjectsConfig = [
-        { subject: 'Physics', start: 0, count: 45 },
-        { subject: 'Chemistry', start: 45, count: 45 },
-        { subject: 'Biology', start: 90, count: 90 },
-      ];
-      
-      return subjectsConfig.map(({ subject, start, count }) => {
+
+    const buildSubjects = (configs: { subject: string; start: number; count: number }[]) =>
+      configs.map(({ subject, start, count }) => {
         let correct = 0;
         let attempted = 0;
         for (let i = start; i < start + count; i++) {
           if (result.answers[i] !== undefined) {
             attempted++;
-            if (result.answers[i] === test.questions[i]?.correctAnswer) {
-              correct++;
-            }
+            if (result.answers[i] === test.questions[i]?.correctAnswer) correct++;
           }
         }
         const wrong = attempted - correct;
@@ -183,39 +186,53 @@ export default function TestResult() {
           wrong,
           attempted,
           total: count,
-          percentage: (correct / count) * 100,
-          accuracy: attempted > 0 ? (correct / attempted) * 100 : 0
+          percentage: count > 0 ? (correct / count) * 100 : 0,
+          accuracy: attempted > 0 ? (correct / attempted) * 100 : 0,
         };
       });
-    } else {
-      // JEE: 25 Physics, 25 Chemistry, 25 Mathematics
-      const subjects = ['Physics', 'Chemistry', 'Mathematics'];
-      return subjects.map((subject, subjectIndex) => {
-        const startIdx = subjectIndex * 25;
-        let correct = 0;
-        let attempted = 0;
-        
-        for (let i = startIdx; i < startIdx + 25; i++) {
-          if (result.answers[i] !== undefined) {
-            attempted++;
-            if (result.answers[i] === test.questions[i]?.correctAnswer) {
-              correct++;
-            }
-          }
-        }
-        const wrong = attempted - correct;
-        
-        return {
-          subject,
-          correct,
-          wrong,
-          attempted,
-          total: 25,
-          percentage: (correct / 25) * 100,
-          accuracy: attempted > 0 ? (correct / attempted) * 100 : 0
-        };
-      });
+
+    if (isCETMockTest()) {
+      if (isCETPCB()) {
+        return buildSubjects([
+          { subject: 'Physics', start: 0, count: 50 },
+          { subject: 'Chemistry', start: 50, count: 50 },
+          { subject: 'Biology', start: 100, count: 100 },
+        ]);
+      }
+      return buildSubjects([
+        { subject: 'Physics', start: 0, count: 50 },
+        { subject: 'Chemistry', start: 50, count: 50 },
+        { subject: 'Mathematics', start: 100, count: 50 },
+      ]);
     }
+
+    if (isNEETMockTest()) {
+      return buildSubjects([
+        { subject: 'Physics', start: 0, count: 45 },
+        { subject: 'Chemistry', start: 45, count: 45 },
+        { subject: 'Biology', start: 90, count: 90 },
+      ]);
+    }
+
+    // JEE: 25 / 25 / 25
+    return buildSubjects([
+      { subject: 'Physics', start: 0, count: 25 },
+      { subject: 'Chemistry', start: 25, count: 25 },
+      { subject: 'Mathematics', start: 50, count: 25 },
+    ]);
+  };
+
+  // CET marks: Phys ×1, Chem ×1, Math ×2 (PCM) → 200; Phys ×1, Chem ×1, Bio ×1 (PCB) → 200
+  const getCETScore = () => {
+    if (!isCETMockTest()) return null;
+    const breakdown = getSubjectBreakdown();
+    const pcb = isCETPCB();
+    let obtained = 0;
+    breakdown.forEach(b => {
+      const mult = !pcb && b.subject === 'Mathematics' ? 2 : 1;
+      obtained += b.correct * mult;
+    });
+    return { obtained, max: 200, pcb };
   };
 
   // Calculate detailed score with negative marking
@@ -300,6 +317,7 @@ export default function TestResult() {
   const subjectBreakdown = getSubjectBreakdown();
   const weakTopics = getWeakTopics();
   const isMockTest = test.test_type === 'mock_test';
+  const cetScore = getCETScore();
 
   return (
     <div className="min-h-screen bg-gradient-subtle py-12">
@@ -354,7 +372,18 @@ export default function TestResult() {
         {/* Performance Analysis */}
         <Card className="p-6 mb-6">
           <h2 className="text-xl font-bold mb-4">Performance Analysis</h2>
-          <div className={`grid grid-cols-2 ${test.negative_marking && test.negative_marking > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
+          <div className={`grid grid-cols-2 ${cetScore ? 'md:grid-cols-3' : (test.negative_marking && test.negative_marking > 0 ? 'md:grid-cols-3' : 'md:grid-cols-2')} gap-4`}>
+            {cetScore && (
+              <div className="flex items-center gap-3 p-4 bg-primary/10 rounded-lg col-span-2 md:col-span-1">
+                <Award className="w-8 h-8 text-primary" />
+                <div>
+                  <div className="text-2xl font-bold text-primary">{cetScore.obtained}/{cetScore.max}</div>
+                  <div className="text-sm text-muted-foreground">
+                    CET Score {cetScore.pcb ? '(PCB)' : '(PCM • Math ×2)'}
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
               <CheckCircle2 className="w-8 h-8 text-green-600" />
               <div>
