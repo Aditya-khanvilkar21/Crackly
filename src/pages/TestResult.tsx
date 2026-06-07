@@ -317,6 +317,7 @@ export default function TestResult() {
   const subjectBreakdown = getSubjectBreakdown();
   const weakTopics = getWeakTopics();
   const isMockTest = test.test_type === 'mock_test';
+  const cetScore = getCETScore();
 
   return (
     <div className="min-h-screen bg-gradient-subtle py-12">
