@@ -421,6 +421,13 @@ export type Database = {
           student_id: string
         }[]
       }
+      get_scheduled_test_meta: {
+        Args: { _test_ids: string[] }
+        Returns: {
+          id: string
+          title: string
+        }[]
+      }
       get_student_available_tests: {
         Args: {
           _exam_type?: Database["public"]["Enums"]["exam_type"]
