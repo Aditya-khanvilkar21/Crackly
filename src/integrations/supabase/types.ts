@@ -197,6 +197,66 @@ export type Database = {
         }
         Relationships: []
       }
+      test_attempts: {
+        Row: {
+          answers: Json
+          current_question_index: number
+          id: string
+          marked_for_review: Json
+          original_index_map: Json
+          started_at: string
+          student_id: string
+          submitted: boolean
+          test_id: string
+          time_left_seconds: number
+          updated_at: string
+          visited_questions: Json
+        }
+        Insert: {
+          answers?: Json
+          current_question_index?: number
+          id?: string
+          marked_for_review?: Json
+          original_index_map?: Json
+          started_at?: string
+          student_id: string
+          submitted?: boolean
+          test_id: string
+          time_left_seconds?: number
+          updated_at?: string
+          visited_questions?: Json
+        }
+        Update: {
+          answers?: Json
+          current_question_index?: number
+          id?: string
+          marked_for_review?: Json
+          original_index_map?: Json
+          started_at?: string
+          student_id?: string
+          submitted?: boolean
+          test_id?: string
+          time_left_seconds?: number
+          updated_at?: string
+          visited_questions?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_attempts_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "test_attempts_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       test_availability: {
         Row: {
           class_id: string
