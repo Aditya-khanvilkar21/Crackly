@@ -41,6 +41,21 @@ interface Test {
 }
 
 type QuestionStatus = 'not-visited' | 'not-answered' | 'answered' | 'marked' | 'answered-marked';
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+
+function SaveBadge({ status, compact = false }: { status: SaveStatus; compact?: boolean }) {
+  if (status === 'idle') return null;
+  const base = compact
+    ? "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium"
+    : "flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium";
+  if (status === 'saving') {
+    return <div className={`${base} bg-blue-700/60 text-white`}><Loader2 className="w-3 h-3 animate-spin" /> Saving…</div>;
+  }
+  if (status === 'saved') {
+    return <div className={`${base} bg-green-600/80 text-white`}><CheckCircle2 className="w-3 h-3" /> {compact ? 'Saved' : 'All Changes Saved'}</div>;
+  }
+  return <div className={`${base} bg-red-600 text-white`}><CloudOff className="w-3 h-3" /> {compact ? 'Retry' : 'Save failed — retrying'}</div>;
+}
 
 export default function TakeTest() {
   const { testId } = useParams();
