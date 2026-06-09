@@ -57,7 +57,7 @@ export const downloadClassRankingsAsPDF = (data: ClassRankingsData) => {
     `${s.averagePercentage.toFixed(1)}%`
   ]);
   
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: tableStartY,
     head: [['Rank', 'Student Name', 'Student ID', 'Tests', 'Score', 'Avg %']],
     body: tableData,
