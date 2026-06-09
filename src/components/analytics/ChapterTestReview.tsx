@@ -317,7 +317,7 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
         `${s.percentage.toFixed(1)}%`,
       ]);
 
-      (doc as any).autoTable({
+      autoTable(doc, {
         startY: 68,
         head: [['Rank', 'Student Name', 'Student ID', 'Score', 'Percentage']],
         body: tableData,
