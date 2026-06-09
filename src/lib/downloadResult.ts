@@ -148,7 +148,7 @@ export const downloadResultAsPDF = (data: ResultData) => {
     doc.setFont('helvetica', 'bold');
     doc.text('Question-wise Analysis', 14, cursorY);
 
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: cursorY + 3,
       head: [['Q No', 'Your Answer', 'Correct Answer', 'Status']],
       body: data.questions.map(q => [
