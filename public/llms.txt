@@ -1,0 +1,13 @@
+# Crackly
+
+> An online examination platform for JEE, NEET & CET preparation. Students practice with authentic exam-pattern MCQ tests while admins manage classes, schedule tests, and track performance.
+
+Crackly helps engineering and medical aspirants prepare for India's toughest entrance exams through timed mock tests, chapter-wise practice, detailed analytics, and progress tracking. Coaching institutes and tuition classes can manage their students, unlock tests for specific batches, and review comprehensive performance reports.
+
+## Pages
+
+- [Home](/landing): Product overview, features, and call-to-action for students and coaching institutes.
+
+## Optional
+
+- [Get Started](/auth): Login and signup for students, admins, and super admins.
