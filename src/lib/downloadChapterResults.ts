@@ -92,7 +92,7 @@ export const downloadChapterResultsAsPDF = (data: ChapterResultsData) => {
     `${s.percentage.toFixed(1)}%`
   ]);
   
-  (doc as any).autoTable({
+  autoTable(doc, {
     startY: 110,
     head: [['Rank', 'Student Name', 'Student ID', 'Score', 'Attempts', 'Percentage']],
     body: tableData,
