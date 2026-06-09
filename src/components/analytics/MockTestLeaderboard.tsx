@@ -10,7 +10,7 @@ import { Award, Trophy, Medal, ArrowLeft, Download, Users, Target, TrendingUp, E
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { StudentTestDrillDown } from "./StudentTestDrillDown";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
