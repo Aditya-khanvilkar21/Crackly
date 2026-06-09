@@ -290,7 +290,7 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
       `${e.percentile.toFixed(1)}%`,
     ]);
 
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: 65,
       head: [['Rank', 'Student Name', 'ID', 'Marks', 'Accuracy', 'Percentile']],
       body: tableData,
