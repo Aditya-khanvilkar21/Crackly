@@ -8,7 +8,7 @@ import { ArrowLeft, Users, Award, Target, ChevronRight, CheckCircle2, XCircle, B
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import { toast } from "sonner";
 import { downloadTestResultsAsXlsx } from "@/lib/downloadResultsXlsx";
 import { LatexRenderer } from "@/components/LatexRenderer";
@@ -317,7 +317,7 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
         `${s.percentage.toFixed(1)}%`,
       ]);
 
-      (doc as any).autoTable({
+      autoTable(doc, {
         startY: 68,
         head: [['Rank', 'Student Name', 'Student ID', 'Score', 'Percentage']],
         body: tableData,

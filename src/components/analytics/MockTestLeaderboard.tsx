@@ -10,7 +10,7 @@ import { Award, Trophy, Medal, ArrowLeft, Download, Users, Target, TrendingUp, E
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { StudentTestDrillDown } from "./StudentTestDrillDown";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
@@ -290,7 +290,7 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
       `${e.percentile.toFixed(1)}%`,
     ]);
 
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: 65,
       head: [['Rank', 'Student Name', 'ID', 'Marks', 'Accuracy', 'Percentile']],
       body: tableData,

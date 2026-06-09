@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 interface QuestionSummary {
   qNo: number;
@@ -128,7 +128,7 @@ export const downloadResultAsPDF = (data: ResultData) => {
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.text('Subject-wise Performance', 14, cursorY);
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: cursorY + 3,
       head: [['Subject', 'Score', 'Percentage']],
       body: data.subjectBreakdown.map(s => [s.subject, `${s.correct}/${s.total}`, `${s.percentage.toFixed(1)}%`]),
@@ -148,7 +148,7 @@ export const downloadResultAsPDF = (data: ResultData) => {
     doc.setFont('helvetica', 'bold');
     doc.text('Question-wise Analysis', 14, cursorY);
 
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: cursorY + 3,
       head: [['Q No', 'Your Answer', 'Correct Answer', 'Status']],
       body: data.questions.map(q => [
