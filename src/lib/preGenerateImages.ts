@@ -20,24 +20,30 @@ interface QuestionData {
  */
 function renderLatexToHtml(content: string): string {
   if (!content) return "";
-  
+
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+  const trustFn = (ctx: { command: string; url?: string }) =>
+    ctx.command !== "\\href" || !(ctx.url || "").toLowerCase().startsWith("javascript:");
+
   const parts = content.split(/(\$\$[\s\S]*?\$\$|\$[^$]*?\$)/g);
-  
+
   return parts
     .map((part) => {
       if (part.startsWith("$$") && part.endsWith("$$")) {
         const latex = part.slice(2, -2).trim();
         try {
-          return katex.renderToString(latex, { displayMode: true, throwOnError: false, trust: true });
-        } catch { return part; }
+          return katex.renderToString(latex, { displayMode: true, throwOnError: false, trust: trustFn });
+        } catch { return escapeHtml(part); }
       }
       if (part.startsWith("$") && part.endsWith("$") && part.length > 1) {
         const latex = part.slice(1, -1).trim();
         try {
-          return katex.renderToString(latex, { displayMode: false, throwOnError: false, trust: true });
-        } catch { return part; }
+          return katex.renderToString(latex, { displayMode: false, throwOnError: false, trust: trustFn });
+        } catch { return escapeHtml(part); }
       }
-      return part.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return escapeHtml(part);
     })
     .join("");
 }
