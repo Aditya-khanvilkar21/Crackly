@@ -17,47 +17,46 @@ export const LatexRenderer = ({ content, className = "", displayMode = false }: 
   const rendered = useMemo(() => {
     if (!content) return "";
 
+    const escapeHtml = (s: string) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+    const trustFn = (ctx: { command: string; url?: string }) =>
+      ctx.command !== "\\href" || !(ctx.url || "").toLowerCase().startsWith("javascript:");
+
     try {
-      // Split by $$...$$ (display) and $...$ (inline) patterns
       const parts = content.split(/(\$\$[\s\S]*?\$\$|\$[^$]*?\$)/g);
 
       return parts
         .map((part) => {
-          // Display math: $$...$$
           if (part.startsWith("$$") && part.endsWith("$$")) {
             const latex = part.slice(2, -2).trim();
             try {
               return katex.renderToString(latex, {
                 displayMode: true,
                 throwOnError: false,
-                trust: true,
+                trust: trustFn,
               });
             } catch {
-              return `<span class="text-destructive">${part}</span>`;
+              return `<span class="text-destructive">${escapeHtml(part)}</span>`;
             }
           }
-          // Inline math: $...$
           if (part.startsWith("$") && part.endsWith("$") && part.length > 1) {
             const latex = part.slice(1, -1).trim();
             try {
               return katex.renderToString(latex, {
                 displayMode: false,
                 throwOnError: false,
-                trust: true,
+                trust: trustFn,
               });
             } catch {
-              return `<span class="text-destructive">${part}</span>`;
+              return `<span class="text-destructive">${escapeHtml(part)}</span>`;
             }
           }
-          // Plain text - escape HTML
-          return part
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;");
+          return escapeHtml(part);
         })
         .join("");
     } catch {
-      return content;
+      return escapeHtml(content);
     }
   }, [content]);
 

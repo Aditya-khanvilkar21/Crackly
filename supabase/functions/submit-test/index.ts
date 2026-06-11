@@ -74,6 +74,50 @@ Deno.serve(async (req) => {
     // Comprehensive input validation
     validateSubmission(testId, answers, timeInSeconds);
 
+    // Enrollment / access check: ensure the student has legitimate access to this test
+    // (via unlocked test_availability or an active scheduled_tests window), or is an admin.
+    const { data: isAdminData } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
+    const { data: isSuperAdminData } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'super_admin' });
+    const isAdmin = !!isAdminData || !!isSuperAdminData;
+
+    if (!isAdmin) {
+      const { data: availability } = await supabase
+        .from('test_availability')
+        .select('class_id, is_locked, class_students!inner(student_id)')
+        .eq('test_id', testId)
+        .eq('is_locked', false)
+        .eq('class_students.student_id', user.id)
+        .limit(1);
+
+      let hasAccess = !!(availability && availability.length > 0);
+
+      if (!hasAccess) {
+        const nowIso = new Date().toISOString();
+        const { data: scheduled } = await supabase
+          .from('scheduled_tests')
+          .select('class_id, scheduled_at, duration_minutes, class_students!inner(student_id)')
+          .eq('test_id', testId)
+          .eq('class_students.student_id', user.id);
+
+        if (scheduled && scheduled.length > 0) {
+          const now = Date.now();
+          hasAccess = scheduled.some((s: any) => {
+            const start = new Date(s.scheduled_at).getTime();
+            const end = start + (s.duration_minutes || 0) * 60_000;
+            return now >= start && now <= end;
+          });
+        }
+      }
+
+      if (!hasAccess) {
+        return new Response(
+          JSON.stringify({ error: 'You are not authorized to submit this test' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+
     // Fetch test with correct answers and negative marking (server-side only)
     const { data: test, error: testError } = await supabase
       .from('tests')
