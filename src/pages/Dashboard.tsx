@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { LogOut, BookOpen, Menu, User, Settings, Target, BarChart3, Clock, CheckCircle2, Users, GraduationCap, Leaf, FlaskConical, ChevronRight, ArrowLeft } from "lucide-react";
 import { AdminExamDashboard } from "@/components/admin/AdminExamDashboard";
 import logo from "@/assets/logo.png";
+import { SeoHead } from "@/components/SeoHead";
 import { toast } from "sonner";
 import { ExamSectionSelector } from "@/components/dashboard/ExamSectionSelector";
 import { ExamDashboard } from "@/components/dashboard/ExamDashboard";
@@ -389,6 +390,11 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
+      <SeoHead
+        title="Dashboard | Crackly"
+        description="Your JEE, NEET and CET prep dashboard. Take tests, track progress, and master every chapter."
+        path="/"
+      />
       {/* Mobile-first Header */}
       <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm">
         <div className="container mx-auto px-4 py-3">
