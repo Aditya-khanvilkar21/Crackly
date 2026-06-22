@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import logo from "@/assets/logo.png";
+import { SeoHead } from "@/components/SeoHead";
 
 const Index = () => {
   const containerVariants = {
@@ -77,6 +78,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <SeoHead
+        title="Crackly — Crack JEE, NEET & CET Exams"
+        description="Authentic exam-style mock tests, chapter-wise practice, and real-time analytics for JEE, NEET and CET aspirants."
+        path="/landing"
+      />
       {/* Navigation Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">

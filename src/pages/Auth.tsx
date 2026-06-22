@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { UserCircle, Shield } from "lucide-react";
 import { emailSchema, passwordSchema, fullNameSchema } from "@/lib/validation";
 import logo from "@/assets/logo.png";
+import { SeoHead } from "@/components/SeoHead";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -250,6 +251,11 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center gradient-subtle px-4 py-12">
+      <SeoHead
+        title="Sign In or Sign Up | Crackly"
+        description="Sign in or create your Crackly account to start preparing for JEE, NEET, or CET with mock tests and analytics."
+        path="/auth"
+      />
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <img 
