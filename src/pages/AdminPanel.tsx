@@ -26,6 +26,7 @@ import {
   CalendarClock
 } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { SeoHead } from "@/components/SeoHead";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   DropdownMenu,
@@ -150,6 +151,11 @@ const AdminPanel = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SeoHead
+        title="Admin Panel | Crackly"
+        description="Manage classes, students, tests and join requests from the Crackly admin panel."
+        path="/admin"
+      />
       {/* Mobile-first Header */}
       <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-sm">
         <div className="container mx-auto px-4 py-3">

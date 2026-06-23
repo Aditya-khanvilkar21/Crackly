@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { SeoHead } from "@/components/SeoHead";
 
 const NotFound = () => {
   const location = useLocation();
@@ -9,6 +10,12 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
+    <>
+    <SeoHead
+      title="Page Not Found | Crackly"
+      description="The page you’re looking for doesn’t exist. Head back to Crackly to continue your JEE, NEET or CET prep."
+      path={location.pathname}
+    />
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="text-center">
         <h1 className="mb-4 text-4xl font-bold">404</h1>
@@ -18,6 +25,7 @@ const NotFound = () => {
         </a>
       </div>
     </div>
+    </>
   );
 };
 

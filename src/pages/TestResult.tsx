@@ -8,6 +8,7 @@ import { LatexRenderer } from "@/components/LatexRenderer";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { downloadResultAsPDF } from "@/lib/downloadResult";
+import { SeoHead } from "@/components/SeoHead";
 
 interface Question {
   question: string;
@@ -321,6 +322,11 @@ export default function TestResult() {
 
   return (
     <div className="min-h-screen bg-gradient-subtle py-12">
+      <SeoHead
+        title="Test Result | Crackly"
+        description="Review your Crackly test result with score breakdown, explanations and topic-wise analysis."
+        path="/test-result"
+      />
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Result Summary */}
         <Card className="p-8 mb-8 bg-gradient-primary text-primary-foreground">
