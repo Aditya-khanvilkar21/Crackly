@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { User, ArrowLeft, Save, Send, BookOpen } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { SeoHead } from "@/components/SeoHead";
 
 interface Profile {
   id: string;
@@ -162,6 +163,11 @@ export default function StudentProfile() {
 
   return (
     <div className="min-h-screen bg-gradient-subtle py-8">
+      <SeoHead
+        title="Your Profile | Crackly"
+        description="Manage your Crackly profile, student ID, tuition class and exam preferences."
+        path="/profile"
+      />
       <div className="container mx-auto px-4 max-w-6xl">
         <Button variant="ghost" onClick={() => navigate("/")} className="mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />

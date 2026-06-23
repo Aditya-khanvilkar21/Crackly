@@ -17,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { SeoHead } from "@/components/SeoHead";
 
 interface Question {
   question: string;
@@ -935,6 +936,11 @@ export default function TakeTest() {
   // ======= MOCK TEST: Advanced CBT INTERFACE (UNCHANGED) =======
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden select-none" style={{ userSelect: 'none' }}>
+      <SeoHead
+        title={`${test.title} | Crackly`}
+        description={`Attempt ${test.title} on Crackly — timed ${isCET ? 'MHT-CET' : isNEET ? 'NEET' : 'JEE'} practice with instant scoring.`}
+        path="/take-test"
+      />
       {/* ===== TOP HEADER ===== */}
       <header className="bg-blue-900 text-white px-4 py-2 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-4">
