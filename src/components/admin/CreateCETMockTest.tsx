@@ -192,6 +192,14 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
   const totalCompleteQuestions = questions.filter(isQuestionComplete).length;
   const subjectCompleteQuestions = questions.slice(range.start, range.end).filter(isQuestionComplete).length;
 
+  const hasUnsavedChanges =
+    !isSubmitting &&
+    (title.length > 0 ||
+      questions.some(
+        (q) => q.question.length > 0 || q.options.some((o) => o.length > 0)
+      ));
+  useUnsavedChangesWarning(hasUnsavedChanges);
+
   const onSubmit = async () => {
     if (title.length < 5) {
       toast({
