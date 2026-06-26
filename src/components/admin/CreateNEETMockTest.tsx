@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 const questionSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),
@@ -164,6 +165,14 @@ export const CreateNEETMockTest = ({ onTestCreated }: { onTestCreated?: () => vo
 
 
 
+
+  const hasUnsavedChanges =
+    !isSubmitting &&
+    (form.formState.isDirty ||
+      questions.some(
+        (q) => q.question.length > 0 || q.options.some((o) => o.length > 0)
+      ));
+  useUnsavedChangesWarning(hasUnsavedChanges);
 
   const onSubmit = async (data: NEETMockTestFormData) => {
     setIsSubmitting(true);

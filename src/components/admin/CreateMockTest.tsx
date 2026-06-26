@@ -15,6 +15,7 @@ import { Save, ChevronLeft, ChevronRight, Upload, X, Image as ImageIcon } from "
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 const questionSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),
@@ -165,6 +166,14 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
 
 
 
+
+  const hasUnsavedChanges =
+    !isSubmitting &&
+    (form.formState.isDirty ||
+      questions.some(
+        (q) => q.question.length > 0 || q.options.some((o) => o.length > 0)
+      ));
+  useUnsavedChangesWarning(hasUnsavedChanges);
 
   const onSubmit = async (data: MockTestFormData) => {
     setIsSubmitting(true);

@@ -15,6 +15,7 @@ import { LatexInput } from "@/components/admin/LatexInput";
 import { LatexRenderer } from "@/components/LatexRenderer";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 const questionSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),
@@ -205,6 +206,14 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
   const totalCompleteQuestions = questions.filter(q => 
     q.question.length >= 10 && q.options.every(opt => opt.length > 0)
   ).length;
+
+  const hasUnsavedChanges =
+    !isSubmitting &&
+    (form.formState.isDirty ||
+      questions.some(
+        (q) => q.question.length > 0 || q.options.some((o) => o.length > 0)
+      ));
+  useUnsavedChangesWarning(hasUnsavedChanges);
 
   return (
     <Form {...form}>

@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 type CETType = 'PCM' | 'PCB';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
@@ -190,6 +191,14 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
 
   const totalCompleteQuestions = questions.filter(isQuestionComplete).length;
   const subjectCompleteQuestions = questions.slice(range.start, range.end).filter(isQuestionComplete).length;
+
+  const hasUnsavedChanges =
+    !isSubmitting &&
+    (title.length > 0 ||
+      questions.some(
+        (q) => q.question.length > 0 || q.options.some((o) => o.length > 0)
+      ));
+  useUnsavedChangesWarning(hasUnsavedChanges);
 
   const onSubmit = async () => {
     if (title.length < 5) {
