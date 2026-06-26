@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 type CETType = 'PCM' | 'PCB';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
