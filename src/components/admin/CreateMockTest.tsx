@@ -167,6 +167,14 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
 
 
 
+  const hasUnsavedChanges =
+    !isSubmitting &&
+    (form.formState.isDirty ||
+      questions.some(
+        (q) => q.question.length > 0 || q.options.some((o) => o.length > 0)
+      ));
+  useUnsavedChangesWarning(hasUnsavedChanges);
+
   const onSubmit = async (data: MockTestFormData) => {
     setIsSubmitting(true);
     try {
