@@ -207,6 +207,14 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
     q.question.length >= 10 && q.options.every(opt => opt.length > 0)
   ).length;
 
+  const hasUnsavedChanges =
+    !isSubmitting &&
+    (form.formState.isDirty ||
+      questions.some(
+        (q) => q.question.length > 0 || q.options.some((o) => o.length > 0)
+      ));
+  useUnsavedChangesWarning(hasUnsavedChanges);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
