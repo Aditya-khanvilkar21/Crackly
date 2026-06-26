@@ -15,6 +15,7 @@ import { LatexInput } from "@/components/admin/LatexInput";
 import { LatexRenderer } from "@/components/LatexRenderer";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 const questionSchema = z.object({
   question: z.string().min(10, "Question must be at least 10 characters"),
