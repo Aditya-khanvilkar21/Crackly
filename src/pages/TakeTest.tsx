@@ -499,14 +499,18 @@ export default function TakeTest() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
-      const timeInSeconds = test.duration_minutes * 60 - timeLeft;
+      const latest = latestStateRef.current;
+      const currentAnswers = latest.answers || answers;
+      const currentTimeLeft = typeof latest.timeLeft === 'number' ? latest.timeLeft : timeLeft;
+      const timeInSeconds = test.duration_minutes * 60 - currentTimeLeft;
       
       // Map shuffled indices back to original question indices
       const mappedAnswers: Record<number, number> = {};
-      for (const [shuffledIdx, optionIdx] of Object.entries(answers)) {
+      for (const [shuffledIdx, optionIdx] of Object.entries(currentAnswers)) {
         const originalIdx = originalIndexMap[parseInt(shuffledIdx)];
         mappedAnswers[originalIdx] = optionIdx as number;
       }
+
       
       const { data, error } = await supabase.functions.invoke('submit-test', {
         body: { testId, answers: mappedAnswers, timeInSeconds },
@@ -519,7 +523,7 @@ export default function TakeTest() {
       if (attemptIdRef.current) {
         await supabase
           .from('test_attempts')
-          .update({ submitted: true, time_left_seconds: timeLeft })
+          .update({ submitted: true, time_left_seconds: currentTimeLeft })
           .eq('id', attemptIdRef.current);
       }
 
