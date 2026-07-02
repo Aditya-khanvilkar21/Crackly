@@ -523,7 +523,7 @@ export default function TakeTest() {
       if (attemptIdRef.current) {
         await supabase
           .from('test_attempts')
-          .update({ submitted: true, time_left_seconds: timeLeft })
+          .update({ submitted: true, time_left_seconds: currentTimeLeft })
           .eq('id', attemptIdRef.current);
       }
 
