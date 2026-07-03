@@ -7,9 +7,11 @@
  * resets its state after a successful return.
  */
 
-export type NetworkGuardResult =
-  | { ok: true }
-  | { ok: false; title: string; description: string };
+export type NetworkGuardResult = {
+  ok: boolean;
+  title: string;
+  description: string;
+};
 
 const PROBE_TIMEOUT_MS = 5000;
 
