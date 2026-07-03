@@ -176,20 +176,29 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
   useUnsavedChangesWarning(hasUnsavedChanges);
 
   const onSubmit = async (data: MockTestFormData) => {
+    const { preflightNetwork, withTimeout } = await import("@/lib/networkGuard");
+    const preflight = await preflightNetwork();
+    if (!preflight.ok) {
+      toast({ title: preflight.title, description: preflight.description, variant: "destructive" });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const { data: insertedTest, error } = await supabase.from("tests").insert({
-        title: data.title,
-        test_type: 'mock_test',
-        difficulty: data.difficulty,
-        duration_minutes: data.duration_minutes,
-        exam_type: data.exam_type,
-        negative_marking: data.negative_marking,
-        questions: data.questions,
-        is_active: true,
-        chapter: null,
-        subject: null,
-      }).select("id").single();
+      const { data: insertedTest, error } = await withTimeout(
+        supabase.from("tests").insert({
+          title: data.title,
+          test_type: 'mock_test',
+          difficulty: data.difficulty,
+          duration_minutes: data.duration_minutes,
+          exam_type: data.exam_type,
+          negative_marking: data.negative_marking,
+          questions: data.questions,
+          is_active: true,
+          chapter: null,
+          subject: null,
+        }).select("id").single()
+      );
 
       if (error) throw error;
 
@@ -212,8 +221,8 @@ export const CreateMockTest = ({ onTestCreated }: { onTestCreated?: () => void }
       setCurrentSubject("physics");
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Failed to create mock test",
+        description: `${error.message || "Unknown error"}. Your questions are safe — press Create again once your network is stable. Do NOT reload the page.`,
         variant: "destructive",
       });
     } finally {

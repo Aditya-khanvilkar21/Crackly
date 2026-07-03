@@ -158,18 +158,27 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
   };
 
   const onSubmit = async (data: TestFormData) => {
+    const { preflightNetwork, withTimeout } = await import("@/lib/networkGuard");
+    const preflight = await preflightNetwork();
+    if (!preflight.ok) {
+      toast({ title: preflight.title, description: preflight.description, variant: "destructive" });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const { data: insertedTest, error } = await supabase.from("tests").insert({
-        title: data.title,
-        chapter: data.chapter,
-        subject: data.subject,
-        difficulty: data.difficulty,
-        duration_minutes: data.duration_minutes,
-        exam_type: data.exam_type,
-        questions: data.questions,
-        is_active: true,
-      }).select("id").single();
+      const { data: insertedTest, error } = await withTimeout(
+        supabase.from("tests").insert({
+          title: data.title,
+          chapter: data.chapter,
+          subject: data.subject,
+          difficulty: data.difficulty,
+          duration_minutes: data.duration_minutes,
+          exam_type: data.exam_type,
+          questions: data.questions,
+          is_active: true,
+        }).select("id").single()
+      );
 
       if (error) throw error;
 
@@ -178,19 +187,18 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
         description: "Test created. Generating anti-copy images...",
       });
 
-      // Trigger pre-generation
       setPreGenTestId(insertedTest.id);
       setPreGenQuestions(data.questions);
       setShowPreGen(true);
 
-      // Reset form
+      // Reset form ONLY after confirmed success
       form.reset();
       setQuestions(Array(45).fill(null).map(() => ({ ...emptyQuestion })));
       setCurrentQuestionIndex(0);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Failed to create test",
+        description: `${error.message || "Unknown error"}. Your questions are safe — press Create Test again once your network is stable. Do NOT reload the page.`,
         variant: "destructive",
       });
     } finally {
