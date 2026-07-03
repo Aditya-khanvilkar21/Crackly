@@ -158,50 +158,17 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
   };
 
   const onSubmit = async (data: TestFormData) => {
-    // Guard: don't even start if browser reports offline — questions stay intact
-    if (typeof navigator !== "undefined" && navigator.onLine === false) {
-      toast({
-        title: "No internet connection",
-        description:
-          "You appear to be offline. Your questions are safe — reconnect and press Create Test again. Do NOT reload the page.",
-        variant: "destructive",
-      });
+    const { preflightNetwork, withTimeout } = await import("@/lib/networkGuard");
+    const preflight = await preflightNetwork();
+    if (!preflight.ok) {
+      toast({ title: preflight.title, description: preflight.description, variant: "destructive" });
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Quick connectivity probe with short timeout so we fail fast on flaky networks
-      // instead of hanging forever (which is what caused users to lose their work).
-      const probeController = new AbortController();
-      const probeTimeout = setTimeout(() => probeController.abort(), 5000);
-      try {
-        await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/auth/v1/health`,
-          {
-            method: "GET",
-            cache: "no-store",
-            signal: probeController.signal,
-            headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-          }
-        );
-      } catch (probeErr) {
-        clearTimeout(probeTimeout);
-        toast({
-          title: "Network unstable",
-          description:
-            "Could not reach the server. Your questions are safe — check your connection and press Create Test again. Do NOT reload the page.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-      clearTimeout(probeTimeout);
-
-      // Wrap the insert in a 30s timeout so a stuck request can't silently swallow the work.
-      const insertPromise = supabase
-        .from("tests")
-        .insert({
+      const { data: insertedTest, error } = await withTimeout(
+        supabase.from("tests").insert({
           title: data.title,
           chapter: data.chapter,
           subject: data.subject,
@@ -210,18 +177,8 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
           exam_type: data.exam_type,
           questions: data.questions,
           is_active: true,
-        })
-        .select("id")
-        .single();
-
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Request timed out — please retry")), 30000)
+        }).select("id").single()
       );
-
-      const { data: insertedTest, error } = (await Promise.race([
-        insertPromise,
-        timeoutPromise,
-      ])) as Awaited<typeof insertPromise>;
 
       if (error) throw error;
 
@@ -230,7 +187,6 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
         description: "Test created. Generating anti-copy images...",
       });
 
-      // Trigger pre-generation
       setPreGenTestId(insertedTest.id);
       setPreGenQuestions(data.questions);
       setShowPreGen(true);
