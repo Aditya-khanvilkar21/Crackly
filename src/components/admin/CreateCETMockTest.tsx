@@ -219,31 +219,40 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
       return;
     }
 
+    const { preflightNetwork, withTimeout } = await import("@/lib/networkGuard");
+    const preflight = await preflightNetwork();
+    if (!preflight.ok) {
+      toast({ title: preflight.title, description: preflight.description, variant: "destructive" });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // Store CET type in the title for identification
       const testTitle = `[CET-${cetType}] ${title}`;
-      
-      const { data: insertedTest, error } = await supabase.from("tests").insert({
-        title: testTitle,
-        test_type: 'mock_test',
-        difficulty,
-        duration_minutes: durationMinutes,
-        exam_type: 'CET',
-        negative_marking: negativeMarking,
-        questions: questions.map(q => ({
-          question: q.question,
-          options: q.options,
-          correctAnswer: q.correctAnswer,
-          imageUrl: q.imageUrl,
-          explanation: q.explanation,
-          subject: q.subject,
-          marksPerQuestion: q.marksPerQuestion,
-        })),
-        is_active: true,
-        chapter: null,
-        subject: null,
-      }).select("id").single();
+
+      const { data: insertedTest, error } = await withTimeout(
+        supabase.from("tests").insert({
+          title: testTitle,
+          test_type: 'mock_test',
+          difficulty,
+          duration_minutes: durationMinutes,
+          exam_type: 'CET',
+          negative_marking: negativeMarking,
+          questions: questions.map(q => ({
+            question: q.question,
+            options: q.options,
+            correctAnswer: q.correctAnswer,
+            imageUrl: q.imageUrl,
+            explanation: q.explanation,
+            subject: q.subject,
+            marksPerQuestion: q.marksPerQuestion,
+          })),
+          is_active: true,
+          chapter: null,
+          subject: null,
+        }).select("id").single()
+      );
 
       if (error) throw error;
 
@@ -263,8 +272,8 @@ export const CreateCETMockTest = ({ onTestCreated }: { onTestCreated?: () => voi
       setCurrentSubject("physics");
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Failed to create CET mock test",
+        description: `${error.message || "Unknown error"}. Your questions are safe — press Create again once your network is stable. Do NOT reload the page.`,
         variant: "destructive",
       });
     } finally {
