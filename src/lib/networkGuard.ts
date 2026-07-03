@@ -27,7 +27,7 @@ export async function preflightNetwork(): Promise<NetworkGuardResult> {
 
   const url = import.meta.env.VITE_SUPABASE_URL;
   const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-  if (!url) return { ok: true };
+  if (!url) return { ok: true, title: "", description: "" };
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
@@ -38,7 +38,7 @@ export async function preflightNetwork(): Promise<NetworkGuardResult> {
       signal: controller.signal,
       headers: key ? { apikey: key } : undefined,
     });
-    return { ok: true };
+    return { ok: true, title: "", description: "" };
   } catch {
     return {
       ok: false,
