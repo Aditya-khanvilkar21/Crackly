@@ -380,8 +380,8 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
                       })}
                     </div>
                   </div>
-                </div>
-              )}
+              </div>
+
             </CardContent>
           </Card>
         </TabsContent>
