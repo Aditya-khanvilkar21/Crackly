@@ -330,12 +330,8 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {filteredTests.length === 0 ? (
-                <p className="text-center py-8 text-muted-foreground">
-                  No {selectedExamType} tests {userRole === "super_admin" ? "created" : "available"} yet.
-                </p>
-              ) : (
-                <div className="space-y-8">
+              <div className="space-y-8">
+
                   {/* Mock Tests */}
                   {mockTests.length > 0 && (
                     <div>
@@ -349,20 +345,43 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
                     </div>
                   )}
 
-                  {/* Chapter Tests */}
-                  {chapterTests.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <div className={`w-1 h-6 bg-${getExamColor(selectedExamType)}-500 rounded-full`}></div>
-                        {selectedExamType} Chapter Tests
-                      </h3>
-                      <div className="grid gap-4 md:grid-cols-2">
-                        {chapterTests.map((test) => renderTestCard(test, userRole === "admin"))}
-                      </div>
+                  {/* Chapter Tests grouped by Subject */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <div className={`w-1 h-6 bg-${getExamColor(selectedExamType)}-500 rounded-full`}></div>
+                      {selectedExamType} Chapter Tests
+                    </h3>
+                    <div className="space-y-6">
+                      {(selectedExamType === 'JEE'
+                        ? ['physics', 'chemistry', 'mathematics']
+                        : selectedExamType === 'NEET'
+                        ? ['physics', 'chemistry', 'biology']
+                        : ['physics', 'chemistry', 'mathematics', 'biology']
+                      ).map((subject) => {
+                        const subjectTests = chapterTests.filter(
+                          (t) => (t.subject || '').toLowerCase() === subject
+                        );
+                        return (
+                          <div key={subject}>
+                            <h4 className="text-base font-semibold mb-3 capitalize text-muted-foreground">
+                              {subject} ({subjectTests.length})
+                            </h4>
+                            {subjectTests.length === 0 ? (
+                              <p className="text-sm text-muted-foreground italic py-3 px-4 border border-dashed rounded-md">
+                                No {subject} tests {userRole === "super_admin" ? "created" : "available"} yet.
+                              </p>
+                            ) : (
+                              <div className="grid gap-4 md:grid-cols-2">
+                                {subjectTests.map((test) => renderTestCard(test, userRole === "admin"))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                  )}
-                </div>
-              )}
+                  </div>
+              </div>
+
             </CardContent>
           </Card>
         </TabsContent>
