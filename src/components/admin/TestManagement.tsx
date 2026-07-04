@@ -330,12 +330,8 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {filteredTests.length === 0 && chapterTests.length === 0 && mockTests.length === 0 ? null : null}
-              {(
-                <></>
-              )}
-              {(
-                <div className="space-y-8">
+              <div className="space-y-8">
+
                   {/* Mock Tests */}
                   {mockTests.length > 0 && (
                     <div>
