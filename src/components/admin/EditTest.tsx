@@ -47,6 +47,7 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
   const [difficulty, setDifficulty] = useState(test.difficulty);
   const [duration, setDuration] = useState(test.duration_minutes.toString());
   const [questions, setQuestions] = useState<Question[]>(test.questions || []);
+  const [uploadingIdx, setUploadingIdx] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
