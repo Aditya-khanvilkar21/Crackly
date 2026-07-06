@@ -333,7 +333,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <Link to="/" className="flex items-center gap-2 opacity-75 hover:opacity-100 transition-opacity">
-              <img src={logo} alt="Crackly" className="h-9 w-auto object-contain" />
+              <img src={logo} alt="Crackly" width={36} height={36} loading="lazy" decoding="async" className="h-9 w-auto object-contain" />
             </Link>
             <p className="text-muted-foreground text-sm">&copy; 2026 Crackly. All rights reserved.</p>
           </div>
