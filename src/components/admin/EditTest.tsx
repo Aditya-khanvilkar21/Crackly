@@ -84,6 +84,49 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
     setQuestions(questions.filter((_, i) => i !== index));
   };
 
+  const handleImageUpload = async (
+    qIndex: number,
+    file: File,
+    field: 'imageUrl' | 'explanationImage'
+  ) => {
+    const key = `${qIndex}-${field}`;
+    setUploadingIdx(key);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const folder = field === 'explanationImage' ? 'explanations/' : '';
+      const fileName = `${folder}${crypto.randomUUID()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('test-questions')
+        .upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage
+        .from('test-questions')
+        .getPublicUrl(fileName);
+      handleUpdateQuestion(qIndex, field, publicUrl);
+      toast({ title: "Image uploaded successfully" });
+    } catch (error: any) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } finally {
+      setUploadingIdx(null);
+    }
+  };
+
+  const handleRemoveImage = async (qIndex: number, field: 'imageUrl' | 'explanationImage') => {
+    const imageUrl = questions[qIndex][field];
+    if (!imageUrl) return;
+    try {
+      const urlParts = imageUrl.split('/test-questions/');
+      const filePath = urlParts[urlParts.length - 1];
+      if (filePath && urlParts.length > 1) {
+        await supabase.storage.from('test-questions').remove([filePath]);
+      }
+    } catch (e) {
+      // ignore storage removal errors, still clear the field
+    }
+    handleUpdateQuestion(qIndex, field, "");
+  };
+
+
   const handleSave = async () => {
     if (!title.trim()) {
       toast({ title: "Title is required", variant: "destructive" });
