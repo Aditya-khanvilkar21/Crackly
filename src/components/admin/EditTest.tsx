@@ -399,19 +399,53 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
                       />
                     </div>
 
-                    <div>
-                      <Label>Explanation Image URL (optional)</Label>
+                    <div className="space-y-2">
+                      <Label>Explanation Image (optional)</Label>
+                      {q.explanationImage ? (
+                        <div className="relative border rounded-lg p-3 bg-muted/50">
+                          <img src={q.explanationImage} alt="Explanation" className="max-h-56 mx-auto rounded" />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={() => handleRemoveImage(qIndex, 'explanationImage')}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                          <ImageIcon className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={uploadingIdx === `${qIndex}-explanationImage`}
+                            onClick={() => {
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/jpg,image/jpeg,image/png';
+                              input.onchange = (e) => {
+                                const file = (e.target as HTMLInputElement).files?.[0];
+                                if (file) handleImageUpload(qIndex, file, 'explanationImage');
+                              };
+                              input.click();
+                            }}
+                          >
+                            <Upload className="w-4 h-4 mr-2" />
+                            {uploadingIdx === `${qIndex}-explanationImage` ? "Uploading..." : "Upload Explanation Image"}
+                          </Button>
+                        </div>
+                      )}
                       <Input
                         value={q.explanationImage || ""}
                         onChange={(e) => handleUpdateQuestion(qIndex, "explanationImage", e.target.value)}
-                        placeholder="https://..."
+                        placeholder="Or paste image URL..."
+                        className="text-xs"
                       />
-                      {q.explanationImage && (
-                        <div className="mt-2 p-2 bg-muted/50 rounded-lg">
-                          <img src={q.explanationImage} alt="Explanation" className="max-h-40 mx-auto rounded" />
-                        </div>
-                      )}
                     </div>
+
                   </CardContent>
                 </Card>
               ))}
