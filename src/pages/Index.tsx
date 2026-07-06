@@ -181,6 +181,10 @@ const Index = () => {
               <img
                 src={logo}
                 alt="Crackly - Crack Your Limits"
+                width={128}
+                height={128}
+                fetchPriority="high"
+                decoding="async"
                 className="relative w-28 h-28 md:w-32 md:h-32 mx-auto object-contain drop-shadow-[0_0_25px_rgba(255,255,255,0.35)] transition-transform duration-500 group-hover:scale-110 group-hover:drop-shadow-[0_0_35px_rgba(255,140,40,0.65)]"
               />
             </motion.div>
@@ -303,6 +307,10 @@ const Index = () => {
             <img
               src={logo}
               alt="Crackly"
+              width={112}
+              height={112}
+              loading="lazy"
+              decoding="async"
               className="w-24 h-24 md:w-28 md:h-28 mx-auto mb-6 drop-shadow-lg object-contain"
             />
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
@@ -325,7 +333,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <Link to="/" className="flex items-center gap-2 opacity-75 hover:opacity-100 transition-opacity">
-              <img src={logo} alt="Crackly" className="h-9 w-auto object-contain" />
+              <img src={logo} alt="Crackly" width={36} height={36} loading="lazy" decoding="async" className="h-9 w-auto object-contain" />
             </Link>
             <p className="text-muted-foreground text-sm">&copy; 2026 Crackly. All rights reserved.</p>
           </div>
