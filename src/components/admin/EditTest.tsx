@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Pencil, Trash2, Plus, X, Image } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Upload, Image as ImageIcon } from "lucide-react";
 
 interface Question {
   question: string;
@@ -47,6 +47,7 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
   const [difficulty, setDifficulty] = useState(test.difficulty);
   const [duration, setDuration] = useState(test.duration_minutes.toString());
   const [questions, setQuestions] = useState<Question[]>(test.questions || []);
+  const [uploadingIdx, setUploadingIdx] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -82,6 +83,49 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
   const handleRemoveQuestion = (index: number) => {
     setQuestions(questions.filter((_, i) => i !== index));
   };
+
+  const handleImageUpload = async (
+    qIndex: number,
+    file: File,
+    field: 'imageUrl' | 'explanationImage'
+  ) => {
+    const key = `${qIndex}-${field}`;
+    setUploadingIdx(key);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const folder = field === 'explanationImage' ? 'explanations/' : '';
+      const fileName = `${folder}${crypto.randomUUID()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('test-questions')
+        .upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage
+        .from('test-questions')
+        .getPublicUrl(fileName);
+      handleUpdateQuestion(qIndex, field, publicUrl);
+      toast({ title: "Image uploaded successfully" });
+    } catch (error: any) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } finally {
+      setUploadingIdx(null);
+    }
+  };
+
+  const handleRemoveImage = async (qIndex: number, field: 'imageUrl' | 'explanationImage') => {
+    const imageUrl = questions[qIndex][field];
+    if (!imageUrl) return;
+    try {
+      const urlParts = imageUrl.split('/test-questions/');
+      const filePath = urlParts[urlParts.length - 1];
+      if (filePath && urlParts.length > 1) {
+        await supabase.storage.from('test-questions').remove([filePath]);
+      }
+    } catch (e) {
+      // ignore storage removal errors, still clear the field
+    }
+    handleUpdateQuestion(qIndex, field, "");
+  };
+
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -267,14 +311,53 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
                       />
                     </div>
                     
-                    <div>
-                      <Label>Image URL (optional)</Label>
+                    <div className="space-y-2">
+                      <Label>Question Image (optional)</Label>
+                      {q.imageUrl ? (
+                        <div className="relative border rounded-lg p-3 bg-muted/50">
+                          <img src={q.imageUrl} alt="Question" className="max-h-56 mx-auto rounded" />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={() => handleRemoveImage(qIndex, 'imageUrl')}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                          <ImageIcon className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={uploadingIdx === `${qIndex}-imageUrl`}
+                            onClick={() => {
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*';
+                              input.onchange = (e) => {
+                                const file = (e.target as HTMLInputElement).files?.[0];
+                                if (file) handleImageUpload(qIndex, file, 'imageUrl');
+                              };
+                              input.click();
+                            }}
+                          >
+                            <Upload className="w-4 h-4 mr-2" />
+                            {uploadingIdx === `${qIndex}-imageUrl` ? "Uploading..." : "Upload Image"}
+                          </Button>
+                        </div>
+                      )}
                       <Input
                         value={q.imageUrl || ""}
                         onChange={(e) => handleUpdateQuestion(qIndex, "imageUrl", e.target.value)}
-                        placeholder="https://..."
+                        placeholder="Or paste image URL..."
+                        className="text-xs"
                       />
                     </div>
+
 
                     <div className="grid grid-cols-2 gap-2">
                       {q.options.map((opt, optIndex) => (
@@ -316,19 +399,53 @@ export const EditTest = ({ test, onTestUpdated, onTestDeleted }: EditTestProps) 
                       />
                     </div>
 
-                    <div>
-                      <Label>Explanation Image URL (optional)</Label>
+                    <div className="space-y-2">
+                      <Label>Explanation Image (optional)</Label>
+                      {q.explanationImage ? (
+                        <div className="relative border rounded-lg p-3 bg-muted/50">
+                          <img src={q.explanationImage} alt="Explanation" className="max-h-56 mx-auto rounded" />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={() => handleRemoveImage(qIndex, 'explanationImage')}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                          <ImageIcon className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={uploadingIdx === `${qIndex}-explanationImage`}
+                            onClick={() => {
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/jpg,image/jpeg,image/png';
+                              input.onchange = (e) => {
+                                const file = (e.target as HTMLInputElement).files?.[0];
+                                if (file) handleImageUpload(qIndex, file, 'explanationImage');
+                              };
+                              input.click();
+                            }}
+                          >
+                            <Upload className="w-4 h-4 mr-2" />
+                            {uploadingIdx === `${qIndex}-explanationImage` ? "Uploading..." : "Upload Explanation Image"}
+                          </Button>
+                        </div>
+                      )}
                       <Input
                         value={q.explanationImage || ""}
                         onChange={(e) => handleUpdateQuestion(qIndex, "explanationImage", e.target.value)}
-                        placeholder="https://..."
+                        placeholder="Or paste image URL..."
+                        className="text-xs"
                       />
-                      {q.explanationImage && (
-                        <div className="mt-2 p-2 bg-muted/50 rounded-lg">
-                          <img src={q.explanationImage} alt="Explanation" className="max-h-40 mx-auto rounded" />
-                        </div>
-                      )}
                     </div>
+
                   </CardContent>
                 </Card>
               ))}
