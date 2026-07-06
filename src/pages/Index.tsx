@@ -307,6 +307,10 @@ const Index = () => {
             <img
               src={logo}
               alt="Crackly"
+              width={112}
+              height={112}
+              loading="lazy"
+              decoding="async"
               className="w-24 h-24 md:w-28 md:h-28 mx-auto mb-6 drop-shadow-lg object-contain"
             />
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
