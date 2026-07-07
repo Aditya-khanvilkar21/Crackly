@@ -110,7 +110,7 @@ const Index = () => {
             <span className="relative overflow-hidden rounded-md">
               <img
                 src={logo}
-                alt="Crackly"
+                alt="Crackly Exam Preparation Logo"
                 className="relative h-10 md:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               />
               {/* Sweep shine */}
@@ -180,7 +180,7 @@ const Index = () => {
               </div>
               <img
                 src={logo}
-                alt="Crackly - Crack Your Limits"
+                alt="Crackly Exam Preparation Logo"
                 width={128}
                 height={128}
                 fetchPriority="high"
@@ -192,7 +192,7 @@ const Index = () => {
               className="text-4xl md:text-6xl font-bold mb-4 leading-tight tracking-tight"
               variants={itemVariants}
             >
-              Crackly
+              Crackly — JEE, NEET & CET Mock Tests
             </motion.h1>
             <motion.p 
               className="text-2xl md:text-3xl font-semibold mb-2 text-white/95"
@@ -306,7 +306,7 @@ const Index = () => {
           >
             <img
               src={logo}
-              alt="Crackly"
+              alt="Crackly Exam Preparation Logo"
               width={112}
               height={112}
               loading="lazy"
@@ -333,7 +333,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <Link to="/" className="flex items-center gap-2 opacity-75 hover:opacity-100 transition-opacity">
-              <img src={logo} alt="Crackly" width={36} height={36} loading="lazy" decoding="async" className="h-9 w-auto object-contain" />
+              <img src={logo} alt="Crackly Exam Preparation Logo" width={36} height={36} loading="lazy" decoding="async" className="h-9 w-auto object-contain" />
             </Link>
             <p className="text-muted-foreground text-sm">&copy; 2026 Crackly. All rights reserved.</p>
           </div>

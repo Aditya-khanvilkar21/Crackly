@@ -201,7 +201,7 @@ const Dashboard = () => {
         <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
           <div className="container mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="Crackly" className="w-12 h-8 object-contain" />
+              <img src={logo} alt="Crackly Exam Preparation Logo" className="w-12 h-8 object-contain" />
               <span className="font-bold text-lg text-foreground">Crackly</span>
             </div>
             <div className="flex items-center gap-3">
@@ -231,7 +231,7 @@ const Dashboard = () => {
               <motion.div className="mb-6" variants={itemVariants}>
                 <img 
                   src={logo} 
-                  alt="Crackly - Crack Your Limits" 
+                  alt="Crackly Exam Preparation Logo" 
                   className="w-48 h-32 md:w-64 md:h-40 mx-auto drop-shadow-[0_0_25px_rgba(255,255,255,0.3)] object-contain"
                 />
               </motion.div>
@@ -239,7 +239,7 @@ const Dashboard = () => {
                 className="text-4xl md:text-6xl font-bold mb-4 leading-tight tracking-tight"
                 variants={itemVariants}
               >
-                Crackly
+                Crackly — JEE, NEET & CET Mock Tests
               </motion.h1>
               <motion.p 
                 className="text-2xl md:text-3xl font-semibold mb-2 text-white/95"
@@ -351,7 +351,7 @@ const Dashboard = () => {
             >
               <img 
                 src={logo} 
-                alt="Crackly" 
+                alt="Crackly Exam Preparation Logo" 
                 className="w-40 h-24 mx-auto mb-6 drop-shadow-lg object-contain"
               />
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
@@ -372,7 +372,7 @@ const Dashboard = () => {
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <img src={logo} alt="Crackly" className="w-16 h-10 object-contain" />
+                <img src={logo} alt="Crackly Exam Preparation Logo" className="w-16 h-10 object-contain" />
                 <span className="font-bold text-lg">Crackly</span>
               </div>
               <p className="text-muted-foreground text-sm">&copy; 2026 Crackly. All rights reserved.</p>
@@ -400,9 +400,9 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="Crackly" className="w-10 h-8 object-contain" />
+              <img src={logo} alt="Crackly Exam Preparation Logo" className="w-10 h-8 object-contain" />
               <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-primary leading-tight">Crackly</h1>
+                <h1 className="text-lg font-bold text-primary leading-tight">Crackly — JEE, NEET & CET Mock Tests</h1>
               </div>
             </div>
 
@@ -415,7 +415,7 @@ const Dashboard = () => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
+                  <Button variant="ghost" size="icon" className="relative" aria-label="Open user menu">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>

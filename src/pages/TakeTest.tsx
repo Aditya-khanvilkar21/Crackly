@@ -1157,7 +1157,7 @@ export default function TakeTest() {
           <div className="w-64 md:w-72 border-l border-border bg-card flex flex-col shrink-0 overflow-hidden">
             <div className="p-3 border-b border-border flex items-center justify-between">
               <h3 className="font-semibold text-sm">Question Palette</h3>
-              <button onClick={() => setPaletteOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <button onClick={() => setPaletteOpen(false)} aria-label="Close question palette" className="text-muted-foreground hover:text-foreground">
                 <PanelRightClose className="w-4 h-4" />
               </button>
             </div>
@@ -1252,6 +1252,7 @@ export default function TakeTest() {
         {!paletteOpen && (
           <button
             onClick={() => setPaletteOpen(true)}
+            aria-label="Open question palette"
             className="absolute right-0 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-2 rounded-l-lg shadow-lg z-10"
           >
             <PanelRightOpen className="w-5 h-5" />
