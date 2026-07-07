@@ -400,9 +400,9 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="Crackly" className="w-10 h-8 object-contain" />
+              <img src={logo} alt="Crackly Exam Preparation Logo" className="w-10 h-8 object-contain" />
               <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-primary leading-tight">Crackly</h1>
+                <h1 className="text-lg font-bold text-primary leading-tight">Crackly — JEE, NEET & CET Mock Tests</h1>
               </div>
             </div>
 
