@@ -1157,7 +1157,7 @@ export default function TakeTest() {
           <div className="w-64 md:w-72 border-l border-border bg-card flex flex-col shrink-0 overflow-hidden">
             <div className="p-3 border-b border-border flex items-center justify-between">
               <h3 className="font-semibold text-sm">Question Palette</h3>
-              <button onClick={() => setPaletteOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <button onClick={() => setPaletteOpen(false)} aria-label="Close question palette" className="text-muted-foreground hover:text-foreground">
                 <PanelRightClose className="w-4 h-4" />
               </button>
             </div>
