@@ -372,7 +372,7 @@ const Dashboard = () => {
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <img src={logo} alt="Crackly" className="w-16 h-10 object-contain" />
+                <img src={logo} alt="Crackly Exam Preparation Logo" className="w-16 h-10 object-contain" />
                 <span className="font-bold text-lg">Crackly</span>
               </div>
               <p className="text-muted-foreground text-sm">&copy; 2026 Crackly. All rights reserved.</p>
