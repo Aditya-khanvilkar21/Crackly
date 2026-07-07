@@ -180,7 +180,7 @@ const Index = () => {
               </div>
               <img
                 src={logo}
-                alt="Crackly - Crack Your Limits"
+                alt="Crackly Exam Preparation Logo"
                 width={128}
                 height={128}
                 fetchPriority="high"
@@ -192,7 +192,7 @@ const Index = () => {
               className="text-4xl md:text-6xl font-bold mb-4 leading-tight tracking-tight"
               variants={itemVariants}
             >
-              Crackly
+              Crackly — JEE, NEET & CET Mock Tests
             </motion.h1>
             <motion.p 
               className="text-2xl md:text-3xl font-semibold mb-2 text-white/95"
