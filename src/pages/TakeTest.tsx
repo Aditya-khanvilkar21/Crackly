@@ -1252,6 +1252,7 @@ export default function TakeTest() {
         {!paletteOpen && (
           <button
             onClick={() => setPaletteOpen(true)}
+            aria-label="Open question palette"
             className="absolute right-0 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-2 rounded-l-lg shadow-lg z-10"
           >
             <PanelRightOpen className="w-5 h-5" />
