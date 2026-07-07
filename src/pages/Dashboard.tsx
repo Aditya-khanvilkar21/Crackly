@@ -415,7 +415,7 @@ const Dashboard = () => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
+                  <Button variant="ghost" size="icon" className="relative" aria-label="Open user menu">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
