@@ -201,7 +201,7 @@ const Dashboard = () => {
         <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b">
           <div className="container mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="Crackly" className="w-12 h-8 object-contain" />
+              <img src={logo} alt="Crackly Exam Preparation Logo" className="w-12 h-8 object-contain" />
               <span className="font-bold text-lg text-foreground">Crackly</span>
             </div>
             <div className="flex items-center gap-3">
