@@ -351,7 +351,7 @@ const Dashboard = () => {
             >
               <img 
                 src={logo} 
-                alt="Crackly" 
+                alt="Crackly Exam Preparation Logo" 
                 className="w-40 h-24 mx-auto mb-6 drop-shadow-lg object-contain"
               />
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
