@@ -78,6 +78,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:bg-background focus:text-foreground focus:px-3 focus:py-2 focus:rounded">Skip to main content</a>
       <SeoHead
         title="Crackly — Crack JEE, NEET & CET Exams"
         description="Authentic exam-style mock tests, chapter-wise practice, and real-time analytics for JEE, NEET and CET aspirants."
