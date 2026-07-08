@@ -239,7 +239,7 @@ const Dashboard = () => {
                 className="text-4xl md:text-6xl font-bold mb-4 leading-tight tracking-tight"
                 variants={itemVariants}
               >
-                Crackly — JEE, NEET & CET Mock Tests
+                Crackly — JEE, NEET & CET
               </motion.h1>
               <motion.p 
                 className="text-2xl md:text-3xl font-semibold mb-2 text-white/95"
@@ -402,7 +402,7 @@ const Dashboard = () => {
             <div className="flex items-center gap-2">
               <img src={logo} alt="Crackly Exam Preparation Logo" className="w-10 h-8 object-contain" />
               <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-primary leading-tight">Crackly — JEE, NEET & CET Mock Tests</h1>
+                <h1 className="text-lg font-bold text-primary leading-tight">Crackly — JEE, NEET & CET</h1>
               </div>
             </div>
 

@@ -263,7 +263,7 @@ const Auth = () => {
             alt="Crackly Exam Preparation Logo" 
             className="w-40 h-24 mx-auto mb-4 drop-shadow-lg object-contain"
           />
-          <h1 className="text-3xl font-bold mb-2">Crackly — JEE, NEET & CET Mock Tests</h1>
+          <h1 className="text-3xl font-bold mb-2">Crackly — JEE, NEET & CET</h1>
           <p className="text-muted-foreground">Crack Your Limits, Unlock Your Future</p>
         </div>
 
