@@ -194,7 +194,7 @@ const Index = () => {
               className="text-4xl md:text-6xl font-bold mb-4 leading-tight tracking-tight"
               variants={itemVariants}
             >
-              Crackly — JEE, NEET & CET Mock Tests
+              Crackly — JEE, NEET & CET
             </motion.h1>
             <motion.p 
               className="text-2xl md:text-3xl font-semibold mb-2 text-white/95"
