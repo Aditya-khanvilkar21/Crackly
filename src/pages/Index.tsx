@@ -137,6 +137,7 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
+      <main id="main-content">
       <section className="relative overflow-hidden bg-primary text-white pt-16">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]" />
         {/* Light rays effect */}
