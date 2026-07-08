@@ -78,6 +78,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:bg-background focus:text-foreground focus:px-3 focus:py-2 focus:rounded">Skip to main content</a>
       <SeoHead
         title="Crackly — Crack JEE, NEET & CET Exams"
         description="Authentic exam-style mock tests, chapter-wise practice, and real-time analytics for JEE, NEET and CET aspirants."
@@ -136,6 +137,7 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
+      <main id="main-content">
       <section className="relative overflow-hidden bg-primary text-white pt-16">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]" />
         {/* Light rays effect */}
@@ -327,6 +329,7 @@ const Index = () => {
           </motion.div>
         </div>
       </motion.section>
+      </main>
 
       {/* Footer */}
       <footer className="bg-card border-t py-8">
