@@ -15,6 +15,7 @@ import { LatexInput } from "@/components/admin/LatexInput";
 import { LatexRenderer } from "@/components/LatexRenderer";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ImagePreGenModal } from "@/components/admin/ImagePreGenModal";
+import { JsonQuestionImport, type EditorQuestion } from "@/components/admin/JsonQuestionImport";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 const questionSchema = z.object({
@@ -50,7 +51,7 @@ const emptyQuestion: QuestionFormData = {
   topic: "",
 };
 
-export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) => {
+export const CreateTest = ({ onTestCreated, userRole }: { onTestCreated?: () => void; userRole?: string }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState<QuestionFormData[]>(
     Array(45).fill(null).map(() => ({ ...emptyQuestion }))
@@ -93,6 +94,28 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
     newQuestions[questionIndex].options = newOptions;
     setQuestions(newQuestions);
     form.setValue("questions", newQuestions);
+  };
+
+  const handleJsonImport = (imported: EditorQuestion[]) => {
+    // Pad or truncate to exactly 45 to match the existing test schema.
+    const filled: QuestionFormData[] = Array(45)
+      .fill(null)
+      .map((_, i) => {
+        const src = imported[i];
+        if (!src) return { ...emptyQuestion };
+        return {
+          question: src.question,
+          options: [...src.options],
+          correctAnswer: src.correctAnswer,
+          imageUrl: src.imageUrl,
+          explanation: src.explanation ?? "",
+          explanationImage: src.explanationImage,
+          topic: src.topic ?? "",
+        };
+      });
+    setQuestions(filled);
+    form.setValue("questions", filled);
+    setCurrentQuestionIndex(0);
   };
 
   const [uploadingExplanationImage, setUploadingExplanationImage] = useState(false);
@@ -357,15 +380,20 @@ export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) =>
         {/* Questions Section */}
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-3 flex-wrap">
               <div>
                 <CardTitle>Questions ({totalCompleteQuestions}/45 Complete)</CardTitle>
                 <CardDescription>
                   Add 45 questions. All questions will be shown to students in shuffled order.
                 </CardDescription>
               </div>
-              <div className="text-sm font-medium">
-                Question {currentQuestionIndex + 1} of 45
+              <div className="flex items-center gap-3">
+                {userRole === "super_admin" && (
+                  <JsonQuestionImport onImport={handleJsonImport} maxQuestions={45} />
+                )}
+                <div className="text-sm font-medium">
+                  Question {currentQuestionIndex + 1} of 45
+                </div>
               </div>
             </div>
           </CardHeader>
