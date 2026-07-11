@@ -51,7 +51,7 @@ const emptyQuestion: QuestionFormData = {
   topic: "",
 };
 
-export const CreateTest = ({ onTestCreated }: { onTestCreated?: () => void }) => {
+export const CreateTest = ({ onTestCreated, userRole }: { onTestCreated?: () => void; userRole?: string }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState<QuestionFormData[]>(
     Array(45).fill(null).map(() => ({ ...emptyQuestion }))
