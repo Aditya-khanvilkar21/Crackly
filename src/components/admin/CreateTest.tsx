@@ -96,6 +96,28 @@ export const CreateTest = ({ onTestCreated, userRole }: { onTestCreated?: () => 
     form.setValue("questions", newQuestions);
   };
 
+  const handleJsonImport = (imported: EditorQuestion[]) => {
+    // Pad or truncate to exactly 45 to match the existing test schema.
+    const filled: QuestionFormData[] = Array(45)
+      .fill(null)
+      .map((_, i) => {
+        const src = imported[i];
+        if (!src) return { ...emptyQuestion };
+        return {
+          question: src.question,
+          options: [...src.options],
+          correctAnswer: src.correctAnswer,
+          imageUrl: src.imageUrl,
+          explanation: src.explanation ?? "",
+          explanationImage: src.explanationImage,
+          topic: src.topic ?? "",
+        };
+      });
+    setQuestions(filled);
+    form.setValue("questions", filled);
+    setCurrentQuestionIndex(0);
+  };
+
   const [uploadingExplanationImage, setUploadingExplanationImage] = useState(false);
 
   const handleImageUpload = async (questionIndex: number, file: File, field: 'imageUrl' | 'explanationImage' = 'imageUrl') => {
