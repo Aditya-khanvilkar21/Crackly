@@ -380,15 +380,20 @@ export const CreateTest = ({ onTestCreated, userRole }: { onTestCreated?: () => 
         {/* Questions Section */}
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-3 flex-wrap">
               <div>
                 <CardTitle>Questions ({totalCompleteQuestions}/45 Complete)</CardTitle>
                 <CardDescription>
                   Add 45 questions. All questions will be shown to students in shuffled order.
                 </CardDescription>
               </div>
-              <div className="text-sm font-medium">
-                Question {currentQuestionIndex + 1} of 45
+              <div className="flex items-center gap-3">
+                {userRole === "super_admin" && (
+                  <JsonQuestionImport onImport={handleJsonImport} maxQuestions={45} />
+                )}
+                <div className="text-sm font-medium">
+                  Question {currentQuestionIndex + 1} of 45
+                </div>
               </div>
             </div>
           </CardHeader>
