@@ -305,7 +305,7 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
         <TabsContent value={selectedExamType} className="mt-6 space-y-6">
           {userRole === "super_admin" && (
             <>
-              <CreateTest onTestCreated={fetchTests} />
+              <CreateTest onTestCreated={fetchTests} userRole={userRole} />
               {selectedExamType === 'JEE' && (
                 <CreateMockTest onTestCreated={fetchTests} />
               )}
