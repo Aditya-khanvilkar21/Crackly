@@ -472,6 +472,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_student_access_test: {
+        Args: { _student_id: string; _test_id: string }
+        Returns: boolean
+      }
       generate_student_id: { Args: never; Returns: string }
       get_available_students_for_class: {
         Args: { _class_id: string }
@@ -526,6 +530,10 @@ export type Database = {
       }
       is_in_class: {
         Args: { _class_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_test_admin_for_student: {
+        Args: { _admin_id: string; _student_id: string; _test_id: string }
         Returns: boolean
       }
     }
