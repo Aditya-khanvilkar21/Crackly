@@ -143,10 +143,10 @@ export const JsonQuestionImport = ({ onImport, maxQuestions }: JsonQuestionImpor
       return;
     }
     // Accept either an array or { questions: [...] }
-    const arr: unknown = Array.isArray(json)
-      ? json
+    const arr: unknown[] | null = Array.isArray(json)
+      ? (json as unknown[])
       : (json && typeof json === "object" && Array.isArray((json as any).questions))
-        ? (json as any).questions
+        ? ((json as any).questions as unknown[])
         : null;
     if (!arr) {
       setFatalError("JSON must be an array of questions, or an object with a `questions` array.");
