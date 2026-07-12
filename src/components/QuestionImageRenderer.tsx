@@ -57,37 +57,11 @@ export const QuestionImageRenderer = ({
         },
       });
 
-      // Try to upload to storage for caching
-      try {
-        const response = await fetch(dataUrl);
-        const blob = await response.blob();
-        const fileName = `question-images/${questionId}.png`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("test-questions")
-          .upload(fileName, blob, {
-            contentType: "image/png",
-            upsert: true,
-          });
-
-        if (!uploadError) {
-          const { data: urlData } = supabase.storage
-            .from("test-questions")
-            .getPublicUrl(fileName);
-
-          if (urlData?.publicUrl) {
-            const publicUrl = urlData.publicUrl;
-            imageCache.set(questionId, publicUrl);
-            setImageUrl(publicUrl);
-            onImageGenerated?.(publicUrl);
-            return;
-          }
-        }
-      } catch {
-        // If upload fails, fall back to data URL
-      }
-
-      // Fallback: use the data URL directly
+      // Note: uploading to storage is handled at test-creation time by
+      // preGenerateTestImages (admin-only, has RLS permissions). Non-admin
+      // clients (students) must NOT attempt storage uploads here — they lack
+      // INSERT permission on the test-questions bucket and each attempt logs
+      // an RLS violation. Use the in-memory data URL as the runtime fallback.
       imageCache.set(questionId, dataUrl);
       setImageUrl(dataUrl);
     } catch (err) {
