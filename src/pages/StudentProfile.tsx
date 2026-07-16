@@ -168,7 +168,7 @@ export default function StudentProfile() {
         description="Manage your Crackly profile, student ID, tuition class and exam preferences."
         path="/profile"
       />
-      <div className="container mx-auto px-4 max-w-6xl">
+      <main className="container mx-auto px-4 max-w-6xl">
         <Button variant="ghost" onClick={() => navigate("/")} className="mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Home
@@ -426,7 +426,7 @@ export default function StudentProfile() {
           )}
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
   );
 }

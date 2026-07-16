@@ -256,7 +256,7 @@ const Auth = () => {
         description="Sign in or create your Crackly account to start preparing for JEE, NEET, or CET with mock tests and analytics."
         path="/auth"
       />
-      <div className="w-full max-w-md">
+      <main className="w-full max-w-md">
         <div className="text-center mb-8">
           <img 
             src={logo} 
@@ -455,7 +455,7 @@ const Auth = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
   );
 };

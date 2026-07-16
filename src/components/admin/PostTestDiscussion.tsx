@@ -436,7 +436,7 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
             {(!subjectGroup || subjectGroup.chapters.length === 0) && (
               <Card>
                 <CardContent className="p-8 text-center">
-                  <BookOpen className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
+                  <BookOpen className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
                   <p className="text-muted-foreground">No chapters found for this subject</p>
                 </CardContent>
               </Card>
@@ -482,7 +482,7 @@ export const PostTestDiscussion = ({ examType, userRole, onBack }: PostTestDiscu
           {subjectGroups.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="p-8 text-center">
-                <BookOpen className="h-10 w-10 mx-auto mb-3 text-muted-foreground/50" />
+                <BookOpen className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
                 <p className="text-muted-foreground">No tests found for this selection</p>
               </CardContent>
             </Card>
