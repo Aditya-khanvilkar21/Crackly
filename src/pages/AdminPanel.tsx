@@ -25,7 +25,7 @@ import {
   UserPlus,
   CalendarClock
 } from "lucide-react";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 import { SeoHead } from "@/components/SeoHead";
 import { motion, AnimatePresence } from "framer-motion";
 import {

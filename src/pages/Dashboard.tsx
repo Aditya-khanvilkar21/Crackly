@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { LogOut, BookOpen, Menu, User, Settings, Target, BarChart3, Clock, CheckCircle2, Users, GraduationCap, Leaf, FlaskConical, ChevronRight, ArrowLeft } from "lucide-react";
 import { AdminExamDashboard } from "@/components/admin/AdminExamDashboard";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 import { SeoHead } from "@/components/SeoHead";
 import { toast } from "sonner";
 import { ExamSectionSelector } from "@/components/dashboard/ExamSectionSelector";

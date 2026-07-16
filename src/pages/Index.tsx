@@ -4,7 +4,7 @@ import { Target, BarChart3, Clock, CheckCircle2, Users, GraduationCap } from "lu
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 import { SeoHead } from "@/components/SeoHead";
 
 const Index = () => {
