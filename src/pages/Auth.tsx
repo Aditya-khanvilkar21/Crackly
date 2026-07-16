@@ -12,7 +12,7 @@ import { signIn, signUp, signOut } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { UserCircle, Shield } from "lucide-react";
 import { emailSchema, passwordSchema, fullNameSchema } from "@/lib/validation";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 import { SeoHead } from "@/components/SeoHead";
 
 const Auth = () => {
