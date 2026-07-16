@@ -174,6 +174,10 @@ export default function StudentProfile() {
           Back to Home
         </Button>
 
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+          Your Student Profile
+        </h1>
+
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="profile">

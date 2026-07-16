@@ -224,7 +224,7 @@ const Index = () => {
                 </Button>
               </Link>
               <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 border-white/30 text-white hover:bg-white/10 hover:border-white/50">
-                Learn More
+                Explore Exam Features
               </Button>
             </motion.div>
           </motion.div>
