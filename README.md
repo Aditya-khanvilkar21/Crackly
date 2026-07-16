@@ -1,52 +1,74 @@
 
+# Crackly
 
-## Project info
+Crackly is an online test and student analytics platform designed for coaching institutes to conduct Computer-Based Tests (CBTs) for competitive exams such as JEE, NEET, and MHT-CET. The platform helps institutes manage tests, track student performance, and gain valuable insights through detailed analytics.
 
-**URL**: 
-crackly.co.in
+## 🚀 Features
 
-**Use your preferred IDE**
+- Computer-Based Online Tests (CBT)
+- Chapter-wise & Full-Length Mock Tests
+- Student Performance Analytics
+- Subject-wise & Chapter-wise Analysis
+- Leaderboard & Ranking System
+- Coaching Institute Dashboard
+- Test Creation & Management
+- Responsive User Interface
+- Secure Authentication
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🛠️ Tech Stack
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
 
-Follow these steps:
+## 📦 Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Clone the Repository
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```bash
+git clone https://github.com/your-username/crackly.git
+cd crackly
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Install Dependencies
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
+```
+
+### Start Development Server
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+http://localhost:5173
+```
 
-**Use GitHub Codespaces**
+## 🏗️ Build for Production
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+npm run build
+```
 
-## What technologies are used for this project?
+## 👨‍💻 Development
 
-This project is built with:
+This project uses:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- Vite for fast development and bundling
+- React with TypeScript
+- Tailwind CSS for styling
+- shadcn/ui for reusable UI components
+
+## 🌐 Website
+
+https://crackly.co.in
+
+## 📄 License
+
+Copyright © 2026 Crackly. All rights reserved.
