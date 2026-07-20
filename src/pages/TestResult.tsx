@@ -499,22 +499,31 @@ export default function TestResult() {
           </Card>
         )}
         <Card className="p-6 mb-6">
-          <h2 className="text-xl font-bold mb-6">Detailed Review</h2>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
+            <h2 className="text-xl font-bold">Detailed Review</h2>
+            {markedForReview.size > 0 && (
+              <Badge className="bg-purple-600 hover:bg-purple-600 text-white">
+                {markedForReview.size} Marked for Review
+              </Badge>
+            )}
+          </div>
           <div className="space-y-6">
             {test.questions.map((question, qIndex) => {
               const selectedAnswer = result.answers[qIndex];
               const isAttempted = selectedAnswer !== undefined;
               const isCorrect = isAttempted && selectedAnswer === question.correctAnswer;
+              const isMarked = markedForReview.has(qIndex);
               const marksPerQ = question.marksPerQuestion || 1;
               const marksObtained = !isAttempted ? 0 : isCorrect ? marksPerQ : (test.negative_marking ? -(test.negative_marking * marksPerQ) : 0);
               
               return (
                 <div key={qIndex} className={`p-4 rounded-lg border-2 ${
+                  isMarked ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/20' :
                   !isAttempted ? 'border-gray-400 bg-gray-50 dark:bg-gray-950/20' :
                   isCorrect ? 'border-green-500 bg-green-50 dark:bg-green-950/20' : 'border-red-500 bg-red-50 dark:bg-red-950/20'
                 }`}>
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold">Q{qIndex + 1}.</span>
                       {!isAttempted ? (
                         <AlertCircle className="w-5 h-5 text-gray-500" />
@@ -524,6 +533,11 @@ export default function TestResult() {
                         <XCircle className="w-5 h-5 text-red-600" />
                       )}
                       <span className="text-xs text-muted-foreground">({marksPerQ} mark{marksPerQ > 1 ? 's' : ''})</span>
+                      {isMarked && (
+                        <Badge className="bg-purple-600 hover:bg-purple-600 text-white text-xs">
+                          Marked for Review
+                        </Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`text-sm font-medium ${
@@ -536,6 +550,7 @@ export default function TestResult() {
                       </Badge>
                     </div>
                   </div>
+                  
                   
                   {/* Topic Badge */}
                   {question.topic && (
