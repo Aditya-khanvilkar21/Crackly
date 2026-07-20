@@ -127,6 +127,24 @@ export default function TestResult() {
       }));
       setTest(testObj);
 
+      // Fetch marked-for-review from the student's attempt (indices are in shuffled order → map back to original)
+      const { data: attemptData } = await supabase
+        .from("test_attempts")
+        .select("marked_for_review, original_index_map")
+        .eq("test_id", testId!)
+        .eq("student_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (attemptData) {
+        const shuffled = (attemptData.marked_for_review as number[]) || [];
+        const map = (attemptData.original_index_map as number[]) || [];
+        const originalMarked = new Set<number>(
+          shuffled.map((i) => (map.length > i ? map[i] : i))
+        );
+        setMarkedForReview(originalMarked);
+      }
+
     } catch (error) {
       toast.error("Failed to load test result");
       navigate("/");
