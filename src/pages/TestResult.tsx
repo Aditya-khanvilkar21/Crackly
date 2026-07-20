@@ -339,15 +339,53 @@ export default function TestResult() {
   const isMockTest = test.test_type === 'mock_test';
   const cetScore = getCETScore();
 
+  const attempted = detailedScore.correct + detailedScore.wrong;
+  const accuracyPct = attempted > 0 ? ((detailedScore.correct / attempted) * 100).toFixed(1) : '0';
+  const secs = result.time_taken_seconds || 0;
+  const hh = Math.floor(secs / 3600);
+  const mm = Math.floor((secs % 3600) / 60);
+  const ss = secs % 60;
+  const timeTakenLabel = hh > 0
+    ? `${hh}h ${mm}m ${ss}s`
+    : `${mm}m ${ss}s`;
+  const examTypeLabel = test.exam_type || (isMockTest ? 'Mock Test' : 'Chapter Test');
+  const chapterLabel = isMockTest
+    ? (test.title || 'Mock Test')
+    : (test.chapter || test.subject || test.title || 'Chapter Test');
+
   return (
-    <div className="min-h-screen bg-gradient-subtle py-12">
+    <div className="min-h-screen bg-gradient-subtle py-6">
       <SeoHead
         title="Test Result | Crackly"
         description="Review your Crackly test result with score breakdown, explanations and topic-wise analysis."
         path="/test-result"
       />
       <div className="container mx-auto px-4 max-w-4xl">
-        {/* Result Summary */}
+        {/* Quick Info Header */}
+        <Card className="p-4 mb-4 border-primary/20">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">Chapter</div>
+              <div className="text-sm md:text-base font-semibold mt-1 truncate" title={chapterLabel}>{chapterLabel}</div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">Exam Type</div>
+              <div className="text-sm md:text-base font-semibold mt-1">{examTypeLabel}{!isMockTest && test.subject ? ` • ${test.subject}` : ''}</div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">Time Taken</div>
+              <div className="text-sm md:text-base font-semibold mt-1 inline-flex items-center gap-1 justify-center">
+                <Clock className="w-4 h-4" /> {timeTakenLabel}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">Accuracy</div>
+              <div className="text-sm md:text-base font-semibold mt-1 text-primary">{accuracyPct}%</div>
+            </div>
+          </div>
+        </Card>
+
+
         <Card className="p-8 mb-8 bg-gradient-primary text-primary-foreground">
           <div className="text-center">
             <Award className="w-16 h-16 mx-auto mb-4" />
