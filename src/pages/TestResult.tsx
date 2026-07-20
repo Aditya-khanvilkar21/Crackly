@@ -72,6 +72,7 @@ export default function TestResult() {
   const [test, setTest] = useState<Test | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [markedForReview, setMarkedForReview] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     fetchResultAndTest();
