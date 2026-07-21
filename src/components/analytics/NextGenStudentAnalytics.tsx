@@ -266,36 +266,38 @@ export const NextGenStudentAnalytics = ({ examType }: NextGenStudentAnalyticsPro
 
         {/* Tabbed Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-4">
-            <TabsTrigger value="overview" className="text-xs">
-              <BarChart3 className="h-3 w-3 mr-1" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="mock-insights" className="text-xs">
-              <Brain className="h-3 w-3 mr-1" />
-              Mock
-            </TabsTrigger>
-            <TabsTrigger value="chapters" className="text-xs">
-              <BookOpen className="h-3 w-3 mr-1" />
-              Chapters
-            </TabsTrigger>
-            <TabsTrigger value="revision" className="text-xs">
-              <Bell className="h-3 w-3 mr-1" />
-              Revision
-            </TabsTrigger>
-            <TabsTrigger value="topics" className="text-xs">
-              <Target className="h-3 w-3 mr-1" />
-              Topics
-            </TabsTrigger>
-            <TabsTrigger value="analysis" className="text-xs">
-              <Activity className="h-3 w-3 mr-1" />
-              Analysis
-            </TabsTrigger>
-            <TabsTrigger value="actions" className="text-xs">
-              <Flame className="h-3 w-3 mr-1" />
-              Actions
-            </TabsTrigger>
-          </TabsList>
+          <div className="mb-4 -mx-2 px-2 overflow-x-auto scrollbar-none">
+            <TabsList className="inline-flex w-max min-w-full gap-1 md:grid md:grid-cols-7 md:w-full">
+              <TabsTrigger value="overview" className="text-xs whitespace-nowrap gap-1.5 px-3">
+                <BarChart3 className="h-3.5 w-3.5" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="mock-insights" className="text-xs whitespace-nowrap gap-1.5 px-3">
+                <Brain className="h-3.5 w-3.5" />
+                Mock
+              </TabsTrigger>
+              <TabsTrigger value="chapters" className="text-xs whitespace-nowrap gap-1.5 px-3">
+                <BookOpen className="h-3.5 w-3.5" />
+                Chapters
+              </TabsTrigger>
+              <TabsTrigger value="revision" className="text-xs whitespace-nowrap gap-1.5 px-3">
+                <Bell className="h-3.5 w-3.5" />
+                Revision
+              </TabsTrigger>
+              <TabsTrigger value="topics" className="text-xs whitespace-nowrap gap-1.5 px-3">
+                <Target className="h-3.5 w-3.5" />
+                Topics
+              </TabsTrigger>
+              <TabsTrigger value="analysis" className="text-xs whitespace-nowrap gap-1.5 px-3">
+                <Activity className="h-3.5 w-3.5" />
+                Analysis
+              </TabsTrigger>
+              <TabsTrigger value="actions" className="text-xs whitespace-nowrap gap-1.5 px-3">
+                <Flame className="h-3.5 w-3.5" />
+                Actions
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-4 mt-0">
