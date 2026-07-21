@@ -140,45 +140,8 @@ export const downloadResultAsPDF = (data: ResultData) => {
     cursorY = (doc as any).lastAutoTable.finalY + 8;
   }
 
-  // Question-wise analysis
-  if (data.questions && data.questions.length > 0) {
-    if (cursorY > 240) { doc.addPage(); cursorY = 20; }
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Question-wise Analysis', 14, cursorY);
+  // Question-wise analysis intentionally omitted from student PDF
 
-    autoTable(doc, {
-      startY: cursorY + 3,
-      head: [['Q No', 'Your Answer', 'Correct Answer', 'Status']],
-      body: data.questions.map(q => [
-        q.qNo,
-        q.yourAnswer,
-        q.correctAnswer,
-        q.status === 'Correct' ? 'Correct' : q.status === 'Incorrect' ? 'Incorrect' : 'Not Attempted',
-      ]),
-      theme: 'grid',
-      headStyles: { fillColor: [30, 41, 59], textColor: 255 },
-      margin: { left: 14, right: 14 },
-      styles: { fontSize: 9, halign: 'center' },
-      columnStyles: {
-        0: { cellWidth: 20 },
-        1: { cellWidth: 50 },
-        2: { cellWidth: 50 },
-        3: { cellWidth: 40 },
-      },
-      didParseCell: (hookData: any) => {
-        if (hookData.section === 'body' && hookData.column.index === 3) {
-          const v = hookData.cell.raw;
-          if (v === 'Correct') hookData.cell.styles.textColor = [22, 163, 74];
-          else if (v === 'Incorrect') hookData.cell.styles.textColor = [220, 38, 38];
-          else hookData.cell.styles.textColor = [120, 120, 120];
-          hookData.cell.styles.fontStyle = 'bold';
-        }
-      },
-    });
-    cursorY = (doc as any).lastAutoTable.finalY + 8;
-  }
 
   // Weak topics
   if (data.weakTopics && data.weakTopics.length > 0) {
