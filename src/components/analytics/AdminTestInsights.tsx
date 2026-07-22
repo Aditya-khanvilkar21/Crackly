@@ -844,14 +844,38 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
         {/* SECTION 7: Leaderboard */}
         <TabsContent value="leaderboard" className="mt-4">
           <Card>
-            <CardHeader className="pb-3 flex flex-row items-center justify-between flex-wrap gap-3">
-              <div>
-                <CardTitle className="text-base">Leaderboard</CardTitle>
-                <CardDescription>Rankings with trend vs previous tests</CardDescription>
+            <CardHeader className="pb-3 gap-3">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <CardTitle className="text-base">Leaderboard</CardTitle>
+                  <CardDescription>Rankings with trend vs previous tests • Download parent-friendly PDF per student</CardDescription>
+                </div>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input value={studentSearch} onChange={e => setStudentSearch(e.target.value)} placeholder="Search student" className="pl-8 h-9 w-52" />
+                </div>
               </div>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                <Input value={studentSearch} onChange={e => setStudentSearch(e.target.value)} placeholder="Search student" className="pl-8 h-9 w-52" />
+              <div className="flex flex-wrap gap-2 items-center pt-1">
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Score band:</span>
+                <div className="flex gap-1 p-0.5 bg-muted rounded-md">
+                  {([
+                    { k: "all", label: "All" },
+                    { k: "top", label: "Top (75%+)" },
+                    { k: "mid", label: "Mid (40–75%)" },
+                    { k: "low", label: "Low (<40%)" },
+                  ] as const).map(b => (
+                    <button
+                      key={b.k}
+                      onClick={() => setBandFilter(b.k as any)}
+                      className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                        bandFilter === b.k ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >{b.label}</button>
+                  ))}
+                </div>
+                <span className="text-[11px] text-muted-foreground ml-auto">
+                  Showing {filteredStudents.length} of {studentRows.length}
+                </span>
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -866,10 +890,11 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
                       <TableHead className="text-center">Accuracy</TableHead>
                       <TableHead className="text-center">Time</TableHead>
                       <TableHead className="text-center">Improvement</TableHead>
+                      <TableHead className="text-right">Report</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredStudents.map((s, i) => {
+                    {filteredStudents.map((s) => {
                       const originalRank = studentRows.findIndex(x => x.userId === s.userId) + 1;
                       const attempted = s.correct + s.wrong;
                       const acc = attempted > 0 ? (s.correct / attempted) * 100 : 0;
@@ -895,6 +920,17 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
                                 {s.improvement > 0 ? "▲" : s.improvement < 0 ? "▼" : "•"} {Math.abs(s.improvement).toFixed(1)}%
                               </span>}
                           </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7"
+                              onClick={() => handleParentPdf(s)}
+                              title="Download parent report"
+                            >
+                              <FileDown className="h-3.5 w-3.5 mr-1" />PDF
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       );
                     })}
@@ -902,6 +938,7 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
                 </Table>
               </div>
             </CardContent>
+
           </Card>
         </TabsContent>
       </Tabs>
