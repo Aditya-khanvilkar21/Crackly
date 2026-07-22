@@ -111,6 +111,10 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
   const [tab, setTab] = useState("questions");
   const [studentSearch, setStudentSearch] = useState("");
   const [qSearch, setQSearch] = useState("");
+  const [topicFilter, setTopicFilter] = useState<string>("all");
+  const [difficultyFilter, setDifficultyFilter] = useState<"all" | "Easy" | "Medium" | "Difficult" | "Critical">("all");
+  const [bandFilter, setBandFilter] = useState<"all" | "top" | "mid" | "low">("all");
+
 
   useEffect(() => {
     (async () => {
