@@ -2,15 +2,16 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, FileText, MessageSquare, ChevronRight, Trophy, ClipboardList } from "lucide-react";
+import { ArrowLeft, BookOpen, FileText, MessageSquare, ChevronRight, Trophy, ClipboardList, Sparkles } from "lucide-react";
 import { AdminChapterAnalytics } from "@/components/analytics/AdminChapterAnalytics";
 import { ExamMockAnalytics } from "@/components/analytics/ExamMockAnalytics";
 import { PostTestDiscussion } from "@/components/admin/PostTestDiscussion";
 import { MockTestLeaderboard } from "@/components/analytics/MockTestLeaderboard";
 import { ChapterTestReview } from "@/components/analytics/ChapterTestReview";
+import { AdminTestPicker } from "@/components/analytics/AdminTestPicker";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
-type ViewMode = 'menu' | 'chapters' | 'mocks' | 'discussion' | 'leaderboard' | 'chapter-review';
+type ViewMode = 'menu' | 'insights' | 'chapters' | 'mocks' | 'discussion' | 'leaderboard' | 'chapter-review';
 
 interface AdminExamDashboardProps {
   examType: ExamType;
