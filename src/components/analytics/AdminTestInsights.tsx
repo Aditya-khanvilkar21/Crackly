@@ -549,19 +549,88 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
           </TabsList>
         </div>
 
+        {/* SECTION: AI Insights (Phase 2) */}
+        <TabsContent value="insights" className="space-y-3 mt-4">
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <div className="p-1.5 rounded-lg bg-primary/15">
+                  <Lightbulb className="h-4 w-4 text-primary" />
+                </div>
+                Teacher Insights
+              </CardTitle>
+              <CardDescription>
+                Rule-based analysis of this test — {teacherInsights.length} recommendation{teacherInsights.length === 1 ? "" : "s"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {teacherInsights.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-6 text-center">Not enough data yet for meaningful insights.</p>
+              ) : teacherInsights.map((ins, i) => {
+                const styles: Record<string, string> = {
+                  success: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-200",
+                  warning: "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-200",
+                  danger: "bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-200",
+                  info: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900 text-blue-800 dark:text-blue-200",
+                };
+                const Icon = ins.icon;
+                return (
+                  <div key={i} className={`flex items-start gap-3 p-3 rounded-xl border ${styles[ins.type]}`}>
+                    <Icon className="h-4 w-4 mt-0.5 shrink-0" />
+                    <p className="text-sm leading-relaxed">{ins.text}</p>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* SECTION 2: Question Wise Analysis */}
         <TabsContent value="questions" className="space-y-3 mt-4">
           <Card>
-            <CardHeader className="pb-3 flex flex-row items-center justify-between gap-3 flex-wrap">
-              <div>
-                <CardTitle className="text-base">Question Wise Analysis</CardTitle>
-                <CardDescription>Click any question to see full option-level breakdown</CardDescription>
+            <CardHeader className="pb-3 gap-3">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                  <CardTitle className="text-base">Question Wise Analysis</CardTitle>
+                  <CardDescription>Click any question to see full option-level breakdown</CardDescription>
+                </div>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input value={qSearch} onChange={e => setQSearch(e.target.value)} placeholder="Search questions" className="pl-8 h-9 w-52" />
+                </div>
               </div>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                <Input value={qSearch} onChange={e => setQSearch(e.target.value)} placeholder="Search questions" className="pl-8 h-9 w-52" />
+              <div className="flex flex-wrap gap-2 items-center pt-1">
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Filters:</span>
+                <select
+                  value={topicFilter}
+                  onChange={e => setTopicFilter(e.target.value)}
+                  className="h-8 px-2 rounded-md border bg-background text-xs"
+                >
+                  <option value="all">All topics</option>
+                  {availableTopics.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+                <div className="flex gap-1 p-0.5 bg-muted rounded-md">
+                  {(["all", "Easy", "Medium", "Difficult", "Critical"] as const).map(d => (
+                    <button
+                      key={d}
+                      onClick={() => setDifficultyFilter(d)}
+                      className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                        difficultyFilter === d ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >{d === "all" ? "All" : d}</button>
+                  ))}
+                </div>
+                {(topicFilter !== "all" || difficultyFilter !== "all") && (
+                  <Button variant="ghost" size="sm" className="h-7 text-xs"
+                    onClick={() => { setTopicFilter("all"); setDifficultyFilter("all"); }}
+                  >Clear</Button>
+                )}
+                <span className="text-[11px] text-muted-foreground ml-auto">
+                  Showing {filteredQuestions.length} of {questionRows.length}
+                </span>
               </div>
             </CardHeader>
+
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <Table>
