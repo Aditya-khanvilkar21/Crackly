@@ -34,6 +34,13 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
 
   const menuItems = [
     {
+      id: 'insights',
+      title: 'Test Insights',
+      description: 'Premium per-test dashboard: question analysis, weak topics, students needing help',
+      icon: Sparkles,
+      featured: true,
+    },
+    {
       id: 'chapter-review',
       title: 'Chapter Test Review',
       description: 'Rank-wise student analysis with question-level details',
