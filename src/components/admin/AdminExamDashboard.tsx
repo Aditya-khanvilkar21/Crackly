@@ -103,7 +103,11 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
                   transition={{ delay: index * 0.1 }}
                 >
                   <Card
-                    className="cursor-pointer hover:shadow-md active:scale-[0.98] transition-all"
+                    className={`cursor-pointer active:scale-[0.98] transition-all ${
+                      (item as any).featured
+                        ? `border-primary/40 shadow-md hover:shadow-lg ring-1 ring-primary/10 bg-gradient-to-br ${gradient} bg-opacity-5`
+                        : "hover:shadow-md"
+                    }`}
                     onClick={() => setViewMode(item.id as ViewMode)}
                   >
                     <CardContent className="p-4 flex items-center gap-4">
@@ -111,7 +115,12 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
                         <Icon className="h-5 w-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold">{item.title}</h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold">{item.title}</h3>
+                          {(item as any).featured && (
+                            <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/15 text-primary">New</span>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground">{item.description}</p>
                       </div>
                       <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
