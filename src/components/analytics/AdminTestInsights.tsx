@@ -108,7 +108,7 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
   const [studentRows, setStudentRows] = useState<StudentRow[]>([]);
   const [totalStudents, setTotalStudents] = useState(0);
   const [selectedQ, setSelectedQ] = useState<QuestionRow | null>(null);
-  const [tab, setTab] = useState("questions");
+  const [tab, setTab] = useState("insights");
   const [studentSearch, setStudentSearch] = useState("");
   const [qSearch, setQSearch] = useState("");
   const [topicFilter, setTopicFilter] = useState<string>("all");
