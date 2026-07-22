@@ -11,14 +11,16 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   ArrowLeft, Users, UserCheck, Percent, Target, Trophy, TrendingDown, Clock,
   BarChart3, Search, Sparkles, AlertTriangle, CheckCircle2, ArrowUpRight, ArrowDownRight,
-  Minus, ChevronRight, Medal,
+  Minus, ChevronRight, Medal, FileDown, Lightbulb, TrendingUp,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
-  PieChart, Pie, Legend,
 } from "recharts";
 import { motion } from "framer-motion";
 import { LatexRenderer } from "@/components/LatexRenderer";
+import { downloadParentReport } from "@/lib/downloadParentReport";
+import { toast } from "@/hooks/use-toast";
+
 
 interface Props {
   testId: string;
