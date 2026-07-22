@@ -11,14 +11,16 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   ArrowLeft, Users, UserCheck, Percent, Target, Trophy, TrendingDown, Clock,
   BarChart3, Search, Sparkles, AlertTriangle, CheckCircle2, ArrowUpRight, ArrowDownRight,
-  Minus, ChevronRight, Medal,
+  Minus, ChevronRight, Medal, FileDown, Lightbulb, TrendingUp,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
-  PieChart, Pie, Legend,
 } from "recharts";
 import { motion } from "framer-motion";
 import { LatexRenderer } from "@/components/LatexRenderer";
+import { downloadParentReport } from "@/lib/downloadParentReport";
+import { toast } from "@/hooks/use-toast";
+
 
 interface Props {
   testId: string;
@@ -106,9 +108,13 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
   const [studentRows, setStudentRows] = useState<StudentRow[]>([]);
   const [totalStudents, setTotalStudents] = useState(0);
   const [selectedQ, setSelectedQ] = useState<QuestionRow | null>(null);
-  const [tab, setTab] = useState("questions");
+  const [tab, setTab] = useState("insights");
   const [studentSearch, setStudentSearch] = useState("");
   const [qSearch, setQSearch] = useState("");
+  const [topicFilter, setTopicFilter] = useState<string>("all");
+  const [difficultyFilter, setDifficultyFilter] = useState<"all" | "Easy" | "Medium" | "Difficult" | "Critical">("all");
+  const [bandFilter, setBandFilter] = useState<"all" | "top" | "mid" | "low">("all");
+
 
   useEffect(() => {
     (async () => {
@@ -310,14 +316,138 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
     return bins;
   }, [studentRows]);
 
-  const filteredQuestions = questionRows.filter(q =>
-    !qSearch || q.question.toLowerCase().includes(qSearch.toLowerCase()) || String(q.qNo).includes(qSearch)
-  );
-  const filteredStudents = studentRows.filter(s =>
-    !studentSearch ||
-    s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-    s.studentId.toLowerCase().includes(studentSearch.toLowerCase())
-  );
+  const filteredQuestions = questionRows.filter(q => {
+    if (qSearch && !q.question.toLowerCase().includes(qSearch.toLowerCase()) && !String(q.qNo).includes(qSearch)) return false;
+    if (topicFilter !== "all" && q.topic !== topicFilter) return false;
+    if (difficultyFilter !== "all" && diffOf(q.accuracy).label !== difficultyFilter) return false;
+    return true;
+  });
+  const filteredStudents = studentRows.filter(s => {
+    if (studentSearch &&
+      !s.name.toLowerCase().includes(studentSearch.toLowerCase()) &&
+      !s.studentId.toLowerCase().includes(studentSearch.toLowerCase())) return false;
+    if (bandFilter === "top" && s.percentage < 75) return false;
+    if (bandFilter === "mid" && (s.percentage < 40 || s.percentage >= 75)) return false;
+    if (bandFilter === "low" && s.percentage >= 40) return false;
+    return true;
+  });
+
+  // ---- Rule-based Teacher Insights ----
+  const teacherInsights = useMemo(() => {
+    const out: { icon: any; type: "success" | "warning" | "danger" | "info"; text: string; priority: number }[] = [];
+    if (studentRows.length === 0) return out;
+
+    // Weak topics
+    weakTopics.slice(0, 3).forEach(t => out.push({
+      icon: AlertTriangle, type: "danger", priority: 1,
+      text: `Revise "${t.topic}" — class accuracy only ${t.accuracy.toFixed(0)}%. Consider a dedicated recap session.`,
+    }));
+    // Strong topics
+    if (strongTopics.length) out.push({
+      icon: CheckCircle2, type: "success", priority: 5,
+      text: `Strong areas: ${strongTopics.slice(0, 3).map(t => t.topic).join(", ")}. Maintain momentum with quick review questions.`,
+    });
+    // Problematic questions
+    if (problematic.length >= 3) out.push({
+      icon: Lightbulb, type: "warning", priority: 2,
+      text: `${problematic.length} questions had <50% accuracy. Discuss questions ${problematic.map(q => `Q${q.qNo}`).join(", ")} in the next lecture.`,
+    });
+    // Low performers
+    const low = studentRows.filter(s => s.percentage < 40);
+    if (low.length) out.push({
+      icon: AlertTriangle, type: "danger", priority: 1,
+      text: `${low.length} student${low.length > 1 ? "s" : ""} scored below 40%. Schedule one-on-one support.`,
+    });
+    // Declining
+    const declining = studentRows.filter(s => s.trend === "down");
+    if (declining.length >= Math.max(3, Math.ceil(studentRows.length * 0.3))) out.push({
+      icon: TrendingDown, type: "warning", priority: 2,
+      text: `${declining.length} students are trending down vs their previous tests. Watch for burnout or gaps.`,
+    });
+    // Improving
+    const improving = studentRows.filter(s => s.trend === "up");
+    if (improving.length >= Math.ceil(studentRows.length * 0.5)) out.push({
+      icon: TrendingUp, type: "success", priority: 3,
+      text: `${improving.length} of ${studentRows.length} students improved vs their previous average — teaching impact is visible.`,
+    });
+    // Attendance
+    if (attendance < 60 && totalStudents > 0) out.push({
+      icon: Users, type: "warning", priority: 4,
+      text: `Only ${attendance.toFixed(0)}% attendance (${appeared}/${totalStudents}). Follow up with absentees.`,
+    });
+    // Average difficulty
+    if (avgScore < 40) out.push({
+      icon: AlertTriangle, type: "danger", priority: 1,
+      text: `Class average is only ${avgScore.toFixed(0)}%. This test may be too tough — consider recap before moving on.`,
+    });
+    else if (avgScore >= 75) out.push({
+      icon: Trophy, type: "success", priority: 3,
+      text: `Class average is ${avgScore.toFixed(0)}%. Great work — consider raising difficulty next time.`,
+    });
+    // Negative marking hits
+    const negHeavy = questionRows.filter(q => q.negativeMarkingCount >= Math.ceil(appeared * 0.4));
+    if (negHeavy.length) out.push({
+      icon: Target, type: "info", priority: 4,
+      text: `${negHeavy.length} questions saw high negative marking — reinforce "skip if unsure" strategy.`,
+    });
+    return out.sort((a, b) => a.priority - b.priority);
+  }, [studentRows, weakTopics, strongTopics, problematic, attendance, totalStudents, appeared, avgScore, questionRows]);
+
+  const availableTopics = useMemo(() => Array.from(new Set(questionRows.map(q => q.topic))), [questionRows]);
+
+  const handleParentPdf = (s: StudentRow) => {
+    try {
+      const questions: any[] = (test?.questions as any) || [];
+      // Subject breakdown from stored per-question subjects (if any)
+      const subjMap = new Map<string, { correct: number; total: number }>();
+      const results = studentRows.find(x => x.userId === s.userId);
+      questions.forEach((q) => {
+        const subj = q.subject || test?.subject || "General";
+        const cur = subjMap.get(subj) || { correct: 0, total: 0 };
+        cur.total++;
+        subjMap.set(subj, cur);
+      });
+      const subjectBreakdown = Array.from(subjMap.entries()).map(([subject, v]) => ({
+        subject, correct: 0, total: v.total, percentage: 0,
+      }));
+      const timeMin = Math.floor(s.timeTaken / 60);
+      const timeSec = Math.round(s.timeTaken % 60);
+      downloadParentReport({
+        studentName: s.name,
+        studentId: s.studentId,
+        testTitle: test.title,
+        examType: test.exam_type,
+        testType: test.test_type,
+        subject: test.subject,
+        chapter: test.chapter,
+        completedAt: new Date().toLocaleDateString(),
+        score: s.score,
+        totalQuestions: s.totalQuestions,
+        percentage: s.percentage,
+        rank: studentRows.findIndex(x => x.userId === s.userId) + 1,
+        totalStudents: studentRows.length,
+        timeTaken: timeMin > 0 ? `${timeMin}m ${timeSec}s` : `${timeSec}s`,
+        correct: s.correct,
+        wrong: s.wrong,
+        skipped: s.skipped,
+        classAverage: avgScore,
+        highestScore: highest,
+        previousAverage: s.previousAvg,
+        improvement: s.improvement,
+        subjectBreakdown,
+        strongTopics: strongTopics.map(t => t.topic),
+        weakTopics: weakTopics.map(t => t.topic),
+        teacherRemark:
+          s.percentage >= 75 ? "Consistent, strong performance. Keep building on advanced problems."
+          : s.percentage >= 50 ? "Good foundation. Focus on the highlighted weak areas to push higher."
+          : "Needs structured revision on weak areas. Recommended: daily practice + concept recap.",
+      });
+      toast({ title: "Parent report downloaded", description: `${s.name}'s report has been saved.` });
+    } catch (e) {
+      toast({ title: "Download failed", description: "Please try again.", variant: "destructive" });
+    }
+  };
+
 
   if (loading) {
     return (
@@ -407,27 +537,100 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
       <Tabs value={tab} onValueChange={setTab}>
         <div className="overflow-x-auto -mx-1 px-1">
           <TabsList className="inline-flex w-max">
+            <TabsTrigger value="insights" className="text-xs md:text-sm">
+              <Lightbulb className="h-3.5 w-3.5 mr-1" />AI Insights
+            </TabsTrigger>
             <TabsTrigger value="questions" className="text-xs md:text-sm">Question Analysis</TabsTrigger>
             <TabsTrigger value="topics" className="text-xs md:text-sm">Weak Topics</TabsTrigger>
             <TabsTrigger value="attention" className="text-xs md:text-sm">Needs Attention</TabsTrigger>
             <TabsTrigger value="distribution" className="text-xs md:text-sm">Distribution</TabsTrigger>
             <TabsTrigger value="leaderboard" className="text-xs md:text-sm">Leaderboard</TabsTrigger>
+
           </TabsList>
         </div>
+
+        {/* SECTION: AI Insights (Phase 2) */}
+        <TabsContent value="insights" className="space-y-3 mt-4">
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <div className="p-1.5 rounded-lg bg-primary/15">
+                  <Lightbulb className="h-4 w-4 text-primary" />
+                </div>
+                Teacher Insights
+              </CardTitle>
+              <CardDescription>
+                Rule-based analysis of this test — {teacherInsights.length} recommendation{teacherInsights.length === 1 ? "" : "s"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {teacherInsights.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-6 text-center">Not enough data yet for meaningful insights.</p>
+              ) : teacherInsights.map((ins, i) => {
+                const styles: Record<string, string> = {
+                  success: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-200",
+                  warning: "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-200",
+                  danger: "bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-200",
+                  info: "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900 text-blue-800 dark:text-blue-200",
+                };
+                const Icon = ins.icon;
+                return (
+                  <div key={i} className={`flex items-start gap-3 p-3 rounded-xl border ${styles[ins.type]}`}>
+                    <Icon className="h-4 w-4 mt-0.5 shrink-0" />
+                    <p className="text-sm leading-relaxed">{ins.text}</p>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* SECTION 2: Question Wise Analysis */}
         <TabsContent value="questions" className="space-y-3 mt-4">
           <Card>
-            <CardHeader className="pb-3 flex flex-row items-center justify-between gap-3 flex-wrap">
-              <div>
-                <CardTitle className="text-base">Question Wise Analysis</CardTitle>
-                <CardDescription>Click any question to see full option-level breakdown</CardDescription>
+            <CardHeader className="pb-3 gap-3">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                  <CardTitle className="text-base">Question Wise Analysis</CardTitle>
+                  <CardDescription>Click any question to see full option-level breakdown</CardDescription>
+                </div>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input value={qSearch} onChange={e => setQSearch(e.target.value)} placeholder="Search questions" className="pl-8 h-9 w-52" />
+                </div>
               </div>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                <Input value={qSearch} onChange={e => setQSearch(e.target.value)} placeholder="Search questions" className="pl-8 h-9 w-52" />
+              <div className="flex flex-wrap gap-2 items-center pt-1">
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Filters:</span>
+                <select
+                  value={topicFilter}
+                  onChange={e => setTopicFilter(e.target.value)}
+                  className="h-8 px-2 rounded-md border bg-background text-xs"
+                >
+                  <option value="all">All topics</option>
+                  {availableTopics.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+                <div className="flex gap-1 p-0.5 bg-muted rounded-md">
+                  {(["all", "Easy", "Medium", "Difficult", "Critical"] as const).map(d => (
+                    <button
+                      key={d}
+                      onClick={() => setDifficultyFilter(d)}
+                      className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                        difficultyFilter === d ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >{d === "all" ? "All" : d}</button>
+                  ))}
+                </div>
+                {(topicFilter !== "all" || difficultyFilter !== "all") && (
+                  <Button variant="ghost" size="sm" className="h-7 text-xs"
+                    onClick={() => { setTopicFilter("all"); setDifficultyFilter("all"); }}
+                  >Clear</Button>
+                )}
+                <span className="text-[11px] text-muted-foreground ml-auto">
+                  Showing {filteredQuestions.length} of {questionRows.length}
+                </span>
               </div>
             </CardHeader>
+
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <Table>
@@ -641,14 +844,38 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
         {/* SECTION 7: Leaderboard */}
         <TabsContent value="leaderboard" className="mt-4">
           <Card>
-            <CardHeader className="pb-3 flex flex-row items-center justify-between flex-wrap gap-3">
-              <div>
-                <CardTitle className="text-base">Leaderboard</CardTitle>
-                <CardDescription>Rankings with trend vs previous tests</CardDescription>
+            <CardHeader className="pb-3 gap-3">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <CardTitle className="text-base">Leaderboard</CardTitle>
+                  <CardDescription>Rankings with trend vs previous tests • Download parent-friendly PDF per student</CardDescription>
+                </div>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input value={studentSearch} onChange={e => setStudentSearch(e.target.value)} placeholder="Search student" className="pl-8 h-9 w-52" />
+                </div>
               </div>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                <Input value={studentSearch} onChange={e => setStudentSearch(e.target.value)} placeholder="Search student" className="pl-8 h-9 w-52" />
+              <div className="flex flex-wrap gap-2 items-center pt-1">
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Score band:</span>
+                <div className="flex gap-1 p-0.5 bg-muted rounded-md">
+                  {([
+                    { k: "all", label: "All" },
+                    { k: "top", label: "Top (75%+)" },
+                    { k: "mid", label: "Mid (40–75%)" },
+                    { k: "low", label: "Low (<40%)" },
+                  ] as const).map(b => (
+                    <button
+                      key={b.k}
+                      onClick={() => setBandFilter(b.k as any)}
+                      className={`px-2 py-1 rounded text-[11px] font-medium transition-colors ${
+                        bandFilter === b.k ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >{b.label}</button>
+                  ))}
+                </div>
+                <span className="text-[11px] text-muted-foreground ml-auto">
+                  Showing {filteredStudents.length} of {studentRows.length}
+                </span>
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -663,10 +890,11 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
                       <TableHead className="text-center">Accuracy</TableHead>
                       <TableHead className="text-center">Time</TableHead>
                       <TableHead className="text-center">Improvement</TableHead>
+                      <TableHead className="text-right">Report</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredStudents.map((s, i) => {
+                    {filteredStudents.map((s) => {
                       const originalRank = studentRows.findIndex(x => x.userId === s.userId) + 1;
                       const attempted = s.correct + s.wrong;
                       const acc = attempted > 0 ? (s.correct / attempted) * 100 : 0;
@@ -692,6 +920,17 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
                                 {s.improvement > 0 ? "▲" : s.improvement < 0 ? "▼" : "•"} {Math.abs(s.improvement).toFixed(1)}%
                               </span>}
                           </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7"
+                              onClick={() => handleParentPdf(s)}
+                              title="Download parent report"
+                            >
+                              <FileDown className="h-3.5 w-3.5 mr-1" />PDF
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       );
                     })}
@@ -699,6 +938,7 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
                 </Table>
               </div>
             </CardContent>
+
           </Card>
         </TabsContent>
       </Tabs>
