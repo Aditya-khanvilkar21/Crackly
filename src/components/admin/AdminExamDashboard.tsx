@@ -133,14 +133,6 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
         </motion.div>
       )}
 
-      {viewMode === 'chapters' && (
-        <motion.div
-          key="chapters"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-        >
-          <AdminChapterAnalytics
       {viewMode === 'insights' && (
         <motion.div
           key="insights"
@@ -155,6 +147,7 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
           />
         </motion.div>
       )}
+
 
       {viewMode === 'chapters' && (
         <motion.div
