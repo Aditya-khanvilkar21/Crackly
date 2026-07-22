@@ -537,11 +537,15 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
       <Tabs value={tab} onValueChange={setTab}>
         <div className="overflow-x-auto -mx-1 px-1">
           <TabsList className="inline-flex w-max">
+            <TabsTrigger value="insights" className="text-xs md:text-sm">
+              <Lightbulb className="h-3.5 w-3.5 mr-1" />AI Insights
+            </TabsTrigger>
             <TabsTrigger value="questions" className="text-xs md:text-sm">Question Analysis</TabsTrigger>
             <TabsTrigger value="topics" className="text-xs md:text-sm">Weak Topics</TabsTrigger>
             <TabsTrigger value="attention" className="text-xs md:text-sm">Needs Attention</TabsTrigger>
             <TabsTrigger value="distribution" className="text-xs md:text-sm">Distribution</TabsTrigger>
             <TabsTrigger value="leaderboard" className="text-xs md:text-sm">Leaderboard</TabsTrigger>
+
           </TabsList>
         </div>
 
