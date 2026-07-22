@@ -316,14 +316,138 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
     return bins;
   }, [studentRows]);
 
-  const filteredQuestions = questionRows.filter(q =>
-    !qSearch || q.question.toLowerCase().includes(qSearch.toLowerCase()) || String(q.qNo).includes(qSearch)
-  );
-  const filteredStudents = studentRows.filter(s =>
-    !studentSearch ||
-    s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
-    s.studentId.toLowerCase().includes(studentSearch.toLowerCase())
-  );
+  const filteredQuestions = questionRows.filter(q => {
+    if (qSearch && !q.question.toLowerCase().includes(qSearch.toLowerCase()) && !String(q.qNo).includes(qSearch)) return false;
+    if (topicFilter !== "all" && q.topic !== topicFilter) return false;
+    if (difficultyFilter !== "all" && diffOf(q.accuracy).label !== difficultyFilter) return false;
+    return true;
+  });
+  const filteredStudents = studentRows.filter(s => {
+    if (studentSearch &&
+      !s.name.toLowerCase().includes(studentSearch.toLowerCase()) &&
+      !s.studentId.toLowerCase().includes(studentSearch.toLowerCase())) return false;
+    if (bandFilter === "top" && s.percentage < 75) return false;
+    if (bandFilter === "mid" && (s.percentage < 40 || s.percentage >= 75)) return false;
+    if (bandFilter === "low" && s.percentage >= 40) return false;
+    return true;
+  });
+
+  // ---- Rule-based Teacher Insights ----
+  const teacherInsights = useMemo(() => {
+    const out: { icon: any; type: "success" | "warning" | "danger" | "info"; text: string; priority: number }[] = [];
+    if (studentRows.length === 0) return out;
+
+    // Weak topics
+    weakTopics.slice(0, 3).forEach(t => out.push({
+      icon: AlertTriangle, type: "danger", priority: 1,
+      text: `Revise "${t.topic}" — class accuracy only ${t.accuracy.toFixed(0)}%. Consider a dedicated recap session.`,
+    }));
+    // Strong topics
+    if (strongTopics.length) out.push({
+      icon: CheckCircle2, type: "success", priority: 5,
+      text: `Strong areas: ${strongTopics.slice(0, 3).map(t => t.topic).join(", ")}. Maintain momentum with quick review questions.`,
+    });
+    // Problematic questions
+    if (problematic.length >= 3) out.push({
+      icon: Lightbulb, type: "warning", priority: 2,
+      text: `${problematic.length} questions had <50% accuracy. Discuss questions ${problematic.map(q => `Q${q.qNo}`).join(", ")} in the next lecture.`,
+    });
+    // Low performers
+    const low = studentRows.filter(s => s.percentage < 40);
+    if (low.length) out.push({
+      icon: AlertTriangle, type: "danger", priority: 1,
+      text: `${low.length} student${low.length > 1 ? "s" : ""} scored below 40%. Schedule one-on-one support.`,
+    });
+    // Declining
+    const declining = studentRows.filter(s => s.trend === "down");
+    if (declining.length >= Math.max(3, Math.ceil(studentRows.length * 0.3))) out.push({
+      icon: TrendingDown, type: "warning", priority: 2,
+      text: `${declining.length} students are trending down vs their previous tests. Watch for burnout or gaps.`,
+    });
+    // Improving
+    const improving = studentRows.filter(s => s.trend === "up");
+    if (improving.length >= Math.ceil(studentRows.length * 0.5)) out.push({
+      icon: TrendingUp, type: "success", priority: 3,
+      text: `${improving.length} of ${studentRows.length} students improved vs their previous average — teaching impact is visible.`,
+    });
+    // Attendance
+    if (attendance < 60 && totalStudents > 0) out.push({
+      icon: Users, type: "warning", priority: 4,
+      text: `Only ${attendance.toFixed(0)}% attendance (${appeared}/${totalStudents}). Follow up with absentees.`,
+    });
+    // Average difficulty
+    if (avgScore < 40) out.push({
+      icon: AlertTriangle, type: "danger", priority: 1,
+      text: `Class average is only ${avgScore.toFixed(0)}%. This test may be too tough — consider recap before moving on.`,
+    });
+    else if (avgScore >= 75) out.push({
+      icon: Trophy, type: "success", priority: 3,
+      text: `Class average is ${avgScore.toFixed(0)}%. Great work — consider raising difficulty next time.`,
+    });
+    // Negative marking hits
+    const negHeavy = questionRows.filter(q => q.negativeMarkingCount >= Math.ceil(appeared * 0.4));
+    if (negHeavy.length) out.push({
+      icon: Target, type: "info", priority: 4,
+      text: `${negHeavy.length} questions saw high negative marking — reinforce "skip if unsure" strategy.`,
+    });
+    return out.sort((a, b) => a.priority - b.priority);
+  }, [studentRows, weakTopics, strongTopics, problematic, attendance, totalStudents, appeared, avgScore, questionRows]);
+
+  const availableTopics = useMemo(() => Array.from(new Set(questionRows.map(q => q.topic))), [questionRows]);
+
+  const handleParentPdf = (s: StudentRow) => {
+    try {
+      const questions: any[] = (test?.questions as any) || [];
+      // Subject breakdown from stored per-question subjects (if any)
+      const subjMap = new Map<string, { correct: number; total: number }>();
+      const results = studentRows.find(x => x.userId === s.userId);
+      questions.forEach((q) => {
+        const subj = q.subject || test?.subject || "General";
+        const cur = subjMap.get(subj) || { correct: 0, total: 0 };
+        cur.total++;
+        subjMap.set(subj, cur);
+      });
+      const subjectBreakdown = Array.from(subjMap.entries()).map(([subject, v]) => ({
+        subject, correct: 0, total: v.total, percentage: 0,
+      }));
+      const timeMin = Math.floor(s.timeTaken / 60);
+      const timeSec = Math.round(s.timeTaken % 60);
+      downloadParentReport({
+        studentName: s.name,
+        studentId: s.studentId,
+        testTitle: test.title,
+        examType: test.exam_type,
+        testType: test.test_type,
+        subject: test.subject,
+        chapter: test.chapter,
+        completedAt: new Date().toLocaleDateString(),
+        score: s.score,
+        totalQuestions: s.totalQuestions,
+        percentage: s.percentage,
+        rank: studentRows.findIndex(x => x.userId === s.userId) + 1,
+        totalStudents: studentRows.length,
+        timeTaken: timeMin > 0 ? `${timeMin}m ${timeSec}s` : `${timeSec}s`,
+        correct: s.correct,
+        wrong: s.wrong,
+        skipped: s.skipped,
+        classAverage: avgScore,
+        highestScore: highest,
+        previousAverage: s.previousAvg,
+        improvement: s.improvement,
+        subjectBreakdown,
+        strongTopics: strongTopics.map(t => t.topic),
+        weakTopics: weakTopics.map(t => t.topic),
+        teacherRemark:
+          s.percentage >= 75 ? "Consistent, strong performance. Keep building on advanced problems."
+          : s.percentage >= 50 ? "Good foundation. Focus on the highlighted weak areas to push higher."
+          : "Needs structured revision on weak areas. Recommended: daily practice + concept recap.",
+      });
+      toast({ title: "Parent report downloaded", description: `${s.name}'s report has been saved.` });
+    } catch (e) {
+      toast({ title: "Download failed", description: "Please try again.", variant: "destructive" });
+    }
+  };
+
 
   if (loading) {
     return (
