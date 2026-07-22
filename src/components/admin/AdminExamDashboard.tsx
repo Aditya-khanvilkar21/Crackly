@@ -2,15 +2,16 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, FileText, MessageSquare, ChevronRight, Trophy, ClipboardList } from "lucide-react";
+import { ArrowLeft, BookOpen, FileText, MessageSquare, ChevronRight, Trophy, ClipboardList, Sparkles } from "lucide-react";
 import { AdminChapterAnalytics } from "@/components/analytics/AdminChapterAnalytics";
 import { ExamMockAnalytics } from "@/components/analytics/ExamMockAnalytics";
 import { PostTestDiscussion } from "@/components/admin/PostTestDiscussion";
 import { MockTestLeaderboard } from "@/components/analytics/MockTestLeaderboard";
 import { ChapterTestReview } from "@/components/analytics/ChapterTestReview";
+import { AdminTestPicker } from "@/components/analytics/AdminTestPicker";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
-type ViewMode = 'menu' | 'chapters' | 'mocks' | 'discussion' | 'leaderboard' | 'chapter-review';
+type ViewMode = 'menu' | 'insights' | 'chapters' | 'mocks' | 'discussion' | 'leaderboard' | 'chapter-review';
 
 interface AdminExamDashboardProps {
   examType: ExamType;
@@ -32,6 +33,13 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
   const gradient = getExamGradient(examType);
 
   const menuItems = [
+    {
+      id: 'insights',
+      title: 'Test Insights',
+      description: 'Premium per-test dashboard: question analysis, weak topics, students needing help',
+      icon: Sparkles,
+      featured: true,
+    },
     {
       id: 'chapter-review',
       title: 'Chapter Test Review',
@@ -95,7 +103,11 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
                   transition={{ delay: index * 0.1 }}
                 >
                   <Card
-                    className="cursor-pointer hover:shadow-md active:scale-[0.98] transition-all"
+                    className={`cursor-pointer active:scale-[0.98] transition-all ${
+                      (item as any).featured
+                        ? `border-primary/40 shadow-md hover:shadow-lg ring-1 ring-primary/10 bg-gradient-to-br ${gradient} bg-opacity-5`
+                        : "hover:shadow-md"
+                    }`}
                     onClick={() => setViewMode(item.id as ViewMode)}
                   >
                     <CardContent className="p-4 flex items-center gap-4">
@@ -103,7 +115,12 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
                         <Icon className="h-5 w-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold">{item.title}</h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold">{item.title}</h3>
+                          {(item as any).featured && (
+                            <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/15 text-primary">New</span>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground">{item.description}</p>
                       </div>
                       <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -115,6 +132,22 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
           </div>
         </motion.div>
       )}
+
+      {viewMode === 'insights' && (
+        <motion.div
+          key="insights"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+        >
+          <AdminTestPicker
+            examType={examType}
+            userRole={userRole}
+            onBack={() => setViewMode('menu')}
+          />
+        </motion.div>
+      )}
+
 
       {viewMode === 'chapters' && (
         <motion.div
