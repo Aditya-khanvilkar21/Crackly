@@ -18,10 +18,7 @@ export const LatexRenderer = ({ content, className = "", displayMode = false }: 
     if (!content) return "";
 
     const escapeHtml = (s: string) =>
-      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-    const trustFn = (ctx: { command: string; url?: string }) =>
-      ctx.command !== "\\href" || !(ctx.url || "").toLowerCase().startsWith("javascript:");
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
     try {
       const parts = content.split(/(\$\$[\s\S]*?\$\$|\$[^$]*?\$)/g);
@@ -34,7 +31,8 @@ export const LatexRenderer = ({ content, className = "", displayMode = false }: 
               return katex.renderToString(latex, {
                 displayMode: true,
                 throwOnError: false,
-                trust: trustFn,
+                trust: false,
+                strict: "ignore",
               });
             } catch {
               return `<span class="text-destructive">${escapeHtml(part)}</span>`;
@@ -46,7 +44,8 @@ export const LatexRenderer = ({ content, className = "", displayMode = false }: 
               return katex.renderToString(latex, {
                 displayMode: false,
                 throwOnError: false,
-                trust: trustFn,
+                trust: false,
+                strict: "ignore",
               });
             } catch {
               return `<span class="text-destructive">${escapeHtml(part)}</span>`;
