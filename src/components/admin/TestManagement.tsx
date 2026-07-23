@@ -351,7 +351,7 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
                       <div className={`w-1 h-6 bg-${getExamColor(selectedExamType)}-500 rounded-full`}></div>
                       {selectedExamType} Chapter Tests
                     </h3>
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                       {(selectedExamType === 'JEE'
                         ? ['physics', 'chemistry', 'mathematics']
                         : selectedExamType === 'NEET'
@@ -361,18 +361,46 @@ export const TestManagement = ({ userRole }: TestManagementProps) => {
                         const subjectTests = chapterTests.filter(
                           (t) => (t.subject || '').toLowerCase() === subject
                         );
+                        // Group by chapter
+                        const byChapter = subjectTests.reduce((acc, t) => {
+                          const ch = (t.chapter || 'General').trim() || 'General';
+                          (acc[ch] = acc[ch] || []).push(t);
+                          return acc;
+                        }, {} as Record<string, Test[]>);
+                        const chapterNames = Object.keys(byChapter).sort((a, b) => a.localeCompare(b));
+                        const color = getExamColor(selectedExamType);
                         return (
-                          <div key={subject}>
-                            <h4 className="text-base font-semibold mb-3 capitalize text-muted-foreground">
-                              {subject} ({subjectTests.length})
-                            </h4>
+                          <div key={subject} className="rounded-xl border bg-card/40 overflow-hidden">
+                            <div className={`flex items-center justify-between px-4 py-3 bg-${color}-500/5 border-b`}>
+                              <div className="flex items-center gap-2">
+                                <div className={`w-1.5 h-5 bg-${color}-500 rounded-full`} />
+                                <h4 className="text-base font-semibold capitalize">{subject}</h4>
+                              </div>
+                              <Badge variant="secondary" className="text-xs">
+                                {subjectTests.length} test{subjectTests.length === 1 ? '' : 's'}
+                              </Badge>
+                            </div>
+
                             {subjectTests.length === 0 ? (
-                              <p className="text-sm text-muted-foreground italic py-3 px-4 border border-dashed rounded-md">
+                              <p className="text-sm text-muted-foreground italic py-6 px-4 text-center">
                                 No {subject} tests {userRole === "super_admin" ? "created" : "available"} yet.
                               </p>
                             ) : (
-                              <div className="grid gap-4 md:grid-cols-2">
-                                {subjectTests.map((test) => renderTestCard(test, userRole === "admin"))}
+                              <div className="p-4 space-y-5">
+                                {chapterNames.map((chapter) => (
+                                  <div key={chapter}>
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <BookOpen className={`h-4 w-4 text-${color}-600`} />
+                                      <h5 className="text-sm font-semibold">{chapter}</h5>
+                                      <span className="text-xs text-muted-foreground">
+                                        · {byChapter[chapter].length} test{byChapter[chapter].length === 1 ? '' : 's'}
+                                      </span>
+                                    </div>
+                                    <div className="grid gap-3 md:grid-cols-2">
+                                      {byChapter[chapter].map((test) => renderTestCard(test, userRole === "admin"))}
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             )}
                           </div>
