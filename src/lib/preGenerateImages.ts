@@ -22,10 +22,7 @@ function renderLatexToHtml(content: string): string {
   if (!content) return "";
 
   const escapeHtml = (s: string) =>
-    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-  const trustFn = (ctx: { command: string; url?: string }) =>
-    ctx.command !== "\\href" || !(ctx.url || "").toLowerCase().startsWith("javascript:");
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
   const parts = content.split(/(\$\$[\s\S]*?\$\$|\$[^$]*?\$)/g);
 
@@ -34,13 +31,13 @@ function renderLatexToHtml(content: string): string {
       if (part.startsWith("$$") && part.endsWith("$$")) {
         const latex = part.slice(2, -2).trim();
         try {
-          return katex.renderToString(latex, { displayMode: true, throwOnError: false, trust: trustFn });
+          return katex.renderToString(latex, { displayMode: true, throwOnError: false, trust: false, strict: "ignore" });
         } catch { return escapeHtml(part); }
       }
       if (part.startsWith("$") && part.endsWith("$") && part.length > 1) {
         const latex = part.slice(1, -1).trim();
         try {
-          return katex.renderToString(latex, { displayMode: false, throwOnError: false, trust: trustFn });
+          return katex.renderToString(latex, { displayMode: false, throwOnError: false, trust: false, strict: "ignore" });
         } catch { return escapeHtml(part); }
       }
       return escapeHtml(part);
