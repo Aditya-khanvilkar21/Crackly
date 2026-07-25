@@ -57,6 +57,8 @@ interface StudentRow {
   previousAvg: number | null;
   trend: "up" | "down" | "flat";
   improvement: number | null;
+  answers: Record<string, number>;
+  completedAt: string | null;
 }
 
 const fmtTime = (sec: number) => {
@@ -166,13 +168,13 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
           .in("student_id", studentIds)
           .neq("test_id", testId)
           .order("completed_at", { ascending: false })
-          .limit(500);
+          .limit(1000);
 
-        const prevMap = new Map<string, number[]>();
+        const prevMap = new Map<string, { pct: number; completedAt: string }[]>();
         (prevResults || []).forEach(r => {
           const pct = (r.score / Math.max(1, r.total_questions)) * 100;
           const arr = prevMap.get(r.student_id) || [];
-          if (arr.length < 3) arr.push(pct);
+          arr.push({ pct, completedAt: r.completed_at as unknown as string });
           prevMap.set(r.student_id, arr);
         });
 
@@ -232,7 +234,15 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
 
           const profile = pmap.get(r.student_id);
           const prevArr = prevMap.get(r.student_id) || [];
-          const prevAvg = prevArr.length ? prevArr.reduce((a, b) => a + b, 0) / prevArr.length : null;
+          const currentCompleted = (r as any).completed_at as string | null;
+          // Only use previous tests that finished BEFORE this student's completion of the current test.
+          const priorPcts = (currentCompleted
+            ? prevArr.filter(x => x.completedAt && x.completedAt < currentCompleted)
+            : prevArr
+          )
+            .slice(0, 3)
+            .map(x => x.pct);
+          const prevAvg = priorPcts.length ? priorPcts.reduce((a, b) => a + b, 0) / priorPcts.length : null;
           const pct = (r.score / Math.max(1, r.total_questions)) * 100;
           const improvement = prevAvg !== null ? pct - prevAvg : null;
 
@@ -248,6 +258,8 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
             previousAvg: prevAvg,
             trend: improvement === null ? "flat" : improvement > 3 ? "up" : improvement < -3 ? "down" : "flat",
             improvement,
+            answers,
+            completedAt: currentCompleted,
           });
         });
 
@@ -398,20 +410,29 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
   const handleParentPdf = (s: StudentRow) => {
     try {
       const questions: any[] = (test?.questions as any) || [];
-      // Subject breakdown from stored per-question subjects (if any)
       const subjMap = new Map<string, { correct: number; total: number }>();
-      const results = studentRows.find(x => x.userId === s.userId);
-      questions.forEach((q) => {
+      const answers = s.answers || {};
+      questions.forEach((q, idx) => {
         const subj = q.subject || test?.subject || "General";
         const cur = subjMap.get(subj) || { correct: 0, total: 0 };
         cur.total++;
+        const chosen = (answers as any)[idx] ?? (answers as any)[String(idx)];
+        if (chosen !== undefined && chosen !== null && chosen !== -1 && chosen === q.correctAnswer) {
+          cur.correct++;
+        }
         subjMap.set(subj, cur);
       });
       const subjectBreakdown = Array.from(subjMap.entries()).map(([subject, v]) => ({
-        subject, correct: 0, total: v.total, percentage: 0,
+        subject,
+        correct: v.correct,
+        total: v.total,
+        percentage: v.total > 0 ? (v.correct / v.total) * 100 : 0,
       }));
       const timeMin = Math.floor(s.timeTaken / 60);
       const timeSec = Math.round(s.timeTaken % 60);
+      const completedDate = s.completedAt
+        ? new Date(s.completedAt).toLocaleDateString()
+        : new Date().toLocaleDateString();
       downloadParentReport({
         studentName: s.name,
         studentId: s.studentId,
@@ -420,7 +441,7 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
         testType: test.test_type,
         subject: test.subject,
         chapter: test.chapter,
-        completedAt: new Date().toLocaleDateString(),
+        completedAt: completedDate,
         score: s.score,
         totalQuestions: s.totalQuestions,
         percentage: s.percentage,
