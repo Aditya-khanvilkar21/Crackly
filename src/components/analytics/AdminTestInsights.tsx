@@ -57,6 +57,8 @@ interface StudentRow {
   previousAvg: number | null;
   trend: "up" | "down" | "flat";
   improvement: number | null;
+  answers: Record<string, number>;
+  completedAt: string | null;
 }
 
 const fmtTime = (sec: number) => {
