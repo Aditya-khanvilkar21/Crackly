@@ -234,7 +234,15 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
 
           const profile = pmap.get(r.student_id);
           const prevArr = prevMap.get(r.student_id) || [];
-          const prevAvg = prevArr.length ? prevArr.reduce((a, b) => a + b, 0) / prevArr.length : null;
+          const currentCompleted = (r as any).completed_at as string | null;
+          // Only use previous tests that finished BEFORE this student's completion of the current test.
+          const priorPcts = (currentCompleted
+            ? prevArr.filter(x => x.completedAt && x.completedAt < currentCompleted)
+            : prevArr
+          )
+            .slice(0, 3)
+            .map(x => x.pct);
+          const prevAvg = priorPcts.length ? priorPcts.reduce((a, b) => a + b, 0) / priorPcts.length : null;
           const pct = (r.score / Math.max(1, r.total_questions)) * 100;
           const improvement = prevAvg !== null ? pct - prevAvg : null;
 
@@ -250,6 +258,8 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
             previousAvg: prevAvg,
             trend: improvement === null ? "flat" : improvement > 3 ? "up" : improvement < -3 ? "down" : "flat",
             improvement,
+            answers,
+            completedAt: currentCompleted,
           });
         });
 
