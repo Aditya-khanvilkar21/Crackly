@@ -168,13 +168,13 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
           .in("student_id", studentIds)
           .neq("test_id", testId)
           .order("completed_at", { ascending: false })
-          .limit(500);
+          .limit(1000);
 
-        const prevMap = new Map<string, number[]>();
+        const prevMap = new Map<string, { pct: number; completedAt: string }[]>();
         (prevResults || []).forEach(r => {
           const pct = (r.score / Math.max(1, r.total_questions)) * 100;
           const arr = prevMap.get(r.student_id) || [];
-          if (arr.length < 3) arr.push(pct);
+          arr.push({ pct, completedAt: r.completed_at as unknown as string });
           prevMap.set(r.student_id, arr);
         });
 
