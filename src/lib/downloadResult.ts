@@ -30,6 +30,9 @@ interface ResultData {
   }[];
   weakTopics?: string[];
   questions?: QuestionSummary[];
+  className?: string;
+  classAddress?: string;
+  classLogoDataUrl?: string;
 }
 
 // Strip LaTeX/markdown noise so PDF text is readable
@@ -65,16 +68,29 @@ export const downloadResultAsPDF = (data: ResultData) => {
   // Header band
   doc.setFillColor(255, 106, 0);
   doc.rect(0, 0, pageWidth, 32, 'F');
+
+  // Class logo (left) if provided
+  if (data.classLogoDataUrl) {
+    try {
+      doc.addImage(data.classLogoDataUrl, 'PNG', 8, 4, 24, 24);
+    } catch {}
+  }
+
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(20);
+  doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text('Crackly Test Report', pageWidth / 2, 14, { align: 'center' });
-  doc.setFontSize(11);
+  const headerTitle = data.className || 'Crackly Test Report';
+  doc.text(headerTitle, pageWidth / 2, 14, { align: 'center' });
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
+  if (data.classAddress) {
+    doc.text(data.classAddress.slice(0, 90), pageWidth / 2, 21, { align: 'center' });
+  }
+  doc.setFontSize(9);
   doc.text(
     data.testType === 'mock_test' ? 'Mock Test Performance Report' : 'Chapter Test Performance Report',
     pageWidth / 2,
-    24,
+    data.classAddress ? 28 : 24,
     { align: 'center' }
   );
 

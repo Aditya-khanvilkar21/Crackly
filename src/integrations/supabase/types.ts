@@ -405,26 +405,32 @@ export type Database = {
       }
       tuition_classes: {
         Row: {
+          address: string | null
           admin_id: string
           created_at: string
           id: string
           is_disabled: boolean | null
+          logo_url: string | null
           name: string
           updated_at: string
         }
         Insert: {
+          address?: string | null
           admin_id: string
           created_at?: string
           id?: string
           is_disabled?: boolean | null
+          logo_url?: string | null
           name: string
           updated_at?: string
         }
         Update: {
+          address?: string | null
           admin_id?: string
           created_at?: string
           id?: string
           is_disabled?: boolean | null
+          logo_url?: string | null
           name?: string
           updated_at?: string
         }
