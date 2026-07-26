@@ -112,7 +112,11 @@ export const ClassManagement = ({ userRole }: ClassManagementProps) => {
     try {
       const { error } = await supabase
         .from("tuition_classes")
-        .update({ name: editingClass.name })
+        .update({
+          name: editingClass.name,
+          address: editingClass.address ?? null,
+          logo_url: editingClass.logo_url ?? null,
+        })
         .eq("id", editingClass.id);
 
       if (error) throw error;
@@ -131,6 +135,22 @@ export const ClassManagement = ({ userRole }: ClassManagementProps) => {
         description: error.message,
         variant: "destructive",
       });
+    }
+  };
+
+  const handleLogoUpload = async (file: File) => {
+    if (!editingClass) return;
+    try {
+      const ext = file.name.split('.').pop() || 'png';
+      const path = `${editingClass.id}/logo-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('class-logos')
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      setEditingClass({ ...editingClass, logo_url: path });
+      toast({ title: "Logo uploaded", description: "Click Update to save." });
+    } catch (error: any) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
     }
   };
 
