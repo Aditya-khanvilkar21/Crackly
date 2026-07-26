@@ -30,6 +30,9 @@ interface ResultData {
   }[];
   weakTopics?: string[];
   questions?: QuestionSummary[];
+  className?: string;
+  classAddress?: string;
+  classLogoDataUrl?: string;
 }
 
 // Strip LaTeX/markdown noise so PDF text is readable
