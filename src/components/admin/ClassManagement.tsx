@@ -16,6 +16,8 @@ interface TuitionClass {
   created_at: string;
   student_count?: number;
   is_disabled?: boolean;
+  address?: string | null;
+  logo_url?: string | null;
 }
 
 interface ClassManagementProps {
