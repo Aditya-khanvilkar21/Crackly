@@ -341,8 +341,10 @@ export const ClassManagement = ({ userRole }: ClassManagementProps) => {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Class</DialogTitle>
-            <DialogDescription>Update the class name</DialogDescription>
+            <DialogTitle>Edit Class Profile</DialogTitle>
+            <DialogDescription>
+              Update class name, address and logo. These appear on students' result PDFs.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -356,6 +358,36 @@ export const ClassManagement = ({ userRole }: ClassManagementProps) => {
                   )
                 }
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="editClassAddress">Address</Label>
+              <Input
+                id="editClassAddress"
+                placeholder="e.g., 123 Main Street, City, State"
+                value={editingClass?.address || ""}
+                onChange={(e) =>
+                  setEditingClass(
+                    editingClass ? { ...editingClass, address: e.target.value } : null
+                  )
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="editClassLogo">Logo</Label>
+              <Input
+                id="editClassLogo"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleLogoUpload(f);
+                }}
+              />
+              {editingClass?.logo_url && (
+                <p className="text-xs text-muted-foreground truncate">
+                  Current: {editingClass.logo_url}
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>
