@@ -430,6 +430,10 @@ export default function StudentProfile() {
             </Card>
           )}
           </TabsContent>
+
+          <TabsContent value="security" className="space-y-6">
+            <ChangePasswordCard />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
