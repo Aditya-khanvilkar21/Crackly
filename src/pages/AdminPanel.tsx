@@ -23,7 +23,8 @@ import {
   LogOut,
   ChevronRight,
   UserPlus,
-  CalendarClock
+  CalendarClock,
+  UserCircle
 } from "lucide-react";
 import logo from "@/assets/logo.webp";
 import { SeoHead } from "@/components/SeoHead";
@@ -187,6 +188,10 @@ const AdminPanel = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => navigate("/admin-profile")}>
+                    <UserCircle className="h-4 w-4 mr-2" />
+                    My Profile
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/")}>
                     Home
                   </DropdownMenuItem>

@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { User, ArrowLeft, Save, Send, BookOpen } from "lucide-react";
+import { User, ArrowLeft, Save, Send, BookOpen, KeyRound } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SeoHead } from "@/components/SeoHead";
+import { ChangePasswordCard } from "@/components/ChangePasswordCard";
 
 interface Profile {
   id: string;
@@ -179,7 +180,7 @@ export default function StudentProfile() {
         </h1>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="profile">
               <User className="w-4 h-4 mr-2" />
               Profile
@@ -187,6 +188,10 @@ export default function StudentProfile() {
             <TabsTrigger value="classes">
               <BookOpen className="w-4 h-4 mr-2" />
               Classes
+            </TabsTrigger>
+            <TabsTrigger value="security">
+              <KeyRound className="w-4 h-4 mr-2" />
+              Password
             </TabsTrigger>
           </TabsList>
 
