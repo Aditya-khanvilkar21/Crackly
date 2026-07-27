@@ -11,6 +11,7 @@ import AdminPanel from "./pages/AdminPanel";
 import TakeTest from "./pages/TakeTest";
 import TestResult from "./pages/TestResult";
 import StudentProfile from "./pages/StudentProfile";
+import AdminProfile from "./pages/AdminProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
