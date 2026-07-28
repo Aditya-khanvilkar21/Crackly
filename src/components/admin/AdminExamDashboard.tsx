@@ -46,12 +46,6 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
       icon: ClipboardList,
     },
     {
-      id: 'chapters',
-      title: 'Chapter Analytics',
-      description: 'Subject-wise chapter test analysis with student rankings',
-      icon: BookOpen,
-    },
-    {
       id: 'mocks',
       title: 'Mock Test Analytics',
       description: 'Full mock test performance with subject breakdown',
