@@ -7,7 +7,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowLeft, Users, Award, Target, ChevronRight, CheckCircle2, XCircle, BookOpen, Download, FileSpreadsheet } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "sonner";
@@ -363,14 +362,17 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
   // Student Detail View
   if (selectedStudent && selectedTest) {
     const questions = selectedTest.questions;
-    const annotated = questions.map((q, idx) => ({
-      ...q,
-      index: idx,
-      studentAnswer: selectedStudent.answers[idx.toString()],
-    }));
-    const correctAnswers = annotated.filter(q => q.studentAnswer !== undefined && q.studentAnswer === q.correctAnswer);
-    const wrongAnswers = annotated.filter(q => q.studentAnswer !== undefined && q.studentAnswer !== q.correctAnswer);
-    const correctCount = correctAnswers.length;
+    const wrongAnswers = questions
+      .map((q, idx) => ({
+        ...q,
+        index: idx,
+        studentAnswer: selectedStudent.answers[idx.toString()],
+      }))
+      .filter(q => q.studentAnswer !== undefined && q.studentAnswer !== q.correctAnswer);
+
+    const correctCount = questions.filter((q, idx) => 
+      selectedStudent.answers[idx.toString()] === q.correctAnswer
+    ).length;
 
     return (
       <motion.div
@@ -421,102 +423,56 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
           </Card>
         </div>
 
-        {/* Answer Review with Tabs */}
+        {/* Wrong Answers Analysis */}
         <Card>
           <CardHeader>
-            <CardTitle>Answer Review</CardTitle>
-            <CardDescription>Review every question the student attempted</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <XCircle className="h-5 w-5 text-red-500" />
+              Incorrect Answers ({wrongAnswers.length})
+            </CardTitle>
+            <CardDescription>Questions the student answered incorrectly</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="incorrect" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="incorrect" className="gap-2">
-                  <XCircle className="h-4 w-4 text-red-500" />
-                  Incorrect ({wrongAnswers.length})
-                </TabsTrigger>
-                <TabsTrigger value="correct" className="gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  Correct ({correctAnswers.length})
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="incorrect" className="mt-4">
-                {wrongAnswers.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-500" />
-                    <p className="font-medium">Perfect Score!</p>
-                    <p className="text-sm">All answers were correct</p>
-                  </div>
-                ) : (
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-4 pr-4">
-                      {wrongAnswers.map((q, idx) => (
-                        <Card key={idx} className="border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/30">
-                          <CardContent className="p-4">
-                            <div className="flex items-start gap-3 mb-3">
-                              <Badge variant="outline" className="shrink-0">Q{q.index + 1}</Badge>
-                              <div className="text-sm font-medium"><LatexRenderer content={q.question} /></div>
+            {wrongAnswers.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-500" />
+                <p className="font-medium">Perfect Score!</p>
+                <p className="text-sm">All answers were correct</p>
+              </div>
+            ) : (
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-4 pr-4">
+                  {wrongAnswers.map((q, idx) => (
+                    <Card key={idx} className="border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/30">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3 mb-3">
+                          <Badge variant="outline" className="shrink-0">Q{q.index + 1}</Badge>
+                          <div className="text-sm font-medium"><LatexRenderer content={q.question} /></div>
+                        </div>
+                        <div className="space-y-2 ml-8">
+                          <div className="flex items-start gap-2 text-sm">
+                            <XCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
+                            <div className="text-red-600 dark:text-red-400">
+                              <span className="font-medium">Student's Answer: </span>
+                              {q.studentAnswer !== undefined && q.options[q.studentAnswer] !== undefined
+                                ? <LatexRenderer content={q.options[q.studentAnswer]} />
+                                : "Not answered"}
                             </div>
-                            <div className="space-y-2 ml-8">
-                              <div className="flex items-start gap-2 text-sm">
-                                <XCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
-                                <div className="text-red-600 dark:text-red-400">
-                                  <span className="font-medium">Student's Answer: </span>
-                                  {q.studentAnswer !== undefined && q.options[q.studentAnswer] !== undefined
-                                    ? <LatexRenderer content={q.options[q.studentAnswer]} />
-                                    : "Not answered"}
-                                </div>
-                              </div>
-                              <div className="flex items-start gap-2 text-sm">
-                                <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
-                                <div className="text-green-600 dark:text-green-400">
-                                  <span className="font-medium">Correct Answer: </span>
-                                  <LatexRenderer content={q.options[q.correctAnswer]} />
-                                </div>
-                              </div>
+                          </div>
+                          <div className="flex items-start gap-2 text-sm">
+                            <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                            <div className="text-green-600 dark:text-green-400">
+                              <span className="font-medium">Correct Answer: </span>
+                              <LatexRenderer content={q.options[q.correctAnswer]} />
                             </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                )}
-              </TabsContent>
-
-              <TabsContent value="correct" className="mt-4">
-                {correctAnswers.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <XCircle className="h-12 w-12 mx-auto mb-3 text-red-500" />
-                    <p className="font-medium">No correct answers</p>
-                    <p className="text-sm">The student did not answer any question correctly</p>
-                  </div>
-                ) : (
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-4 pr-4">
-                      {correctAnswers.map((q, idx) => (
-                        <Card key={idx} className="border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30">
-                          <CardContent className="p-4">
-                            <div className="flex items-start gap-3 mb-3">
-                              <Badge variant="outline" className="shrink-0">Q{q.index + 1}</Badge>
-                              <div className="text-sm font-medium"><LatexRenderer content={q.question} /></div>
-                            </div>
-                            <div className="space-y-2 ml-8">
-                              <div className="flex items-start gap-2 text-sm">
-                                <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
-                                <div className="text-green-600 dark:text-green-400">
-                                  <span className="font-medium">Answer: </span>
-                                  <LatexRenderer content={q.options[q.correctAnswer]} />
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                )}
-              </TabsContent>
-            </Tabs>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
           </CardContent>
         </Card>
       </motion.div>
