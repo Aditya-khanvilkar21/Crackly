@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { ExamSectionSelector } from "@/components/dashboard/ExamSectionSelector";
 import { ExamDashboard } from "@/components/dashboard/ExamDashboard";
 import { ScheduledTestsPanel } from "@/components/dashboard/ScheduledTestsPanel";
+import { MyClassesBanner } from "@/components/dashboard/MyClassesBanner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
