@@ -482,6 +482,7 @@ const Dashboard = () => {
                       <h2 className="text-xl font-bold mb-1">Select Exam</h2>
                       <p className="text-sm text-muted-foreground">Choose your exam type</p>
                     </div>
+                    <MyClassesBanner />
                     <ScheduledTestsPanel />
                     <ExamSectionSelector 
                       selectedExam={selectedExam} 
