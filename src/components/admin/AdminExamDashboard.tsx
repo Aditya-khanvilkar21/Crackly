@@ -10,7 +10,7 @@ import { ChapterTestReview } from "@/components/analytics/ChapterTestReview";
 import { AdminTestPicker } from "@/components/analytics/AdminTestPicker";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
-type ViewMode = 'menu' | 'insights' | 'chapters' | 'mocks' | 'discussion' | 'leaderboard' | 'chapter-review';
+type ViewMode = 'menu' | 'insights' | 'mocks' | 'discussion' | 'leaderboard' | 'chapter-review';
 
 interface AdminExamDashboardProps {
   examType: ExamType;
