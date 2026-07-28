@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, FileText, MessageSquare, ChevronRight, Trophy, ClipboardList, Sparkles } from "lucide-react";
-import { AdminChapterAnalytics } from "@/components/analytics/AdminChapterAnalytics";
+import { ArrowLeft, FileText, MessageSquare, ChevronRight, Trophy, ClipboardList, Sparkles } from "lucide-react";
 import { ExamMockAnalytics } from "@/components/analytics/ExamMockAnalytics";
 import { PostTestDiscussion } from "@/components/admin/PostTestDiscussion";
 import { MockTestLeaderboard } from "@/components/analytics/MockTestLeaderboard";
@@ -11,7 +10,7 @@ import { ChapterTestReview } from "@/components/analytics/ChapterTestReview";
 import { AdminTestPicker } from "@/components/analytics/AdminTestPicker";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
-type ViewMode = 'menu' | 'insights' | 'chapters' | 'mocks' | 'discussion' | 'leaderboard' | 'chapter-review';
+type ViewMode = 'menu' | 'insights' | 'mocks' | 'discussion' | 'leaderboard' | 'chapter-review';
 
 interface AdminExamDashboardProps {
   examType: ExamType;
@@ -45,12 +44,6 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
       title: 'Chapter Test Review',
       description: 'Rank-wise student analysis with question-level details',
       icon: ClipboardList,
-    },
-    {
-      id: 'chapters',
-      title: 'Chapter Analytics',
-      description: 'Subject-wise chapter test analysis with student rankings',
-      icon: BookOpen,
     },
     {
       id: 'mocks',
@@ -148,21 +141,6 @@ export const AdminExamDashboard = ({ examType, userRole, onBack }: AdminExamDash
         </motion.div>
       )}
 
-
-      {viewMode === 'chapters' && (
-        <motion.div
-          key="chapters"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-        >
-          <AdminChapterAnalytics
-            examType={examType}
-            userRole={userRole}
-            onBack={() => setViewMode('menu')}
-          />
-        </motion.div>
-      )}
 
       {viewMode === 'mocks' && (
         <motion.div
