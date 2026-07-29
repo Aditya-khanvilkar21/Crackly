@@ -360,25 +360,6 @@ export const AdminChapterAnalytics = ({ examType, userRole, onBack }: AdminChapt
                 <Download className="h-4 w-4" />
                 PDF
               </Button>
-              <Button onClick={() => {
-                downloadTestResultsAsXlsx({
-                  testTitle: selectedChapter!,
-                  examType,
-                  subject: getSubjectLabel(selectedSubject!),
-                  chapter: selectedChapter!,
-                  students: chapterStudents.map((s, idx) => ({
-                    rank: idx + 1,
-                    studentName: s.studentName,
-                    score: s.score,
-                    totalQuestions: s.totalQuestions,
-                    percentage: s.percentage,
-                  })),
-                });
-                toast.success("Excel file downloaded!");
-              }} size="sm" className="gap-2">
-                <FileSpreadsheet className="h-4 w-4" />
-                Excel
-              </Button>
             </div>
           )}
         </div>
