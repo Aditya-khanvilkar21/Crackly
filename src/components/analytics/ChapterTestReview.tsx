@@ -361,121 +361,12 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
 
   // Student Detail View
   if (selectedStudent && selectedTest) {
-    const questions = selectedTest.questions;
-    const wrongAnswers = questions
-      .map((q, idx) => ({
-        ...q,
-        index: idx,
-        studentAnswer: selectedStudent.answers[idx.toString()],
-      }))
-      .filter(q => q.studentAnswer !== undefined && q.studentAnswer !== q.correctAnswer);
-
-    const correctCount = questions.filter((q, idx) => 
-      selectedStudent.answers[idx.toString()] === q.correctAnswer
-    ).length;
-
     return (
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        className="space-y-4"
-      >
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSelectedStudent(null)}
-            className="shrink-0"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h2 className="text-xl font-bold">{selectedStudent.studentName}</h2>
-            <p className="text-sm text-muted-foreground">
-              Rank #{selectedStudent.rank} • {selectedStudent.studentCode}
-            </p>
-          </div>
-        </div>
-
-        {/* Summary */}
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
-            <CardContent className="p-4 text-center">
-              <CheckCircle2 className="h-6 w-6 mx-auto mb-2 text-green-600" />
-              <div className="text-2xl font-bold text-green-600">{correctCount}</div>
-              <p className="text-xs text-muted-foreground">Correct</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
-            <CardContent className="p-4 text-center">
-              <XCircle className="h-6 w-6 mx-auto mb-2 text-red-600" />
-              <div className="text-2xl font-bold text-red-600">{wrongAnswers.length}</div>
-              <p className="text-xs text-muted-foreground">Wrong</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-primary/10 border-primary/20">
-            <CardContent className="p-4 text-center">
-              <Target className="h-6 w-6 mx-auto mb-2 text-primary" />
-              <div className="text-2xl font-bold text-primary">{selectedStudent.percentage.toFixed(0)}%</div>
-              <p className="text-xs text-muted-foreground">Score</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Wrong Answers Analysis */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-red-500" />
-              Incorrect Answers ({wrongAnswers.length})
-            </CardTitle>
-            <CardDescription>Questions the student answered incorrectly</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {wrongAnswers.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-500" />
-                <p className="font-medium">Perfect Score!</p>
-                <p className="text-sm">All answers were correct</p>
-              </div>
-            ) : (
-              <ScrollArea className="h-[400px]">
-                <div className="space-y-4 pr-4">
-                  {wrongAnswers.map((q, idx) => (
-                    <Card key={idx} className="border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/30">
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3 mb-3">
-                          <Badge variant="outline" className="shrink-0">Q{q.index + 1}</Badge>
-                          <div className="text-sm font-medium"><LatexRenderer content={q.question} /></div>
-                        </div>
-                        <div className="space-y-2 ml-8">
-                          <div className="flex items-start gap-2 text-sm">
-                            <XCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
-                            <div className="text-red-600 dark:text-red-400">
-                              <span className="font-medium">Student's Answer: </span>
-                              {q.studentAnswer !== undefined && q.options[q.studentAnswer] !== undefined
-                                ? <LatexRenderer content={q.options[q.studentAnswer]} />
-                                : "Not answered"}
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-2 text-sm">
-                            <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
-                            <div className="text-green-600 dark:text-green-400">
-                              <span className="font-medium">Correct Answer: </span>
-                              <LatexRenderer content={q.options[q.correctAnswer]} />
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
+      <StudentDetailView
+        student={selectedStudent}
+        test={selectedTest}
+        onBack={() => setSelectedStudent(null)}
+      />
     );
   }
 
