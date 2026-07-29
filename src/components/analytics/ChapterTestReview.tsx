@@ -4,13 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Users, Award, Target, ChevronRight, CheckCircle2, XCircle, BookOpen, Download, FileSpreadsheet } from "lucide-react";
+import { ArrowLeft, Users, Award, Target, ChevronRight, CheckCircle2, XCircle, BookOpen, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast } from "sonner";
-import { downloadTestResultsAsXlsx } from "@/lib/downloadResultsXlsx";
 import { LatexRenderer } from "@/components/LatexRenderer";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
