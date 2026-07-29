@@ -753,3 +753,182 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
     </motion.div>
   );
 };
+
+type FilterMode = 'all' | 'correct' | 'incorrect' | 'unanswered';
+
+const StudentDetailView = ({
+  student,
+  test,
+  onBack,
+}: {
+  student: StudentResult;
+  test: ChapterTest;
+  onBack: () => void;
+}) => {
+  const [filter, setFilter] = useState<FilterMode>('all');
+  const questions = test.questions;
+
+  const enriched = questions.map((q, idx) => {
+    const studentAnswer = student.answers[idx.toString()];
+    const answered = studentAnswer !== undefined && studentAnswer !== null;
+    const isCorrect = answered && studentAnswer === q.correctAnswer;
+    return { ...q, index: idx, studentAnswer, answered, isCorrect };
+  });
+
+  const correctCount = enriched.filter(q => q.isCorrect).length;
+  const wrongCount = enriched.filter(q => q.answered && !q.isCorrect).length;
+  const unansweredCount = enriched.filter(q => !q.answered).length;
+
+  const filtered = enriched.filter(q => {
+    if (filter === 'correct') return q.isCorrect;
+    if (filter === 'incorrect') return q.answered && !q.isCorrect;
+    if (filter === 'unanswered') return !q.answered;
+    return true;
+  });
+
+  const filterTabs: { id: FilterMode; label: string; count: number }[] = [
+    { id: 'all', label: 'All', count: enriched.length },
+    { id: 'correct', label: 'Correct', count: correctCount },
+    { id: 'incorrect', label: 'Incorrect', count: wrongCount },
+    { id: 'unanswered', label: 'Unanswered', count: unansweredCount },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="space-y-4"
+    >
+      <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h2 className="text-xl font-bold">{student.studentName}</h2>
+          <p className="text-sm text-muted-foreground">
+            Rank #{student.rank} • {student.studentCode}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+          <CardContent className="p-4 text-center">
+            <CheckCircle2 className="h-6 w-6 mx-auto mb-2 text-green-600" />
+            <div className="text-2xl font-bold text-green-600">{correctCount}</div>
+            <p className="text-xs text-muted-foreground">Correct</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
+          <CardContent className="p-4 text-center">
+            <XCircle className="h-6 w-6 mx-auto mb-2 text-red-600" />
+            <div className="text-2xl font-bold text-red-600">{wrongCount}</div>
+            <p className="text-xs text-muted-foreground">Wrong</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-primary/10 border-primary/20">
+          <CardContent className="p-4 text-center">
+            <Target className="h-6 w-6 mx-auto mb-2 text-primary" />
+            <div className="text-2xl font-bold text-primary">{student.percentage.toFixed(0)}%</div>
+            <p className="text-xs text-muted-foreground">Score</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Question Review</CardTitle>
+          <CardDescription>Filter to review specific answers</CardDescription>
+          <div className="flex flex-wrap gap-2 pt-2">
+            {filterTabs.map(t => (
+              <Button
+                key={t.id}
+                size="sm"
+                variant={filter === t.id ? 'default' : 'outline'}
+                onClick={() => setFilter(t.id)}
+                className="h-8"
+              >
+                {t.label}
+                <Badge variant="secondary" className="ml-2 h-5 px-1.5">{t.count}</Badge>
+              </Button>
+            ))}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {filtered.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground text-sm">
+              No questions in this category.
+            </div>
+          ) : (
+            <ScrollArea className="h-[500px]">
+              <div className="space-y-3 pr-4">
+                {filtered.map(q => {
+                  const statusColor = !q.answered
+                    ? 'border-muted bg-muted/30'
+                    : q.isCorrect
+                    ? 'border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30'
+                    : 'border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/30';
+                  return (
+                    <Card key={q.index} className={statusColor}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3 mb-3">
+                          <Badge variant="outline" className="shrink-0">Q{q.index + 1}</Badge>
+                          {!q.answered ? (
+                            <Badge variant="secondary" className="shrink-0">Unanswered</Badge>
+                          ) : q.isCorrect ? (
+                            <Badge className="shrink-0 bg-green-600 hover:bg-green-600">Correct</Badge>
+                          ) : (
+                            <Badge variant="destructive" className="shrink-0">Incorrect</Badge>
+                          )}
+                          <div className="text-sm font-medium flex-1">
+                            <LatexRenderer content={q.question} />
+                          </div>
+                        </div>
+                        <div className="space-y-2 ml-2">
+                          {q.options.map((opt, oIdx) => {
+                            const isStudent = q.studentAnswer === oIdx;
+                            const isCorrectOpt = q.correctAnswer === oIdx;
+                            let cls = 'text-muted-foreground';
+                            let Icon: typeof CheckCircle2 | null = null;
+                            let iconCls = '';
+                            if (isCorrectOpt) {
+                              cls = 'text-green-700 dark:text-green-400 font-medium';
+                              Icon = CheckCircle2;
+                              iconCls = 'text-green-600';
+                            }
+                            if (isStudent && !isCorrectOpt) {
+                              cls = 'text-red-700 dark:text-red-400 font-medium';
+                              Icon = XCircle;
+                              iconCls = 'text-red-600';
+                            }
+                            return (
+                              <div key={oIdx} className="flex items-start gap-2 text-sm">
+                                {Icon ? (
+                                  <Icon className={`h-4 w-4 shrink-0 mt-0.5 ${iconCls}`} />
+                                ) : (
+                                  <span className="h-4 w-4 shrink-0" />
+                                )}
+                                <div className={cls}>
+                                  <span className="font-semibold mr-1">{String.fromCharCode(65 + oIdx)}.</span>
+                                  <LatexRenderer content={opt} />
+                                  {isStudent && (
+                                    <span className="ml-2 text-xs opacity-75">(Student's answer)</span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
