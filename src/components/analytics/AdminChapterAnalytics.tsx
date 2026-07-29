@@ -2,15 +2,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Users, TrendingUp, BookOpen, Award, Target, ChevronRight, ArrowLeft, Download, FileSpreadsheet } from "lucide-react";
-import { downloadChapterResultsAsPDF } from "@/lib/downloadChapterResults";
-import { downloadTestResultsAsXlsx } from "@/lib/downloadResultsXlsx";
+import { Users, TrendingUp, BookOpen, Award, Target, ChevronRight, ArrowLeft, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
+import { downloadChapterResultsAsPDF } from "@/lib/downloadChapterResults";
 type ExamType = 'JEE' | 'NEET' | 'CET';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
 
@@ -359,25 +358,6 @@ export const AdminChapterAnalytics = ({ examType, userRole, onBack }: AdminChapt
               <Button onClick={handleDownloadChapterResults} variant="outline" className="gap-2" size="sm">
                 <Download className="h-4 w-4" />
                 PDF
-              </Button>
-              <Button onClick={() => {
-                downloadTestResultsAsXlsx({
-                  testTitle: selectedChapter!,
-                  examType,
-                  subject: getSubjectLabel(selectedSubject!),
-                  chapter: selectedChapter!,
-                  students: chapterStudents.map((s, idx) => ({
-                    rank: idx + 1,
-                    studentName: s.studentName,
-                    score: s.score,
-                    totalQuestions: s.totalQuestions,
-                    percentage: s.percentage,
-                  })),
-                });
-                toast.success("Excel file downloaded!");
-              }} size="sm" className="gap-2">
-                <FileSpreadsheet className="h-4 w-4" />
-                Excel
               </Button>
             </div>
           )}
