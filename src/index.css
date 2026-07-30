@@ -8,107 +8,111 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* JEE-inspired professional blue theme */
+    /* Navy Trust theme */
     --background: 0 0% 100%;
-    --foreground: 215 25% 15%;
+    --foreground: 224 60% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 224 60% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 224 60% 15%;
 
-    /* Primary: Deep professional blue */
-    --primary: 217 91% 45%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 217 91% 40%;
+    /* Primary: deep navy */
+    --primary: 212 52% 25%;
+    --primary-foreground: 210 33% 97%;
+    --primary-hover: 213 55% 20%;
 
-    /* Secondary: Light blue accent */
-    --secondary: 210 100% 97%;
-    --secondary-foreground: 217 91% 45%;
+    /* Secondary: near-white navy tint */
+    --secondary: 210 33% 93%;
+    --secondary-foreground: 212 52% 25%;
 
-    /* Muted backgrounds */
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 210 33% 95%;
+    --muted-foreground: 213 20% 40%;
 
-    /* Accent: Vibrant blue */
-    --accent: 212 100% 48%;
+    /* Accent: steel blue */
+    --accent: 209 46% 43%;
     --accent-foreground: 0 0% 100%;
 
-    /* Success: Green for correct answers */
-    --success: 142 76% 36%;
+    /* Brand ember (logo accent) */
+    --brand: 25 100% 50%;
+    --brand-foreground: 0 0% 100%;
+
+    --success: 152 55% 34%;
     --success-foreground: 0 0% 100%;
 
-    /* Warning: Orange */
-    --warning: 38 92% 50%;
+    --warning: 32 92% 45%;
     --warning-foreground: 0 0% 100%;
 
-    /* Destructive: Red for errors */
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 217 91% 45%;
+    --border: 212 25% 87%;
+    --input: 212 25% 87%;
+    --ring: 209 46% 43%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 45%), hsl(212 100% 48%));
-    --gradient-hero: linear-gradient(135deg, hsl(217 91% 45%) 0%, hsl(212 100% 48%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 100% 99%));
+    --gradient-primary: linear-gradient(135deg, hsl(212 52% 25%), hsl(209 46% 43%));
+    --gradient-hero: linear-gradient(140deg, hsl(224 60% 15%) 0%, hsl(212 52% 25%) 55%, hsl(209 46% 38%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 33% 97%));
+    --gradient-ember: linear-gradient(135deg, hsl(25 100% 50%), hsl(32 100% 58%));
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    --shadow-primary: 0 10px 30px -10px hsl(217 91% 45% / 0.3);
+    --shadow-primary: 0 18px 40px -18px hsl(212 52% 25% / 0.45);
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --background: 224 60% 11%;
+    --foreground: 210 33% 95%;
 
-    --card: 217 33% 17%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 48% 16%;
+    --card-foreground: 210 33% 95%;
 
-    --popover: 217 33% 17%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 48% 16%;
+    --popover-foreground: 210 33% 95%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 217 91% 55%;
+    --primary: 209 55% 58%;
+    --primary-foreground: 224 60% 12%;
+    --primary-hover: 209 55% 52%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 218 40% 20%;
+    --secondary-foreground: 210 33% 95%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 218 40% 19%;
+    --muted-foreground: 212 22% 70%;
 
-    --accent: 212 100% 55%;
+    --accent: 209 50% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --success: 142 76% 45%;
+    --brand: 25 100% 56%;
+    --brand-foreground: 224 60% 12%;
+
+    --success: 152 50% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 60%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 32 92% 58%;
+    --warning-foreground: 224 60% 12%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 210 33% 95%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 217 91% 60%;
+    --border: 218 34% 24%;
+    --input: 218 34% 24%;
+    --ring: 209 55% 58%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(212 100% 55%));
-    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(212 100% 55%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(222 47% 11%), hsl(222 47% 13%));
+    --gradient-primary: linear-gradient(135deg, hsl(212 52% 30%), hsl(209 55% 52%));
+    --gradient-hero: linear-gradient(140deg, hsl(224 60% 9%) 0%, hsl(220 48% 16%) 55%, hsl(212 45% 26%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(224 60% 11%), hsl(224 55% 13%));
 
-    --shadow-primary: 0 10px 30px -10px hsl(217 91% 60% / 0.4);
+    --shadow-primary: 0 18px 40px -18px hsl(224 60% 5% / 0.7);
   }
 }
 
@@ -119,13 +123,16 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    letter-spacing: -0.02em;
   }
 }
+
 
 @layer utilities {
   .gradient-primary {
