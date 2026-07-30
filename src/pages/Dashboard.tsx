@@ -16,6 +16,7 @@ import { ScheduledTestsPanel } from "@/components/dashboard/ScheduledTestsPanel"
 import { MyClassesBanner } from "@/components/dashboard/MyClassesBanner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import Index from "@/pages/Index";
 import {
   DropdownMenu,
   DropdownMenuContent,
