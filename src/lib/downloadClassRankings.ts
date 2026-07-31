@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { drawBrandedHeader, type ClassBranding } from './classBranding';
 
 interface StudentRanking {
   rank: number;
@@ -16,24 +17,20 @@ interface ClassRankingsData {
   testTitle?: string;
   generatedAt: string;
   students: StudentRanking[];
+  branding?: ClassBranding;
 }
 
 export const downloadClassRankingsAsPDF = (data: ClassRankingsData) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
-  
-  // Header
-  doc.setFillColor(79, 70, 229);
-  doc.rect(0, 0, pageWidth, 40, 'F');
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Class Rankings Report', pageWidth / 2, 20, { align: 'center' });
-  
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'normal');
-  doc.text(data.className, pageWidth / 2, 32, { align: 'center' });
+
+  // Branded header (class logo + name)
+  drawBrandedHeader(
+    doc,
+    { ...(data.branding || {}), className: data.branding?.className || data.className },
+    { title: 'Class Rankings Report', subtitle: data.testTitle, color: [79, 70, 229] }
+  );
+
   
   // Report Info
   doc.setTextColor(0, 0, 0);

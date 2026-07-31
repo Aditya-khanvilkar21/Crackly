@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { downloadChapterResultsAsPDF } from "@/lib/downloadChapterResults";
+import { getClassBranding } from "@/lib/classBranding";
 type ExamType = 'JEE' | 'NEET' | 'CET';
 type Subject = 'physics' | 'chemistry' | 'mathematics' | 'biology';
 
@@ -276,7 +277,7 @@ export const AdminChapterAnalytics = ({ examType, userRole, onBack }: AdminChapt
     return chapterStats.filter(c => c.subject === subject);
   };
 
-  const handleDownloadChapterResults = () => {
+  const handleDownloadChapterResults = async () => {
     if (!selectedChapter || !selectedSubject) {
       toast.error("Please select a chapter first");
       return;
@@ -292,7 +293,10 @@ export const AdminChapterAnalytics = ({ examType, userRole, onBack }: AdminChapt
       const classAverage = chapterStudents.reduce((sum, s) => sum + s.percentage, 0) / chapterStudents.length;
       const topScore = chapterStudents[0]?.percentage || 0;
 
+      const branding = await getClassBranding();
+
       downloadChapterResultsAsPDF({
+        branding,
         chapterName: selectedChapter,
         subject: getSubjectLabel(selectedSubject),
         examType: examType,

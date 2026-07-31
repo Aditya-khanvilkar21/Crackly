@@ -19,6 +19,7 @@ import {
 import { motion } from "framer-motion";
 import { LatexRenderer } from "@/components/LatexRenderer";
 import { downloadParentReport } from "@/lib/downloadParentReport";
+import { getClassBranding } from "@/lib/classBranding";
 import { toast } from "@/hooks/use-toast";
 
 
@@ -407,7 +408,7 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
 
   const availableTopics = useMemo(() => Array.from(new Set(questionRows.map(q => q.topic))), [questionRows]);
 
-  const handleParentPdf = (s: StudentRow) => {
+  const handleParentPdf = async (s: StudentRow) => {
     try {
       const questions: any[] = (test?.questions as any) || [];
       const subjMap = new Map<string, { correct: number; total: number }>();
@@ -433,7 +434,10 @@ export const AdminTestInsights = ({ testId, userRole, onBack }: Props) => {
       const completedDate = s.completedAt
         ? new Date(s.completedAt).toLocaleDateString()
         : new Date().toLocaleDateString();
+      const branding = await getClassBranding();
+
       downloadParentReport({
+        branding,
         studentName: s.name,
         studentId: s.studentId,
         testTitle: test.title,

@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { downloadClassRankingsAsPDF } from "@/lib/downloadClassRankings";
+import { getClassBranding } from "@/lib/classBranding";
 
 interface Student {
   id: string;
@@ -345,7 +346,7 @@ export const StudentTracking = () => {
     });
   };
 
-  const downloadClassRankings = () => {
+  const downloadClassRankings = async () => {
     if (students.length === 0) {
       toast({
         title: "No students",
@@ -375,8 +376,11 @@ export const StudentTracking = () => {
       };
     });
 
+    const branding = await getClassBranding(selectedClass);
+
     downloadClassRankingsAsPDF({
-      className: selectedClassName,
+      branding,
+      className: branding.className || selectedClassName,
       generatedAt: new Date().toLocaleDateString('en-IN', {
         year: 'numeric',
         month: 'long',

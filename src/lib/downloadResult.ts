@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { logoFormat } from './classBranding';
 
 interface QuestionSummary {
   qNo: number;
@@ -72,7 +73,7 @@ export const downloadResultAsPDF = (data: ResultData) => {
   // Class logo (left) if provided
   if (data.classLogoDataUrl) {
     try {
-      doc.addImage(data.classLogoDataUrl, 'PNG', 8, 4, 24, 24);
+      doc.addImage(data.classLogoDataUrl, logoFormat(data.classLogoDataUrl), 8, 4, 24, 24);
     } catch {}
   }
 
