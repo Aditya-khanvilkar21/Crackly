@@ -48,18 +48,13 @@ export const downloadParentReport = (d: ParentReportData) => {
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
 
-  // Header
-  doc.setFillColor(BRAND.r, BRAND.g, BRAND.b);
-  doc.rect(0, 0, W, 34, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.text("Crackly", 14, 16);
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text("Parent Performance Report", 14, 24);
-  doc.setFontSize(9);
-  doc.text(new Date().toLocaleDateString(), W - 14, 24, { align: "right" });
+  // Branded header (class logo + name)
+  drawBrandedHeader(doc, d.branding || {}, {
+    title: "Parent Performance Report",
+    subtitle: `Generated ${new Date().toLocaleDateString()}`,
+    color: [BRAND.r, BRAND.g, BRAND.b],
+  });
+
 
   // Student card
   doc.setFillColor(DARK.r, DARK.g, DARK.b);
