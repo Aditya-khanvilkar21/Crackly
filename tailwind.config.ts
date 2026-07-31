@@ -17,6 +17,9 @@ export default {
         heading: ["Outfit", "system-ui", "sans-serif"],
         sans: ["Figtree", "system-ui", "sans-serif"],
       },
+      backgroundImage: {
+        "gradient-primary": "var(--gradient-primary)",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
