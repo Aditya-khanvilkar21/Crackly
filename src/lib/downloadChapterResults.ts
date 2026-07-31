@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { drawBrandedHeader, type ClassBranding } from './classBranding';
 
 interface StudentResult {
   rank: number;
@@ -19,27 +20,20 @@ interface ChapterResultsData {
   classAverage: number;
   topScore: number;
   totalAttempts: number;
+  branding?: ClassBranding;
 }
 
 export const downloadChapterResultsAsPDF = (data: ChapterResultsData) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
-  
-  // Header
-  doc.setFillColor(79, 70, 229);
-  doc.rect(0, 0, pageWidth, 45, 'F');
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Chapter Test Results', pageWidth / 2, 18, { align: 'center' });
-  
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'normal');
-  doc.text(data.chapterName, pageWidth / 2, 30, { align: 'center' });
-  
-  doc.setFontSize(11);
-  doc.text(`${data.subject} - ${data.examType}`, pageWidth / 2, 40, { align: 'center' });
+
+  // Branded header (class logo + name)
+  drawBrandedHeader(doc, data.branding || {}, {
+    title: `Chapter Test Results — ${data.chapterName}`,
+    subtitle: `${data.subject} • ${data.examType}`,
+    color: [79, 70, 229],
+  });
+
   
   // Report Info
   doc.setTextColor(0, 0, 0);
