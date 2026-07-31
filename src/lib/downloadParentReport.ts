@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { drawBrandedHeader, type ClassBranding } from "./classBranding";
 
 export interface ParentReportData {
   studentName: string;
@@ -27,6 +28,7 @@ export interface ParentReportData {
   strongTopics: string[];
   weakTopics: string[];
   teacherRemark?: string;
+  branding?: ClassBranding;
 }
 
 const BRAND = { r: 255, g: 106, b: 0 };
