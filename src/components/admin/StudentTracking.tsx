@@ -346,7 +346,7 @@ export const StudentTracking = () => {
     });
   };
 
-  const downloadClassRankings = () => {
+  const downloadClassRankings = async () => {
     if (students.length === 0) {
       toast({
         title: "No students",
