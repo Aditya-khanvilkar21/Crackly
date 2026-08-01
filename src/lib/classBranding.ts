@@ -98,6 +98,28 @@ export const getClassBranding = async (classId?: string | null): Promise<ClassBr
   }
 };
 
+/**
+ * Resolve branding for the currently signed-in student, from their enrolled class.
+ */
+export const getStudentClassBranding = async (): Promise<ClassBranding> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return {};
+    const { data } = await supabase
+      .from("class_students")
+      .select("class_id")
+      .eq("student_id", session.user.id);
+    const classIds = ((data as any[]) || []).map((r) => r.class_id);
+    const classId = await pickBrandedClassId(classIds);
+    if (!classId) return {};
+    return await getClassBranding(classId);
+  } catch {
+    return {};
+  }
+};
+
+
+
 export const logoFormat = (dataUrl: string): string => {
   const m = /^data:image\/([a-zA-Z0-9.+-]+);/.exec(dataUrl);
   const t = (m?.[1] || "png").toLowerCase();
