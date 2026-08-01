@@ -8,6 +8,7 @@ import { LatexRenderer } from "@/components/LatexRenderer";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { downloadResultAsPDF } from "@/lib/downloadResult";
+import { getClassBranding, pickBrandedClassId } from "@/lib/classBranding";
 import { SeoHead } from "@/components/SeoHead";
 
 interface Question {
