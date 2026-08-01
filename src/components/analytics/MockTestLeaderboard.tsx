@@ -250,27 +250,20 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
     return `${mins}m ${secs}s`;
   };
 
-  const downloadLeaderboardPDF = () => {
+  const downloadLeaderboardPDF = async () => {
     if (!selectedTest || leaderboard.length === 0) return;
 
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Header
-    doc.setFillColor(79, 70, 229);
-    doc.rect(0, 0, pageWidth, 45, 'F');
+    // Branded header (class logo + name + address)
+    const branding = await getClassBranding();
+    drawBrandedHeader(doc, branding, {
+      title: `Mock Test Leaderboard — ${selectedTest.title}`,
+      subtitle: `${examType} • ${new Date().toLocaleDateString('en-IN')}`,
+      color: [79, 70, 229],
+    });
 
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Mock Test Leaderboard', pageWidth / 2, 18, { align: 'center' });
-
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'normal');
-    doc.text(selectedTest.title, pageWidth / 2, 30, { align: 'center' });
-
-    doc.setFontSize(11);
-    doc.text(`${examType} | ${new Date().toLocaleDateString('en-IN')}`, pageWidth / 2, 40, { align: 'center' });
 
     // Stats
     doc.setTextColor(0, 0, 0);
