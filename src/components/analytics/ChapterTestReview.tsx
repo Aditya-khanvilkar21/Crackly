@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { getClassBranding, drawBrandedHeader } from "@/lib/classBranding";
 import { toast } from "sonner";
 import { LatexRenderer } from "@/components/LatexRenderer";
 
