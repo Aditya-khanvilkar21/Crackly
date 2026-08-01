@@ -80,14 +80,18 @@ export const NextGenStudentAnalytics = ({ examType }: NextGenStudentAnalyticsPro
   }));
 
   // Download analytics report as PDF
-  const downloadReport = () => {
+  const downloadReport = async () => {
     const doc = new jsPDF();
     const examName = examType || 'Overall';
-    
-    doc.setFontSize(20);
-    doc.text(`${examName} Performance Report`, 20, 20);
-    doc.setFontSize(12);
-    doc.text(`Generated on ${new Date().toLocaleDateString()}`, 20, 30);
+
+    // Branded header (class logo + name + address)
+    const branding = await getStudentClassBranding();
+    drawBrandedHeader(doc, branding, {
+      title: `${examName} Performance Report`,
+      subtitle: `Generated on ${new Date().toLocaleDateString()}`,
+      color: [255, 106, 0],
+    });
+
     
     doc.setFontSize(14);
     doc.text('Key Metrics', 20, 50);
