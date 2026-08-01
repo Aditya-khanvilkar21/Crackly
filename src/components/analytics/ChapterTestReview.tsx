@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { getClassBranding, drawBrandedHeader } from "@/lib/classBranding";
 import { toast } from "sonner";
 import { LatexRenderer } from "@/components/LatexRenderer";
 
@@ -271,7 +272,7 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
     }
   };
 
-  const downloadRankListPDF = () => {
+  const downloadRankListPDF = async () => {
     if (!selectedTest) {
       toast.error("Please select a test first");
       return;
@@ -286,19 +287,14 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
 
-      // Header
-      doc.setFillColor(79, 70, 229);
-      doc.rect(0, 0, pageWidth, 40, 'F');
+      // Branded header (class logo + name + address)
+      const branding = await getClassBranding();
+      drawBrandedHeader(doc, branding, {
+        title: `Chapter Test Results — ${selectedTest.title}`,
+        subtitle: `${getSubjectLabel(selectedTest.subject)} • ${examType}`,
+        color: [79, 70, 229],
+      });
 
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(20);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Chapter Test Results', pageWidth / 2, 16, { align: 'center' });
-
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
-      doc.text(selectedTest.title, pageWidth / 2, 28, { align: 'center' });
-      doc.text(`${getSubjectLabel(selectedTest.subject)} - ${examType}`, pageWidth / 2, 36, { align: 'center' });
 
       // Stats
       const avgScore = studentResults.reduce((sum, s) => sum + s.percentage, 0) / studentResults.length;

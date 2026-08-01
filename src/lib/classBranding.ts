@@ -28,8 +28,32 @@ const toDataUrl = async (path: string): Promise<string | undefined> => {
 };
 
 /**
+ * Given candidate class ids, pick the one that actually has branding
+ * (logo and/or address), falling back to the first candidate.
+ */
+export const pickBrandedClassId = async (
+  classIds: string[]
+): Promise<string | null> => {
+  if (!classIds || classIds.length === 0) return null;
+  try {
+    const { data } = await supabase
+      .from("tuition_classes")
+      .select("id, logo_url, address")
+      .in("id", classIds);
+    const rows = (data as any[]) || [];
+    const withLogo = rows.find((r) => !!r.logo_url);
+    if (withLogo) return withLogo.id;
+    const withAddress = rows.find((r) => !!r.address);
+    if (withAddress) return withAddress.id;
+  } catch {
+    /* ignore */
+  }
+  return classIds[0];
+};
+
+/**
  * Resolve tuition class branding (name, address, logo) for PDF headers.
- * Pass a classId when known, otherwise the current admin's own class is used.
+ * Pass a classId when known, otherwise the current admin's branded class is used.
  */
 export const getClassBranding = async (classId?: string | null): Promise<ClassBranding> => {
   try {
@@ -51,10 +75,15 @@ export const getClassBranding = async (classId?: string | null): Promise<ClassBr
         .from("tuition_classes")
         .select("name, address, logo_url")
         .eq("admin_id", session.user.id)
-        .order("created_at", { ascending: true })
-        .limit(1);
-      cls = (data && data.length > 0 ? (data[0] as any) : null);
+        .order("created_at", { ascending: true });
+      const rows = (data as any[]) || [];
+      cls =
+        rows.find((r) => !!r.logo_url) ??
+        rows.find((r) => !!r.address) ??
+        rows[0] ??
+        null;
     }
+
 
     if (!cls) return {};
 
@@ -68,6 +97,28 @@ export const getClassBranding = async (classId?: string | null): Promise<ClassBr
     return {};
   }
 };
+
+/**
+ * Resolve branding for the currently signed-in student, from their enrolled class.
+ */
+export const getStudentClassBranding = async (): Promise<ClassBranding> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return {};
+    const { data } = await supabase
+      .from("class_students")
+      .select("class_id")
+      .eq("student_id", session.user.id);
+    const classIds = ((data as any[]) || []).map((r) => r.class_id);
+    const classId = await pickBrandedClassId(classIds);
+    if (!classId) return {};
+    return await getClassBranding(classId);
+  } catch {
+    return {};
+  }
+};
+
+
 
 export const logoFormat = (dataUrl: string): string => {
   const m = /^data:image\/([a-zA-Z0-9.+-]+);/.exec(dataUrl);

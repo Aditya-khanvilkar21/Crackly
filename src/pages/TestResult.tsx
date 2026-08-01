@@ -8,6 +8,7 @@ import { LatexRenderer } from "@/components/LatexRenderer";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { downloadResultAsPDF } from "@/lib/downloadResult";
+import { getClassBranding, pickBrandedClassId } from "@/lib/classBranding";
 import { SeoHead } from "@/components/SeoHead";
 
 interface Question {
@@ -732,54 +733,39 @@ export default function TestResult() {
                     .eq('student_id', user.id);
                   const classIds = (myClasses || []).map((r: any) => r.class_id);
                   if (classIds.length > 0) {
-                    let classId: string | null = null;
+                    const candidates: string[] = [];
                     const { data: ta } = await supabase
                       .from('test_availability')
                       .select('class_id')
                       .eq('test_id', testId!)
-                      .in('class_id', classIds)
-                      .limit(1);
-                    if (ta && ta.length > 0) classId = ta[0].class_id;
-                    if (!classId) {
-                      const { data: st } = await supabase
-                        .from('scheduled_tests')
-                        .select('class_id')
-                        .eq('test_id', testId!)
-                        .in('class_id', classIds)
-                        .limit(1);
-                      if (st && st.length > 0) classId = st[0].class_id;
-                    }
-                    if (!classId) classId = classIds[0];
+                      .in('class_id', classIds);
+                    (ta || []).forEach((r: any) => candidates.push(r.class_id));
+                    const { data: st } = await supabase
+                      .from('scheduled_tests')
+                      .select('class_id')
+                      .eq('test_id', testId!)
+                      .in('class_id', classIds);
+                    (st || []).forEach((r: any) => candidates.push(r.class_id));
+
+                    const pool = candidates.length > 0 ? Array.from(new Set(candidates)) : classIds;
+                    let classId = await pickBrandedClassId(pool);
                     if (classId) {
-                      const { data: cls } = await supabase
-                        .from('tuition_classes')
-                        .select('name, address, logo_url')
-                        .eq('id', classId)
-                        .maybeSingle();
-                      if (cls) {
-                        className = cls.name;
-                        classAddress = cls.address || undefined;
-                        if (cls.logo_url) {
-                          try {
-                            const { data: signed } = await supabase.storage
-                              .from('class-logos')
-                              .createSignedUrl(cls.logo_url, 60);
-                            if (signed?.signedUrl) {
-                              const resp = await fetch(signed.signedUrl);
-                              const blob = await resp.blob();
-                              classLogoDataUrl = await new Promise<string>((res, rej) => {
-                                const fr = new FileReader();
-                                fr.onload = () => res(fr.result as string);
-                                fr.onerror = rej;
-                                fr.readAsDataURL(blob);
-                              });
-                            }
-                          } catch {}
+                      let branding = await getClassBranding(classId);
+                      // If the matched class has no branding, fall back to any branded class of this student
+                      if (!branding.classLogoDataUrl && !branding.classAddress && pool !== classIds) {
+                        const alt = await pickBrandedClassId(classIds);
+                        if (alt && alt !== classId) {
+                          const altBranding = await getClassBranding(alt);
+                          if (altBranding.classLogoDataUrl || altBranding.classAddress) branding = altBranding;
                         }
                       }
+                      className = branding.className;
+                      classAddress = branding.classAddress;
+                      classLogoDataUrl = branding.classLogoDataUrl;
                     }
                   }
                 } catch {}
+
 
                 downloadResultAsPDF({
                   studentName: profile.full_name,
