@@ -23,6 +23,7 @@ import { SpacedRepetitionReminders } from "./SpacedRepetitionReminders";
 import { MockTestAnalytics } from "./MockTestAnalytics";
 import { StudentChapterAnalytics } from "./StudentChapterAnalytics";
 import { jsPDF } from "jspdf";
+import { getStudentClassBranding, drawBrandedHeader } from "@/lib/classBranding";
 
 type ExamType = 'JEE' | 'NEET' | 'CET';
 
