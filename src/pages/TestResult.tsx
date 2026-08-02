@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { downloadResultAsPDF } from "@/lib/downloadResult";
 import { getClassBranding, pickBrandedClassId } from "@/lib/classBranding";
+import { scoreTest, getQuestionMarks, type MarkingTest } from "@/lib/marking";
+
 import { SeoHead } from "@/components/SeoHead";
 
 interface Question {
