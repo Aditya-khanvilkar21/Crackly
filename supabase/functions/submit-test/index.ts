@@ -1,4 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.1';
+import { scoreTest, type MarkingTest } from '../_shared/marking.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -129,47 +131,17 @@ Deno.serve(async (req) => {
       throw new Error('Test not found');
     }
 
-    // Calculate score server-side with negative marking support
-    const questions = test.questions as Array<{ correctAnswer: number; marksPerQuestion?: number; subject?: string }>;
-    const isChapterTest = test.test_type === 'chapter_test';
-    const negativeMarking = test.negative_marking || 0;
-    
-    // Use all questions for both chapter tests and mock tests
-    const totalQuestions = questions.length;
-    let correctCount = 0;
-    let wrongCount = 0;
-    let totalMarks = 0;
-    let maxMarks = 0;
-    
-    // Calculate max marks based on question weights
-    questions.forEach((q, idx) => {
-      const marksPerQ = q.marksPerQuestion || 1;
-      maxMarks += marksPerQ;
-    });
-    
-    // Iterate through each submitted answer
-    Object.entries(answers).forEach(([questionIndex, selectedAnswer]) => {
-      const index = parseInt(questionIndex);
-      if (questions[index]) {
-        const marksPerQ = questions[index].marksPerQuestion || 1;
-        if (questions[index].correctAnswer === selectedAnswer) {
-          correctCount++;
-          totalMarks += marksPerQ;
-        } else {
-          wrongCount++;
-          // Apply negative marking (deduct marks for wrong answers)
-          if (negativeMarking > 0) {
-            totalMarks -= negativeMarking * marksPerQ;
-          }
-        }
-      }
-    });
-
-    // Ensure total marks don't go below 0
-    totalMarks = Math.max(0, totalMarks);
+    // Canonical scoring — shared with the client UI (single source of truth)
+    const scored = scoreTest(test as unknown as MarkingTest, answers as Record<string, number>);
+    const correctCount = scored.correct;
+    const wrongCount = scored.wrong;
+    const totalMarks = scored.totalMarks;
+    const maxMarks = scored.maxMarks;
+    const totalQuestions = scored.totalQuestions;
+    const negativeMarking = scored.scheme.negativeMarking;
 
     // For backward compatibility, store correct count as score
-    // The actual marks can be calculated on display using the test's question weights
+
 
     // Insert result using service role (bypasses RLS)
     const { data: result, error: insertError } = await supabase

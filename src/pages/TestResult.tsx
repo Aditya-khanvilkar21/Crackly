@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { downloadResultAsPDF } from "@/lib/downloadResult";
 import { getClassBranding, pickBrandedClassId } from "@/lib/classBranding";
+import { scoreTest, getQuestionMarks, type MarkingTest } from "@/lib/marking";
+
 import { SeoHead } from "@/components/SeoHead";
 
 interface Question {
@@ -168,127 +170,36 @@ export default function TestResult() {
     return result.total_questions;
   };
 
-  const isNEETMockTest = () => {
-    if (!test || test.test_type !== 'mock_test') return false;
-    if (test.exam_type === 'NEET') return true;
-    return test.chapter === 'NEET' || (test.questions && test.questions.length === 180);
-  };
-
-  const isCETMockTest = () => {
-    if (!test || test.test_type !== 'mock_test') return false;
-    if (test.exam_type === 'CET') return true;
-    return test.chapter === 'CET' || (test.questions && (test.questions.length === 150 || test.questions.length === 200));
-  };
-
-  // CET PCB has Biology (200 questions total: 50+50+100). CET PCM has Math (150 questions: 50+50+50).
-  const isCETPCB = () => {
-    if (!test) return false;
-    if (test.questions?.length === 200) return true;
-    return test.questions?.some(q => (q.subject || '').toLowerCase().includes('bio')) ?? false;
-  };
+  // All marks / subject-section rules come from the shared marking module
+  const scored = result && test ? scoreTest(test as unknown as MarkingTest, result.answers || {}) : null;
 
   const getSubjectBreakdown = (): SubjectBreakdown[] => {
-    if (!test || test.test_type !== 'mock_test' || !result) return [];
-
-    const buildSubjects = (configs: { subject: string; start: number; count: number }[]) =>
-      configs.map(({ subject, start, count }) => {
-        let correct = 0;
-        let attempted = 0;
-        for (let i = start; i < start + count; i++) {
-          if (result.answers[i] !== undefined) {
-            attempted++;
-            if (result.answers[i] === test.questions[i]?.correctAnswer) correct++;
-          }
-        }
-        const wrong = attempted - correct;
-        return {
-          subject,
-          correct,
-          wrong,
-          attempted,
-          total: count,
-          percentage: count > 0 ? (correct / count) * 100 : 0,
-          accuracy: attempted > 0 ? (correct / attempted) * 100 : 0,
-        };
-      });
-
-    if (isCETMockTest()) {
-      if (isCETPCB()) {
-        return buildSubjects([
-          { subject: 'Physics', start: 0, count: 50 },
-          { subject: 'Chemistry', start: 50, count: 50 },
-          { subject: 'Biology', start: 100, count: 100 },
-        ]);
-      }
-      return buildSubjects([
-        { subject: 'Physics', start: 0, count: 50 },
-        { subject: 'Chemistry', start: 50, count: 50 },
-        { subject: 'Mathematics', start: 100, count: 50 },
-      ]);
-    }
-
-    if (isNEETMockTest()) {
-      return buildSubjects([
-        { subject: 'Physics', start: 0, count: 45 },
-        { subject: 'Chemistry', start: 45, count: 45 },
-        { subject: 'Biology', start: 90, count: 90 },
-      ]);
-    }
-
-    // JEE: 25 / 25 / 25
-    return buildSubjects([
-      { subject: 'Physics', start: 0, count: 25 },
-      { subject: 'Chemistry', start: 25, count: 25 },
-      { subject: 'Mathematics', start: 50, count: 25 },
-    ]);
+    if (!scored || !test || test.test_type !== 'mock_test') return [];
+    return scored.subjects.map((s) => ({
+      subject: s.subject,
+      correct: s.correct,
+      wrong: s.wrong,
+      attempted: s.attempted,
+      total: s.total,
+      percentage: s.percentage,
+      accuracy: s.accuracy,
+    }));
   };
 
-  // CET marks: Phys ×1, Chem ×1, Math ×2 (PCM) → 200; Phys ×1, Chem ×1, Bio ×1 (PCB) → 200
   const getCETScore = () => {
-    if (!isCETMockTest()) return null;
-    const breakdown = getSubjectBreakdown();
-    const pcb = isCETPCB();
-    let obtained = 0;
-    breakdown.forEach(b => {
-      const mult = !pcb && b.subject === 'Mathematics' ? 2 : 1;
-      obtained += b.correct * mult;
-    });
-    return { obtained, max: 200, pcb };
+    if (!scored) return null;
+    const key = scored.scheme.key;
+    if (key !== 'CET-PCM' && key !== 'CET-PCB') return null;
+    return { obtained: scored.totalMarks, max: scored.scheme.totalMarks, pcb: key === 'CET-PCB' };
   };
 
-  // Calculate detailed score with negative marking
+  // Detailed score with negative marking (shared logic)
   const calculateDetailedScore = () => {
-    if (!result || !test) return { correct: 0, wrong: 0, unanswered: 0, totalMarks: 0, maxMarks: 0, negativeMarksDeducted: 0 };
-    
-    let correct = 0;
-    let wrong = 0;
-    let totalMarks = 0;
-    let maxMarks = 0;
-    const negativeMarking = test.negative_marking || 0;
-    
-    test.questions.forEach((q, idx) => {
-      const marksPerQ = q.marksPerQuestion || 1;
-      maxMarks += marksPerQ;
-      
-      if (result.answers[idx] !== undefined) {
-        if (result.answers[idx] === q.correctAnswer) {
-          correct++;
-          totalMarks += marksPerQ;
-        } else {
-          wrong++;
-          if (negativeMarking > 0) {
-            totalMarks -= negativeMarking * marksPerQ;
-          }
-        }
-      }
-    });
-    
-    const unanswered = test.questions.length - correct - wrong;
-    const negativeMarksDeducted = wrong * negativeMarking;
-    totalMarks = Math.max(0, totalMarks);
-    
+    if (!scored) return { correct: 0, wrong: 0, unanswered: 0, totalMarks: 0, maxMarks: 0, negativeMarksDeducted: 0 };
+    const { correct, wrong, unanswered, totalMarks, maxMarks, negativeMarksDeducted } = scored;
     return { correct, wrong, unanswered, totalMarks, maxMarks, negativeMarksDeducted };
   };
+
 
   // Calculate topic-wise analysis for weak areas
   const getTopicAnalysis = (): TopicAnalysis[] => {
@@ -392,7 +303,7 @@ export default function TestResult() {
             <Award className="w-16 h-16 mx-auto mb-4" />
             <h1 className="text-3xl font-bold mb-2">Test Completed!</h1>
             <p className="text-lg opacity-90 mb-6">
-              {test.title} {isMockTest ? (isNEETMockTest() ? '- NEET Mock Test' : '- JEE Mock Test') : `- ${test.subject}`}
+              {test.title} {isMockTest ? `- ${scored?.scheme.label ?? 'Mock Test'}` : `- ${test.subject}`}
             </p>
             
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-4xl mx-auto">
@@ -552,7 +463,7 @@ export default function TestResult() {
               const isAttempted = selectedAnswer !== undefined;
               const isCorrect = isAttempted && selectedAnswer === question.correctAnswer;
               const isMarked = markedForReview.has(qIndex);
-              const marksPerQ = question.marksPerQuestion || 1;
+              const marksPerQ = getQuestionMarks(test as unknown as MarkingTest, qIndex);
               const marksObtained = !isAttempted ? 0 : isCorrect ? marksPerQ : (test.negative_marking ? -(test.negative_marking * marksPerQ) : 0);
               
               return (

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { scoreTest, type MarkingTest } from "@/lib/marking";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -153,7 +154,7 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
       // Get test details
       const { data: testData } = await supabase
         .from("tests")
-        .select("questions, negative_marking")
+        .select("questions, negative_marking, title, subject, chapter, test_type, exam_type")
         .eq("id", testId)
         .single();
 
@@ -174,7 +175,8 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
       if (results && profiles && testData) {
         const questions = testData.questions as any[];
         const negativeMarking = testData.negative_marking || 0;
-        const maxMarks = questions.reduce((sum, q) => sum + (q.marksPerQuestion || 1), 0);
+        const markingTest = testData as unknown as MarkingTest;
+        const maxMarks = scoreTest(markingTest, {}).maxMarks;
 
         // Group by student to get best score
         const studentBest = new Map<string, any>();
@@ -191,24 +193,10 @@ export const MockTestLeaderboard = ({ examType, userRole, onBack }: MockTestLead
             const profile = profiles.find(p => p.id === r.student_id);
             const answers = r.answers as Record<number, number>;
             
-            let correct = 0;
-            let wrong = 0;
-            let marks = 0;
-
-            questions.forEach((q, idx) => {
-              const marksPerQ = q.marksPerQuestion || 1;
-              if (answers[idx] !== undefined) {
-                if (answers[idx] === q.correctAnswer) {
-                  correct++;
-                  marks += marksPerQ;
-                } else {
-                  wrong++;
-                  marks -= negativeMarking * marksPerQ;
-                }
-              }
-            });
-
-            marks = Math.max(0, marks);
+            const scored = scoreTest(markingTest, answers || {});
+            const correct = scored.correct;
+            const wrong = scored.wrong;
+            const marks = scored.totalMarks;
 
             return {
               rank: 0,

@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getQuestionMarks, type MarkingTest } from "@/lib/marking";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -99,7 +100,7 @@ export const StudentTestDrillDown = ({
           topic: q.topic,
           explanation: q.explanation,
           explanationImage: q.explanationImage,
-          marksPerQuestion: q.marksPerQuestion || 1,
+          marksPerQuestion: getQuestionMarks(testRes.data as unknown as MarkingTest, idx),
         };
       });
 
