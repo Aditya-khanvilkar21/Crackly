@@ -187,108 +187,36 @@ export default function TestResult() {
     return test.questions?.some(q => (q.subject || '').toLowerCase().includes('bio')) ?? false;
   };
 
+  // All marks / subject-section rules come from the shared marking module
+  const scored = result && test ? scoreTest(test as unknown as MarkingTest, result.answers || {}) : null;
+
   const getSubjectBreakdown = (): SubjectBreakdown[] => {
-    if (!test || test.test_type !== 'mock_test' || !result) return [];
-
-    const buildSubjects = (configs: { subject: string; start: number; count: number }[]) =>
-      configs.map(({ subject, start, count }) => {
-        let correct = 0;
-        let attempted = 0;
-        for (let i = start; i < start + count; i++) {
-          if (result.answers[i] !== undefined) {
-            attempted++;
-            if (result.answers[i] === test.questions[i]?.correctAnswer) correct++;
-          }
-        }
-        const wrong = attempted - correct;
-        return {
-          subject,
-          correct,
-          wrong,
-          attempted,
-          total: count,
-          percentage: count > 0 ? (correct / count) * 100 : 0,
-          accuracy: attempted > 0 ? (correct / attempted) * 100 : 0,
-        };
-      });
-
-    if (isCETMockTest()) {
-      if (isCETPCB()) {
-        return buildSubjects([
-          { subject: 'Physics', start: 0, count: 50 },
-          { subject: 'Chemistry', start: 50, count: 50 },
-          { subject: 'Biology', start: 100, count: 100 },
-        ]);
-      }
-      return buildSubjects([
-        { subject: 'Physics', start: 0, count: 50 },
-        { subject: 'Chemistry', start: 50, count: 50 },
-        { subject: 'Mathematics', start: 100, count: 50 },
-      ]);
-    }
-
-    if (isNEETMockTest()) {
-      return buildSubjects([
-        { subject: 'Physics', start: 0, count: 45 },
-        { subject: 'Chemistry', start: 45, count: 45 },
-        { subject: 'Biology', start: 90, count: 90 },
-      ]);
-    }
-
-    // JEE: 25 / 25 / 25
-    return buildSubjects([
-      { subject: 'Physics', start: 0, count: 25 },
-      { subject: 'Chemistry', start: 25, count: 25 },
-      { subject: 'Mathematics', start: 50, count: 25 },
-    ]);
+    if (!scored || !test || test.test_type !== 'mock_test') return [];
+    return scored.subjects.map((s) => ({
+      subject: s.subject,
+      correct: s.correct,
+      wrong: s.wrong,
+      attempted: s.attempted,
+      total: s.total,
+      percentage: s.percentage,
+      accuracy: s.accuracy,
+    }));
   };
 
-  // CET marks: Phys ×1, Chem ×1, Math ×2 (PCM) → 200; Phys ×1, Chem ×1, Bio ×1 (PCB) → 200
   const getCETScore = () => {
-    if (!isCETMockTest()) return null;
-    const breakdown = getSubjectBreakdown();
-    const pcb = isCETPCB();
-    let obtained = 0;
-    breakdown.forEach(b => {
-      const mult = !pcb && b.subject === 'Mathematics' ? 2 : 1;
-      obtained += b.correct * mult;
-    });
-    return { obtained, max: 200, pcb };
+    if (!scored) return null;
+    const key = scored.scheme.key;
+    if (key !== 'CET-PCM' && key !== 'CET-PCB') return null;
+    return { obtained: scored.totalMarks, max: scored.scheme.totalMarks, pcb: key === 'CET-PCB' };
   };
 
-  // Calculate detailed score with negative marking
+  // Detailed score with negative marking (shared logic)
   const calculateDetailedScore = () => {
-    if (!result || !test) return { correct: 0, wrong: 0, unanswered: 0, totalMarks: 0, maxMarks: 0, negativeMarksDeducted: 0 };
-    
-    let correct = 0;
-    let wrong = 0;
-    let totalMarks = 0;
-    let maxMarks = 0;
-    const negativeMarking = test.negative_marking || 0;
-    
-    test.questions.forEach((q, idx) => {
-      const marksPerQ = q.marksPerQuestion || 1;
-      maxMarks += marksPerQ;
-      
-      if (result.answers[idx] !== undefined) {
-        if (result.answers[idx] === q.correctAnswer) {
-          correct++;
-          totalMarks += marksPerQ;
-        } else {
-          wrong++;
-          if (negativeMarking > 0) {
-            totalMarks -= negativeMarking * marksPerQ;
-          }
-        }
-      }
-    });
-    
-    const unanswered = test.questions.length - correct - wrong;
-    const negativeMarksDeducted = wrong * negativeMarking;
-    totalMarks = Math.max(0, totalMarks);
-    
+    if (!scored) return { correct: 0, wrong: 0, unanswered: 0, totalMarks: 0, maxMarks: 0, negativeMarksDeducted: 0 };
+    const { correct, wrong, unanswered, totalMarks, maxMarks, negativeMarksDeducted } = scored;
     return { correct, wrong, unanswered, totalMarks, maxMarks, negativeMarksDeducted };
   };
+
 
   // Calculate topic-wise analysis for weak areas
   const getTopicAnalysis = (): TopicAnalysis[] => {
