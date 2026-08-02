@@ -322,7 +322,7 @@ export default function TestResult() {
             <Award className="w-16 h-16 mx-auto mb-4" />
             <h1 className="text-3xl font-bold mb-2">Test Completed!</h1>
             <p className="text-lg opacity-90 mb-6">
-              {test.title} {isMockTest ? (isNEETMockTest() ? '- NEET Mock Test' : '- JEE Mock Test') : `- ${test.subject}`}
+              {test.title} {isMockTest ? `- ${scored?.scheme.label ?? 'Mock Test'}` : `- ${test.subject}`}
             </p>
             
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-4xl mx-auto">
@@ -482,7 +482,7 @@ export default function TestResult() {
               const isAttempted = selectedAnswer !== undefined;
               const isCorrect = isAttempted && selectedAnswer === question.correctAnswer;
               const isMarked = markedForReview.has(qIndex);
-              const marksPerQ = question.marksPerQuestion || 1;
+              const marksPerQ = getQuestionMarks(test as unknown as MarkingTest, qIndex);
               const marksObtained = !isAttempted ? 0 : isCorrect ? marksPerQ : (test.negative_marking ? -(test.negative_marking * marksPerQ) : 0);
               
               return (
