@@ -552,46 +552,28 @@ export default function TakeTest() {
 
   const getMarkingScheme = () => {
     if (!test) return null;
-    const negativeMarking = test.negative_marking || 0;
-    const isCETTest = test.title?.includes('[CET-');
-    const isPCMTest = test.title?.includes('[CET-PCM]');
-    const isPCBTest = test.title?.includes('[CET-PCB]');
-    
-    if (test.test_type === 'chapter_test') {
-      const totalQ = selectedQuestions.length || test.questions?.length || 45;
-      return { title: 'Chapter Test', totalQuestions: totalQ, totalMarks: totalQ, negativeMarking: 0,
-        subjects: [{ name: test.subject || 'Subject', questions: totalQ, marksPerQ: 1 }] };
-    }
-    if (examType === 'NEET') {
-      return { title: 'NEET Mock Test', totalQuestions: 180, totalMarks: 720, marksPerQuestion: 4, negativeMarking,
-        subjects: [
-          { name: 'Physics', questions: 45, marksPerQ: 4 },
-          { name: 'Chemistry', questions: 45, marksPerQ: 4 },
-          { name: 'Biology', questions: 90, marksPerQ: 4 }
-        ] };
-    }
-    if (isCETTest && isPCMTest) {
-      return { title: 'CET PCM Mock Test', totalQuestions: 150, totalMarks: 200, negativeMarking,
-        subjects: [
-          { name: 'Physics', questions: 50, marksPerQ: 1 },
-          { name: 'Chemistry', questions: 50, marksPerQ: 1 },
-          { name: 'Mathematics', questions: 50, marksPerQ: 2 }
-        ] };
-    }
-    if (isCETTest && isPCBTest) {
-      return { title: 'CET PCB Mock Test', totalQuestions: 200, totalMarks: 200, negativeMarking,
-        subjects: [
-          { name: 'Physics', questions: 50, marksPerQ: 1 },
-          { name: 'Chemistry', questions: 50, marksPerQ: 1 },
-          { name: 'Biology', questions: 100, marksPerQ: 1 }
-        ] };
-    }
-    return { title: 'JEE Mock Test', totalQuestions: 75, totalMarks: 300, marksPerQuestion: 4, negativeMarking,
-      subjects: [
-        { name: 'Physics', questions: 25, marksPerQ: 4 },
-        { name: 'Chemistry', questions: 25, marksPerQ: 4 },
-        { name: 'Mathematics', questions: 25, marksPerQ: 4 }
-      ] };
+    // Single source of truth: shared marking module
+    const scheme = sharedMarkingScheme({
+      title: test.title,
+      subject: test.subject,
+      chapter: (test as any).chapter,
+      test_type: test.test_type,
+      exam_type: test.exam_type,
+      negative_marking: test.negative_marking,
+      questions: (test.questions || []) as any,
+    } as MarkingTest);
+
+    return {
+      title: scheme.label,
+      totalQuestions: scheme.totalQuestions,
+      totalMarks: scheme.totalMarks,
+      negativeMarking: scheme.negativeMarking,
+      subjects: scheme.sections.map((s) => ({
+        name: s.subject,
+        questions: s.count,
+        marksPerQ: s.marksPerQuestion,
+      })),
+    };
   };
 
   const markingScheme = getMarkingScheme();
@@ -599,7 +581,9 @@ export default function TakeTest() {
   // Get current question marks
   const getCurrentQuestionMarks = () => {
     const q = selectedQuestions[currentQuestionIndex];
-    return q?.marksPerQuestion || markingScheme?.marksPerQuestion || 1;
+    if (!test) return 1;
+    const originalIdx = originalIndexMap[currentQuestionIndex] ?? currentQuestionIndex;
+    return getQuestionMarks(test as unknown as MarkingTest, originalIdx);
   };
 
   // Get subject label for current question

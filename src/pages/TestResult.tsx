@@ -170,25 +170,6 @@ export default function TestResult() {
     return result.total_questions;
   };
 
-  const isNEETMockTest = () => {
-    if (!test || test.test_type !== 'mock_test') return false;
-    if (test.exam_type === 'NEET') return true;
-    return test.chapter === 'NEET' || (test.questions && test.questions.length === 180);
-  };
-
-  const isCETMockTest = () => {
-    if (!test || test.test_type !== 'mock_test') return false;
-    if (test.exam_type === 'CET') return true;
-    return test.chapter === 'CET' || (test.questions && (test.questions.length === 150 || test.questions.length === 200));
-  };
-
-  // CET PCB has Biology (200 questions total: 50+50+100). CET PCM has Math (150 questions: 50+50+50).
-  const isCETPCB = () => {
-    if (!test) return false;
-    if (test.questions?.length === 200) return true;
-    return test.questions?.some(q => (q.subject || '').toLowerCase().includes('bio')) ?? false;
-  };
-
   // All marks / subject-section rules come from the shared marking module
   const scored = result && test ? scoreTest(test as unknown as MarkingTest, result.answers || {}) : null;
 
