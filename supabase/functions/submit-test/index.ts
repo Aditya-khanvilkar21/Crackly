@@ -1,4 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.1';
+import { scoreTest, type MarkingTest } from '../_shared/marking.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
