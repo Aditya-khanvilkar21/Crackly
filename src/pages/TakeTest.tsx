@@ -18,6 +18,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SeoHead } from "@/components/SeoHead";
+import { getMarkingScheme as sharedMarkingScheme, getQuestionMarks, type MarkingTest } from "@/lib/marking";
+
 
 interface Question {
   question: string;
