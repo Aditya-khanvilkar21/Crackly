@@ -56,7 +56,7 @@ export const downloadClassRankingsAsPDF = (data: ClassRankingsData) => {
   
   autoTable(doc, {
     startY: tableStartY,
-    head: [['Rank', 'Student Name', 'Student ID', 'Tests', 'Score', 'Avg %']],
+    head: [['Rank', 'Student Name', 'Alpha ID', 'Tests', 'Score', 'Avg %']],
     body: tableData,
     theme: 'striped',
     headStyles: { fillColor: [79, 70, 229] },

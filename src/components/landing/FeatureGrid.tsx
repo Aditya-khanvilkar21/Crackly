@@ -36,7 +36,7 @@ const features = [
   },
   {
     icon: GraduationCap,
-    title: "Auto student ID",
+    title: "Auto Alpha ID",
     description: "Unique TrackAlpha IDs make enrolment and tracking effortless.",
   },
 ];

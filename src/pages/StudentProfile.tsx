@@ -166,7 +166,7 @@ export default function StudentProfile() {
     <div className="min-h-screen bg-gradient-subtle py-8">
       <SeoHead
         title="Your Profile | TrackAlpha"
-        description="Manage your TrackAlpha profile, student ID, tuition class and exam preferences."
+        description="Manage your TrackAlpha profile, Alpha ID, tuition class and exam preferences."
         path="/profile"
       />
       <main className="container mx-auto px-4 max-w-6xl">
@@ -216,7 +216,7 @@ export default function StudentProfile() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="studentId">Student ID</Label>
+                  <Label htmlFor="studentId">Alpha ID</Label>
                   <Input
                     id="studentId"
                     value={profile?.student_id || ""}

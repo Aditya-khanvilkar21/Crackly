@@ -88,7 +88,7 @@ export const downloadChapterResultsAsPDF = (data: ChapterResultsData) => {
   
   autoTable(doc, {
     startY: 110,
-    head: [['Rank', 'Student Name', 'Student ID', 'Score', 'Attempts', 'Percentage']],
+    head: [['Rank', 'Student Name', 'Alpha ID', 'Score', 'Attempts', 'Percentage']],
     body: tableData,
     theme: 'striped',
     headStyles: { fillColor: [79, 70, 229] },
