@@ -17,7 +17,7 @@ const faqs = [
   },
   {
     q: "Do I need a tuition class to use TrackAlpha?",
-    a: "You can sign up on your own, but tests are unlocked by your tuition class admin. Share your TRACKALPHA student ID with them or send a join request from your dashboard.",
+    a: "You can sign up on your own, but tests are unlocked by your tuition class admin. Share your TrackAlpha student ID with them or send a join request from your dashboard.",
   },
   {
     q: "What is the difference between chapter tests and mock tests?",
