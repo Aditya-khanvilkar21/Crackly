@@ -37,7 +37,7 @@ const features = [
   {
     icon: GraduationCap,
     title: "Auto student ID",
-    description: "Unique CRACKLY IDs make enrolment and tracking effortless.",
+    description: "Unique TRACKALPHA IDs make enrolment and tracking effortless.",
   },
 ];
 
@@ -45,7 +45,7 @@ export const FeatureGrid = () => (
   <section className="bg-gradient-subtle py-16 md:py-20">
     <div className="container mx-auto px-4">
       <div className="mx-auto mb-12 max-w-2xl text-center">
-        <h2 className="font-heading text-3xl font-bold md:text-4xl">Why choose Crackly?</h2>
+        <h2 className="font-heading text-3xl font-bold md:text-4xl">Why choose TrackAlpha?</h2>
         <p className="mt-3 text-muted-foreground">Everything you need for JEE, NEET &amp; CET success</p>
       </div>
 

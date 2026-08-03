@@ -205,7 +205,7 @@ export const downloadParentReport = (d: ParentReportData) => {
     doc.setTextColor(156, 163, 175);
     doc.setFont("helvetica", "italic");
     doc.text(
-      `Crackly — JEE, NEET & CET  •  Parent Report  •  Page ${i} of ${pages}`,
+      `TrackAlpha — JEE, NEET & CET  •  Parent Report  •  Page ${i} of ${pages}`,
       W / 2, H - 8, { align: "center" }
     );
   }

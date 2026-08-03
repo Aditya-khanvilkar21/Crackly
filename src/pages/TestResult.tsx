@@ -268,8 +268,8 @@ export default function TestResult() {
   return (
     <div className="min-h-screen bg-gradient-subtle py-6">
       <SeoHead
-        title="Test Result | Crackly"
-        description="Review your Crackly test result with score breakdown, explanations and topic-wise analysis."
+        title="Test Result | TrackAlpha"
+        description="Review your TrackAlpha test result with score breakdown, explanations and topic-wise analysis."
         path="/test-result"
       />
       <div className="container mx-auto px-4 max-w-4xl">

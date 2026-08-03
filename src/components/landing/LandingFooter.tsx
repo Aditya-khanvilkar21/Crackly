@@ -8,7 +8,7 @@ export const LandingFooter = () => (
         <Link to="/" className="flex items-center gap-3 opacity-80 transition-opacity hover:opacity-100">
           <img
             src={logo}
-            alt="Crackly Exam Preparation Logo"
+            alt="TrackAlpha Exam Preparation Logo"
             width={36}
             height={36}
             loading="lazy"
@@ -17,7 +17,7 @@ export const LandingFooter = () => (
           />
           <span className="font-heading text-sm font-semibold">Practice. Analyse. Crack it.</span>
         </Link>
-        <p className="text-sm text-muted-foreground">&copy; 2026 Crackly. All rights reserved.</p>
+        <p className="text-sm text-muted-foreground">&copy; 2026 TrackAlpha. All rights reserved.</p>
       </div>
     </div>
   </footer>

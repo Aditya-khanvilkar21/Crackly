@@ -165,8 +165,8 @@ export default function StudentProfile() {
   return (
     <div className="min-h-screen bg-gradient-subtle py-8">
       <SeoHead
-        title="Your Profile | Crackly"
-        description="Manage your Crackly profile, student ID, tuition class and exam preferences."
+        title="Your Profile | TrackAlpha"
+        description="Manage your TrackAlpha profile, student ID, tuition class and exam preferences."
         path="/profile"
       />
       <main className="container mx-auto px-4 max-w-6xl">

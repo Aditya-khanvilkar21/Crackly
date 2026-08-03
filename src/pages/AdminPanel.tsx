@@ -153,8 +153,8 @@ const AdminPanel = () => {
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
-        title="Admin Panel | Crackly"
-        description="Manage classes, students, tests and join requests from the Crackly admin panel."
+        title="Admin Panel | TrackAlpha"
+        description="Manage classes, students, tests and join requests from the TrackAlpha admin panel."
         path="/admin"
       />
       {/* Mobile-first Header */}
@@ -170,9 +170,9 @@ const AdminPanel = () => {
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <img src={logo} alt="CRACKLY" className="w-8 h-6 object-contain" />
+              <img src={logo} alt="TRACKALPHA" className="w-8 h-6 object-contain" />
               <div className="hidden sm:block">
-                <h1 className="text-sm font-bold text-primary leading-tight">CRACKLY Admin</h1>
+                <h1 className="text-sm font-bold text-primary leading-tight">TRACKALPHA Admin</h1>
               </div>
             </div>
 

@@ -23,7 +23,7 @@ export const ForClasses = () => (
           >
             <span className="text-xs font-semibold uppercase tracking-wider text-brand">For tuition classes</span>
             <h2 className="mt-3 font-heading text-3xl font-bold md:text-4xl">
-              Run your coaching batch on Crackly
+              Run your coaching batch on TrackAlpha
             </h2>
             <p className="mt-4 max-w-lg text-primary-foreground/80">
               Add your students, control which tests they can attempt, and turn every

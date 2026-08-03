@@ -29,7 +29,7 @@ export const HeroSplit = () => (
           </span>
 
           <h1 className="mt-5 font-heading text-4xl font-extrabold leading-[1.08] md:text-6xl">
-            Crackly — JEE, NEET &amp; CET
+            TrackAlpha — JEE, NEET &amp; CET
           </h1>
 
           <p className="mt-4 text-xl font-semibold md:text-2xl">

@@ -252,18 +252,18 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center gradient-subtle px-4 py-12">
       <SeoHead
-        title="Sign In or Sign Up | Crackly"
-        description="Sign in or create your Crackly account to start preparing for JEE, NEET, or CET with mock tests and analytics."
+        title="Sign In or Sign Up | TrackAlpha"
+        description="Sign in or create your TrackAlpha account to start preparing for JEE, NEET, or CET with mock tests and analytics."
         path="/auth"
       />
       <main className="w-full max-w-md">
         <div className="text-center mb-8">
           <img 
             src={logo} 
-            alt="Crackly Exam Preparation Logo" 
+            alt="TrackAlpha Exam Preparation Logo" 
             className="w-40 h-24 mx-auto mb-4 drop-shadow-lg object-contain"
           />
-          <h1 className="text-3xl font-bold mb-2">Crackly — JEE, NEET & CET</h1>
+          <h1 className="text-3xl font-bold mb-2">TrackAlpha — JEE, NEET & CET</h1>
           <p className="text-muted-foreground">Crack Your Limits, Unlock Your Future</p>
         </div>
 

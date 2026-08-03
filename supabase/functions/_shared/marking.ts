@@ -1,5 +1,5 @@
 /**
- * SINGLE SOURCE OF TRUTH for all Crackly marking / scoring rules.
+ * SINGLE SOURCE OF TRUTH for all TrackAlpha marking / scoring rules.
  *
  * This file is imported by BOTH:
  *  - the `submit-test` edge function (Deno)  -> `../_shared/marking.ts`

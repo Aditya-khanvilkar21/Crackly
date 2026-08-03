@@ -1,7 +1,7 @@
 
-# Crackly
+# TrackAlpha
 
-Crackly is an online test and student analytics platform designed for coaching institutes to conduct Computer-Based Tests (CBTs) for competitive exams such as JEE, NEET, and MHT-CET. The platform helps institutes manage tests, track student performance, and gain valuable insights through detailed analytics.
+TrackAlpha is an online test and student analytics platform designed for coaching institutes to conduct Computer-Based Tests (CBTs) for competitive exams such as JEE, NEET, and MHT-CET. The platform helps institutes manage tests, track student performance, and gain valuable insights through detailed analytics.
 
 ## 🚀 Features
 
@@ -28,8 +28,8 @@ Crackly is an online test and student analytics platform designed for coaching i
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/crackly.git
-cd crackly
+git clone https://github.com/your-username/trackalpha.git
+cd trackalpha
 ```
 
 ### Install Dependencies
@@ -71,4 +71,4 @@ https://crackly.co.in
 
 ## 📄 License
 
-Copyright © 2026 Crackly. All rights reserved.
+Copyright © 2026 TrackAlpha. All rights reserved.

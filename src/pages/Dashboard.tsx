@@ -209,7 +209,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <SeoHead
-        title="Dashboard | Crackly"
+        title="Dashboard | TrackAlpha"
         description="Your JEE, NEET and CET prep dashboard. Take tests, track progress, and master every chapter."
         path="/"
       />
@@ -218,9 +218,9 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="Crackly Exam Preparation Logo" className="w-10 h-8 object-contain" />
+              <img src={logo} alt="TrackAlpha Exam Preparation Logo" className="w-10 h-8 object-contain" />
               <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-primary leading-tight">Crackly — JEE, NEET & CET</h1>
+                <h1 className="text-lg font-bold text-primary leading-tight">TrackAlpha — JEE, NEET & CET</h1>
               </div>
             </div>
 

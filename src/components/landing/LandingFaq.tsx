@@ -8,16 +8,16 @@ import { Helmet } from "react-helmet-async";
 
 const faqs = [
   {
-    q: "What is Crackly?",
-    a: "Crackly is an online test platform for JEE, NEET and CET aspirants. Students take exam-pattern chapter tests and mock tests, and get instant scores with detailed analytics.",
+    q: "What is TrackAlpha?",
+    a: "TrackAlpha is an online test platform for JEE, NEET and CET aspirants. Students take exam-pattern chapter tests and mock tests, and get instant scores with detailed analytics.",
   },
   {
-    q: "Which exams does Crackly cover?",
+    q: "Which exams does TrackAlpha cover?",
     a: "JEE, NEET and MHT-CET, across Physics, Chemistry, Mathematics and Biology, organised by subject and chapter.",
   },
   {
-    q: "Do I need a tuition class to use Crackly?",
-    a: "You can sign up on your own, but tests are unlocked by your tuition class admin. Share your CRACKLY student ID with them or send a join request from your dashboard.",
+    q: "Do I need a tuition class to use TrackAlpha?",
+    a: "You can sign up on your own, but tests are unlocked by your tuition class admin. Share your TRACKALPHA student ID with them or send a join request from your dashboard.",
   },
   {
     q: "What is the difference between chapter tests and mock tests?",
