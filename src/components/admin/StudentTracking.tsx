@@ -453,7 +453,7 @@ export const StudentTracking = () => {
                       <div className="flex gap-2">
                         <Input
                           id="student-id"
-                          placeholder="e.g., CRACKLYXXXXX or user UUID"
+                          placeholder="e.g., TRACKALPHAXXXXX or user UUID"
                           value={studentIdSearch}
                           onChange={(e) => setStudentIdSearch(e.target.value)}
                           onKeyDown={(e) => {

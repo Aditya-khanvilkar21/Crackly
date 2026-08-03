@@ -5,7 +5,7 @@ const steps = [
   {
     icon: UserPlus,
     title: "Sign up and get your ID",
-    text: "Every student receives a unique CRACKLY student ID the moment they register.",
+    text: "Every student receives a unique TRACKALPHA student ID the moment they register.",
   },
   {
     icon: Users,
@@ -23,7 +23,7 @@ export const HowItWorks = () => (
   <section className="py-16 md:py-20">
     <div className="container mx-auto px-4">
       <div className="mx-auto mb-12 max-w-2xl text-center">
-        <h2 className="font-heading text-3xl font-bold md:text-4xl">How Crackly works</h2>
+        <h2 className="font-heading text-3xl font-bold md:text-4xl">How TrackAlpha works</h2>
         <p className="mt-3 text-muted-foreground">Three steps from sign-up to your first score report</p>
       </div>
 

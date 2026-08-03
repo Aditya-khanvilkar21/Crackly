@@ -80,7 +80,7 @@ export const downloadResultAsPDF = (data: ResultData) => {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  const headerTitle = data.className || 'Crackly Test Report';
+  const headerTitle = data.className || 'TrackAlpha Test Report';
   doc.text(headerTitle, pageWidth / 2, 14, { align: 'center' });
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
@@ -183,7 +183,7 @@ export const downloadResultAsPDF = (data: ResultData) => {
     doc.setFontSize(8);
     doc.setTextColor(156, 163, 175);
     doc.setFont('helvetica', 'italic');
-    doc.text(`Crackly  -  Generated on ${new Date().toLocaleString()}  -  Page ${i} of ${pageCount}`, pageWidth / 2, fy, { align: 'center' });
+    doc.text(`TrackAlpha  -  Generated on ${new Date().toLocaleString()}  -  Page ${i} of ${pageCount}`, pageWidth / 2, fy, { align: 'center' });
   }
 
   const safeName = (data.studentName || 'student').replace(/\s+/g, '_');

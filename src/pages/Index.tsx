@@ -22,7 +22,7 @@ const Index = () => {
       </a>
 
       <SeoHead
-        title="Crackly — Crack JEE, NEET & CET Exams"
+        title="TrackAlpha — Crack JEE, NEET & CET Exams"
         description="Authentic exam-style mock tests, chapter-wise practice, and real-time analytics for JEE, NEET and CET aspirants."
         path="/landing"
       />
@@ -51,7 +51,7 @@ const Index = () => {
             <span className="relative overflow-hidden rounded-md">
               <img
                 src={logo}
-                alt="Crackly Exam Preparation Logo"
+                alt="TrackAlpha Exam Preparation Logo"
                 className="relative h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105 md:h-11"
               />
             </span>

@@ -927,8 +927,8 @@ export default function TakeTest() {
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden select-none" style={{ userSelect: 'none' }}>
       <SeoHead
-        title={`${test.title} | Crackly`}
-        description={`Attempt ${test.title} on Crackly — timed ${isCET ? 'MHT-CET' : isNEET ? 'NEET' : 'JEE'} practice with instant scoring.`}
+        title={`${test.title} | TrackAlpha`}
+        description={`Attempt ${test.title} on TrackAlpha — timed ${isCET ? 'MHT-CET' : isNEET ? 'NEET' : 'JEE'} practice with instant scoring.`}
         path="/take-test"
       />
       {/* ===== TOP HEADER ===== */}

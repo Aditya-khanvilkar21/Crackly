@@ -12,8 +12,8 @@ const NotFound = () => {
   return (
     <>
     <SeoHead
-      title="Page Not Found | Crackly"
-      description="The page you’re looking for doesn’t exist. Head back to Crackly to continue your JEE, NEET or CET prep."
+      title="Page Not Found | TrackAlpha"
+      description="The page you’re looking for doesn’t exist. Head back to TrackAlpha to continue your JEE, NEET or CET prep."
       path={location.pathname}
     />
     <div className="flex min-h-screen items-center justify-center bg-background">

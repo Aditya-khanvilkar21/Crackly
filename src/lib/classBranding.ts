@@ -156,7 +156,7 @@ export const drawBrandedHeader = (
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
-  doc.text((branding.className || "Crackly").slice(0, 42), textX, 16);
+  doc.text((branding.className || "TrackAlpha").slice(0, 42), textX, 16);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);

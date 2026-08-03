@@ -142,7 +142,7 @@ export default function AdminProfile() {
   return (
     <div className="min-h-screen bg-gradient-subtle py-8">
       <SeoHead
-        title="My Profile | Crackly Admin"
+        title="My Profile | TrackAlpha Admin"
         description="Manage your admin profile, tuition class branding and account password."
         path="/admin-profile"
       />
