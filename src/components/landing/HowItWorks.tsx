@@ -5,7 +5,7 @@ const steps = [
   {
     icon: UserPlus,
     title: "Sign up and get your ID",
-    text: "Every student receives a unique TrackAlpha student ID the moment they register.",
+    text: "Every student receives a unique TrackAlpha Alpha ID the moment they register.",
   },
   {
     icon: Users,

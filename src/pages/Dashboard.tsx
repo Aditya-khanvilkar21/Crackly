@@ -110,9 +110,9 @@ const Dashboard = () => {
     },
     {
       icon: GraduationCap,
-      title: "Auto Student ID",
+      title: "Auto Alpha ID",
       description: "Unique identification for every student",
-      content: "Automatically generated student IDs for easy tracking and management.",
+      content: "Automatically generated Alpha IDs for easy tracking and management.",
     },
   ];
 
@@ -283,7 +283,7 @@ const Dashboard = () => {
                   <div className="text-center py-8 text-muted-foreground">
                     <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-50" />
                     <p className="font-semibold mb-1">Join a Class</p>
-                    <p className="text-sm mt-2">Share your Student ID with your admin to get added.</p>
+                    <p className="text-sm mt-2">Share your Alpha ID with your admin to get added.</p>
                     <p className="text-sm mt-3 font-mono font-semibold text-primary">{profile?.student_id}</p>
                   </div>
                 </CardContent>

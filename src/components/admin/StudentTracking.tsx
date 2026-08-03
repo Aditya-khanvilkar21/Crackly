@@ -437,10 +437,10 @@ export const StudentTracking = () => {
                 <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl">Add Student to Class</DialogTitle>
-                    <DialogDescription>Search by Student ID or select from the registered students list</DialogDescription>
+                    <DialogDescription>Search by Alpha ID or select from the registered students list</DialogDescription>
                   </DialogHeader>
 
-                  {/* Search by Student ID - Enhanced UI */}
+                  {/* Search by Alpha ID - Enhanced UI */}
                   <div className="space-y-4 p-4 bg-primary/5 rounded-lg border-2 border-primary/20 mt-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Search className="w-5 h-5 text-primary" />
@@ -448,7 +448,7 @@ export const StudentTracking = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="student-id" className="text-sm">
-                        Enter Student ID or User ID
+                        Enter Alpha ID or User ID
                       </Label>
                       <div className="flex gap-2">
                         <Input
@@ -504,7 +504,7 @@ export const StudentTracking = () => {
                             <TableHeader className="sticky top-0 bg-muted z-10">
                               <TableRow>
                                 <TableHead className="font-semibold">Student Name</TableHead>
-                                <TableHead className="font-semibold">Student ID</TableHead>
+                                <TableHead className="font-semibold">Alpha ID</TableHead>
                                 <TableHead className="text-right font-semibold">Action</TableHead>
                               </TableRow>
                             </TableHeader>
@@ -585,7 +585,7 @@ export const StudentTracking = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Student Name</TableHead>
-                  <TableHead>Student ID</TableHead>
+                  <TableHead>Alpha ID</TableHead>
                   <TableHead>Tests Taken</TableHead>
                   <TableHead>Average Score</TableHead>
                   <TableHead className="text-right">Actions</TableHead>

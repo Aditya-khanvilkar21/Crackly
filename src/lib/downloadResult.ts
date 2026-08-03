@@ -103,7 +103,7 @@ export const downloadResultAsPDF = (data: ResultData) => {
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.text(`Name: ${data.studentName || 'N/A'}`, 14, 52);
-  doc.text(`Student ID: ${data.studentId || 'N/A'}`, 14, 58);
+  doc.text(`Alpha ID: ${data.studentId || 'N/A'}`, 14, 58);
   doc.text(`Date: ${data.completedAt || 'N/A'}`, 14, 64);
 
   doc.setFontSize(13);

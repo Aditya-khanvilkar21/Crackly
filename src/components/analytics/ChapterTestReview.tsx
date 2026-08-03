@@ -314,7 +314,7 @@ export const ChapterTestReview = ({ examType, userRole, onBack }: ChapterTestRev
 
       autoTable(doc, {
         startY: 68,
-        head: [['Rank', 'Student Name', 'Student ID', 'Score', 'Percentage']],
+        head: [['Rank', 'Student Name', 'Alpha ID', 'Score', 'Percentage']],
         body: tableData,
         theme: 'striped',
         headStyles: { fillColor: [79, 70, 229] },
